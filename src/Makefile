@@ -14,7 +14,7 @@ compile:
 	ifort -o fruittest *.o
 
 clean:
-	rm -rf *.o *.mod
+	rm -rf *.o *.mod fruittest
 	rm -rf fruittest
 
 test:

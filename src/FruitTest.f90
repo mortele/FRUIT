@@ -6,6 +6,7 @@
 !------------------------
 !
 module fruitTest
+		use fruit
 
 contains
   ! ----
@@ -13,13 +14,25 @@ contains
   ! ----
   subroutine allFruitTest  
     implicit none;
-    call initializeFruitTest;
+
+		!----------------
+		! test printing and formats
+		!----------------
+    call progressMarkTest()
     
-    call markTest()
+    call showOutputTest;
+    call getTestSummaryTest;
+    call showOutputForReport;
     
+		!----------------
+		! the following should give 100% pass
+		!----------------
+    
+    call assertTrueResultMessageTest;
+    call getTestSummary
+
     call assertTrueResultTest;
     call assertTrueResultTest_invalid;
-    call assertTrueResultMessageTest;
     
     call assertTrueTest;
     call assertTrueMessageTest;
@@ -27,26 +40,16 @@ contains
     call addSuccessTest;
     call addSuccessMessageTest;
     call addFailTest;
+
     call addFailMessageTest;
-    call getTestSummaryTest;
     call isAllSuccessfulTest;
-    call showOutputForReport;
-    
-    call showOutputTest;
-    
+
     call testAssertEqualsFloat;
+    call getTestSummary
+
   end subroutine allFruitTest
   
-  ! ----
-  subroutine initializeFruitTest  
-    use fruit
-    implicit none;
-
-    call initializeFruit;
-    return
-  end subroutine initializeFruitTest
-  
-  subroutine markTest
+  subroutine progressMarkTest
     use fruit
     
     write (*,*) "Should see . here:"
@@ -60,12 +63,12 @@ contains
     write (*,*) "Should see F here:"
     call failedMark()
   
-    write (*,*) "Should see F here:"
+    write (*,*) "Should see FF here:"
     call failedMark()
     call failedMark()
   
     write (*,*) 
-  end subroutine markTest
+  end subroutine progressMarkTest
   
   ! ----
   subroutine assertTrueResultTest 
@@ -104,7 +107,6 @@ contains
       write (*,*) 'assertTrueResultTest_invalid FAILED!!!'
     end IF
     
-    return
   end subroutine assertTrueResultTest_invalid
 
   !------------
@@ -119,6 +121,7 @@ contains
     inputValue = .true.
     resultValue = .FALSE.
     
+    call initializeFruit;
     call assertTrue (inputValue, 'Test assertTrue (input, msg, result) message.', resultValue)
     
     IF (resultValue .eqv. .true.) then 
@@ -128,9 +131,10 @@ contains
     end IF
     
     write (*,*) 'Should see 1 successful case';
+
+		call addSuccess ('assertTrueResultMessageTest', 'success')
     call getTestSummary
     
-    return
   end subroutine assertTrueResultMessageTest
   
   ! ----
@@ -140,17 +144,14 @@ contains
     use fruit
     implicit none;
 
-    write (*,*) 'Should see 1 successful case';
     call initializeFruit;
+    write (*,*) 'Should see 1 successful case';
     call assertTrue (.true.);
-    call getTestSummary
 
     write (*,*) 'Shoule see 1 failed case';
-    call initializeFruit;
     call assertTrue (.FALSE.);
-    call getTestSummary
     
-    return
+		call getTestSummary
   end subroutine assertTrueTest
   
   ! ----
@@ -160,17 +161,12 @@ contains
     use fruit
     implicit none;
     
-    write (*,*) 'Should see 1 successful case';
     call initializeFruit;
     call assertTrue (.true., 'message in assertTrueTest_message true test');
-    call getTestSummary
 
-    write (*,*) 'Should see 1 failed case';
-    call initializeFruit;
     call assertTrue (.FALSE., 'message in assertTrueTest_message false test');
-    call getTestSummary
     
-    return
+		call getTestSummary
   end subroutine assertTrueMessageTest
   
   ! -----
@@ -183,6 +179,7 @@ contains
     logical :: result = .FALSE.
 
     call initializeFruit;
+
     call addSuccess
     call isAllSuccessful (result);
 
@@ -191,6 +188,8 @@ contains
       write (*, *) 'FAILED addSuccess!!!';
       write (*, *);
     end IF
+
+		call getTestSummary
     
   end subroutine addSuccessTest
   
@@ -198,9 +197,12 @@ contains
     use fruit
     implicit none;
 
+    call initializeFruit;
     call addSuccess ('Success in this subroutine: addSuccessMessageTest');
     
-    return
+    call addSuccess ('addSuccessMessageTest', 'Success in this subroutine: addSuccessMessageTest');
+    
+		call getTestSummary
   end subroutine addSuccessMessageTest
   
   ! -----
@@ -222,6 +224,9 @@ contains
       write (*, *);
     end IF
     
+    call addFail('addFailTest', 'testing addFail')
+		call getTestSummary
+
   end subroutine addFailTest
   
   ! -----
@@ -235,6 +240,7 @@ contains
 
     call initializeFruit;
     call addFail ('Add a failed case');
+    call addFail ('addFailMessageTest', 'Add a failed case');
     call isAllSuccessful (result);
 
     IF (result .neqv. .FALSE.) then
@@ -242,7 +248,8 @@ contains
       write (*, *) 'FAILED addFail !!!';
       write (*, *);
     end IF
-    
+
+		call getTestSummary
   end subroutine addFailMessageTest
   
   ! ----
@@ -273,7 +280,6 @@ contains
     call addFail('Fail message from test case.');
     call getTestSummary
     
-    return
   end subroutine getTestSummaryTest
   
   ! ----
@@ -298,6 +304,8 @@ contains
       write (*, *);
     end IF
 
+		call getTestSummary
+
     call initializeFruit;
     call addSuccess
     call addSuccess
@@ -309,6 +317,7 @@ contains
       write (*, *) 'FAILED isAllSuccessfulTest!!! (addSuccess)';
       write (*, *);
     end IF
+		call getTestSummary
 
     call initializeFruit;
     IF (result .neqv. .true.) then
@@ -316,8 +325,8 @@ contains
       write (*, *) 'FAILED isAllSuccessfulTest!!! (addSuccess)';
       write (*, *);
     end IF
+    call getTestSummary
 
-    return
   end subroutine isAllSuccessfulTest
   
   subroutine showOutputTest 
@@ -328,6 +337,7 @@ contains
     integer :: i;
     integer :: count;
     
+    call initializeFruit;
     DO i=1,100
       call assertTrue (trueValue)
     END DO
@@ -335,8 +345,8 @@ contains
     DO i=1,100
       call assertTrue (falseValue)
     END DO
+    call getTestSummary
     
-    return
   end subroutine showOutputTest
   
   subroutine showOutputForReport 
@@ -348,6 +358,7 @@ contains
     integer :: count;
     character (100), DIMENSION (3)  :: msgs; 
     
+		call initializeFruit
     DO i=1,2
       call assertTrue (trueValue, 'msg')
     END DO
@@ -364,10 +375,10 @@ contains
     
     ! to be implemented
     !call getMessages (msgs);
-    write (*, *) 'Messages are: '; 
-    write (*, *) msgs; 
+    !write (*, *) 'Messages are: '; 
+    !write (*, *) msgs; 
     
-    return
+    call getTestSummary;
   end subroutine showOutputForReport
   
   subroutine testAssertEqualsFloat
