@@ -1,128 +1,119 @@
 !------------------------
 !
-! Original author: Andrew H. Chen chena@westinghouse.com
+! Utility module for comparison routines.
 !
-! Last modified: 2004/01/12
+! $Id$
 ! Version : $Revision$
 !------------------------
 module FruitUtil
 
-  !-------
-  ! Assert true 
-  !-------
-  interface equals
-      module procedure equalEpsilon;
-      module procedure floatEqual;
-      module procedure integerEqual;
-      module procedure doublePrecisionEqual;
-  end interface
+  use DataType
+  
+  ! --------------------------------------------------
+  ! Compare
+  ! --------------------------------------------------
+  interface Equals
+     module procedure EqualsDouble
+     module procedure EqualsFloat
+     module procedure EqualsInteger
+     module procedure EqualsString
+     module procedure EqualsLogical
+     module procedure EqualsWithTolDouble
+     module procedure EqualsWithTolFloat
+     module procedure EqualsWithTolInteger
+  end interface Equals
 
 contains
 
-!------------------
-! Compare 2 files
-!
-! a tool to compare two text files, return 0 is files are the same
-! 
-! @param file1 input file 1
-! @param file2 input file 2
-! @return error_code return code
-!     0 - success; file 1 and file 2 are the same
-!     1 - file 1 not exist
-!     2 - file 2 not exist
-!     3 - operation error
-!     4 - file difference found
-!------------------
+  ! ------------------------------------
+  ! Compare two double precision numbers
+  ! ------------------------------------
+  logical function EqualsDouble(dval1, dval2)
+    real(kind=double), intent(in) :: dval1
+    real(kind=double), intent(in) :: dval2
+    
+    EqualsDouble = (dval1 == dval2)
+    
+  end function EqualsDouble
 
-
+  ! ------------------------------------
+  ! Compare two single precision numbers
+  ! ------------------------------------
+  logical function EqualsFloat(fval1, fval2)
+    real(kind=single), intent(in) :: fval1
+    real(kind=single), intent(in) :: fval2
+    
+    EqualsFloat = (fval1 == fval2)
   
-  !------------------------
-  ! test if 2 values are close
-  !------------------------
-  !logical function equals (number1, number2) 
-  !  real,  intent (in) :: number1, number2
-  !  
-  !  return equalEpsilon (number1, number2, epsilon(number1));
-  !
-  !end function equals
+  end function EqualsFloat
 
+  ! --------------------
+  ! Compare two integers
+  ! --------------------
+  logical function EqualsInteger(ival1, ival2)
+    integer, intent(in) :: ival1
+    integer, intent(in) :: ival2
+    
+    EqualsInteger = (ival1 == ival2)
   
-  function equalEpsilon (number1, number2, epsilon ) result (resultValue)
-    real , intent (in) :: number1, number2, epsilon 
-    logical :: resultValue 
-    
-    resultValue = .false.
-    
-    ! test very small number1
-    if ( abs(number1) < epsilon .and.  abs(number1 - number2) < epsilon ) then
-      resultValue = .true.
-    else 
-      if ((abs(( number1 - number2)) / number1) < epsilon ) then
-        resultValue = .true.
-      else
-        resultValue = .false.
-      end if
-    end if
-    
-  end function equalEpsilon
+  end function EqualsInteger
 
+  ! ---------------
+  ! Compare strings
+  ! ---------------
+  logical function EqualsString(sval1, sval2)
+    character(*), intent(in) :: sval1
+    character(*), intent(in) :: sval2
+    
+    EqualsString = (sval1 == sval2)
   
-  function floatEqual (number1, number2 ) result (resultValue)
-    real , intent (in) :: number1, number2
-    real :: epsilon 
-    logical :: resultValue 
-    
-    resultValue = .false.
-    epsilon = 1E-6
-    !epsilon = epsilon (number1)
-    
-    ! test very small number1
-    if ( abs(number1) < epsilon .and.  abs(number1 - number2) < epsilon ) then
-      resultValue = .true.
-    else 
-      if ((abs(( number1 - number2)) / number1) < epsilon ) then
-        resultValue = .true.
-      else
-        resultValue = .false.
-      end if
-    end if
-    
-  end function floatEqual
+  end function EqualsString
 
-  function doublePrecisionEqual (number1, number2 ) result (resultValue)
-    double precision , intent (in) :: number1, number2
-    real :: epsilon 
-    logical :: resultValue 
+  ! ---------------------------
+  ! Compare logicals (booleans)
+  ! ---------------------------
+  logical function EqualsLogical(bval1, bval2)
+    logical, intent(in) :: bval1
+    logical, intent(in) :: bval2
     
-    resultValue = .false.
-    epsilon = 1E-6
-    !epsilon = epsilon (number1)
-    
-    ! test very small number1
-    if ( abs(number1) < epsilon .and.  abs(number1 - number2) < epsilon ) then
-      resultValue = .true.
-    else 
-      if ((abs(( number1 - number2)) / number1) < epsilon ) then
-        resultValue = .true.
-      else
-        resultValue = .false.
-      end if
-    end if
-    
-  end function doublePrecisionEqual
+    EqualsLogical = (bval1 .eqv. bval2)
+  
+  end function EqualsLogical
 
-  function integerEqual (number1, number2 ) result (resultValue)
-    integer , intent (in) :: number1, number2
-    logical :: resultValue 
+  ! ----------------------------------------------------
+  ! Compare two double precision numbers, with tolerance
+  ! ----------------------------------------------------
+  logical function EqualsWithTolDouble(dval1, dval2, tol)
+    real(kind=double), intent(in) :: dval1
+    real(kind=double), intent(in) :: dval2
+    real(kind=double), intent(in) :: tol
     
-    resultValue = .false.
+    EqualsWithTolDouble = (abs(dval1 - dval2) <= tol)
+  
+  end function EqualsWithTolDouble
+
+  ! ----------------------------------------------------
+  ! Compare two single precision numbers, with tolerance
+  ! ----------------------------------------------------
+  logical function EqualsWithTolFloat(fval1, fval2, tol)
+    real(kind=single), intent(in) :: fval1
+    real(kind=single), intent(in) :: fval2
+    real(kind=single), intent(in) :: tol
     
-    if ( number1 .eq. number2 ) then
-      resultValue = .true.
-    else 
-        resultValue = .false.
-    end if
+    EqualsWithTolFloat = (abs(fval1 - fval2) <= tol)
+  
+  end function EqualsWithTolFloat
+
+  ! -------------------------------------------
+  ! Compare two INTEGER numbers, with tolerance
+  ! -------------------------------------------
+  logical function EqualsWithTolInteger(ival1, ival2, tol)
+    integer, intent(in) :: ival1
+    integer, intent(in) :: ival2
+    integer, intent(in) :: tol
     
-  end function integerEqual
+    EqualsWithTolInteger = (abs(ival1 - ival2) <= tol)
+  
+  end function EqualsWithTolInteger
 
 end module FruitUtil

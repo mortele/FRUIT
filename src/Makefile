@@ -6,6 +6,7 @@
 #------------------------
 
 compile:
+	ifort -c DataType.f90
 	ifort -c FruitUtil.f90
 	ifort -c Fruit.f90
 	ifort -c FruitTest.f90

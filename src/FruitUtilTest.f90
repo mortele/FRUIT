@@ -1,33 +1,32 @@
 !------------------------
 !
-! Author: Andrew H. Chen chen@meihome.com
-! Last modified: 2004/01/12
+! Test code for FruitUtils
+!
+! $Id$
 ! Version : $Revision$
 !------------------------
-module util_test
+module TestFruitUtil
+  implicit none;
 
 contains
 
-  subroutine allUtilTest
-    implicit none;
-  
-    call floatEuqalTest
-
-  end subroutine allUtilTest
-  
-  
-  subroutine floatEuqalTest
-    use util
-    use fruit
-    implicit none;
+  subroutine allTestFruitUtil
     
-    real :: number1 = 3.001
-    real :: number2 = 3.001
-    real :: number3 = 3.2
-
-   call assertTrue (floatEqual (number1, number2), "floatEuqalTest" )
-   call assertTrue ( .not. floatEqual (number1, number3), "floatEuqalTest")
+    call testFloatEuqal
     
-  end subroutine floatEuqalTest
+  end subroutine allTestFruitUtil
+  
+  subroutine testFloatEquals
+  
+    use FruitUtil
+    
+    real(kind=single) :: number1 = 3.001_single
+    real(kind=single) :: number2 = 3.002_single
+    real(kind=single) :: number3 = 3.2_single
 
-end module util_test
+    write (*,*) Equals (number1, number2 )
+    !write (*,*) .not. Equals (number1, number3)
+    
+  end subroutine testFloatEquals
+
+end module TestFruitUtil
