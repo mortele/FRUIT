@@ -6,9 +6,10 @@
 #------------------------
 
 compile:
-	ifort -c Util.f90
+	ifort -c FruitUtil.f90
 	ifort -c Fruit.f90
 	ifort -c FruitTest.f90
+	ifort -c FruitUtilTest.f90
 	ifort -c AllUnitTest.f90
 	ifort -c Main.f90
 	ifort -o fruittest *.o
