@@ -1,0 +1,2 @@
+We can provide suggested usage, such as directory structures.
+Then we can provide sample Makefile, scons and possibly imake files
