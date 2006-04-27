@@ -12,7 +12,7 @@ contains
 
   subroutine allTestFruitUtil
     
-    call testFloatEuqal
+    call testFloatEquals
     
   end subroutine allTestFruitUtil
   
