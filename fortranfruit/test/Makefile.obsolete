@@ -1,0 +1,6 @@
+all:
+	ifort -o test_driver *.f90
+
+clean:
+	rm -rf *.o *.a
+
