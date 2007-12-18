@@ -1,0 +1,16 @@
+require 'rake/clean'
+
+task :default => [:all]
+task :all => [:compile, :test]
+
+CLEAN.include(FileList['**/*.o', '**/*.mod'])
+CLOBBER.include(FileList['**/*.a'])
+
+task :compile do
+  sh 'cd src;rake'
+end
+
+task :test do
+  sh 'cd test;rake;./fruit_driver'
+end
+

@@ -1,0 +1,17 @@
+This project use rake to build, instead of make.
+
+It is actually very easy, and it can do much more with less code!
+
+Prerequisite:
+  1) Ruby install, and in your path
+  2) Rake installed, as gem
+
+To build:
+  rake clean
+  rake clobber
+  rake
+
+
+Cheers!
+Andrew Chen
+meihome_at_gmail.com
