@@ -1,0 +1,22 @@
+require 'rake/clean'
+
+CLEAN.include(['*.o', '*.mod'])
+CLOBBER.include('*.a')
+
+task :default => ["libfruit.a"]
+
+SRC = FileList['*.f90']
+OBJ = SRC.ext('o')
+
+rule '.o' => '.f90' do |t|
+  sh "ifort -c -o #{t.name} #{t.source}"
+end
+
+file "libfruit.a" => OBJ do
+  sh "ar cr libfruit.a #{OBJ}"
+end
+      
+# File dependencies go here ...
+file 'libfruit.a' => ['fruit.o', 'fruit_utility.o']
+file 'fruit.o' => ['fruit.f90', 'fruit_utility.o']
+file 'fruit_utlity.o' => ['fruit_utility.f90']

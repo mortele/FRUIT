@@ -1,0 +1,14 @@
+LIBRARY = libfruit.a
+FCOMPILER = ifort
+
+all: ${OBJS}
+	${FCOMPILER} -c *.f90
+	ar cr ${LIBRARY} *.o
+
+clean:
+	find . -name "*.o" -or -name "*.mod" -or -name "${LIBRARY}" | xargs rm -rf
+
+test:
+	${FCOMPILER}
+
+
