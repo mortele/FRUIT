@@ -17,6 +17,7 @@ file "libfruit.a" => OBJ do
 end
       
 # File dependencies go here ...
-file 'libfruit.a' => ['fruit.o', 'fruit_utility.o']
-file 'fruit.o' => ['fruit.f90', 'fruit_utility.o']
-file 'fruit_utlity.o' => ['fruit_utility.f90']
+# do not need to specify dependency if it is obvious
+#file 'libfruit.a' => ['fruit.o', 'fruit_utility.o']
+#file 'fruit.o' => ['fruit.f90', 'fruit_utility.o']
+#file 'fruit_utlity.o' => ['fruit_utility.f90']
