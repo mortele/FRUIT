@@ -1,23 +1,35 @@
 require 'rake/clean'
 
-CLEAN.include(['*.o', '*.mod'])
-CLOBBER.include('*.a')
+BUILD_DIR='../build'
 
-task :default => ["libfruit.a"]
+CLEAN.include(['*.o', '*.mod'])
+CLOBBER.include(['*.a', "#{BUILD_DIR}"])
+
+task :default => ["libfruit.a", :deploy]
 
 SRC = FileList['*.f90']
 OBJ = SRC.ext('o')
 
+lib = 'libfruit.a'
+
 rule '.o' => '.f90' do |t|
-  sh "ifort -c -o #{t.name} #{t.source}"
+  Rake::Task[:dirs].invoke
+  sh "ifort -c -o #{t.name} #{t.source} -module #{BUILD_DIR} -lfruit -L#{BUILD_DIR}"
 end
 
-file "libfruit.a" => OBJ do
-  sh "ar cr libfruit.a #{OBJ}"
+file lib => OBJ do
+  sh "ar cr #{lib} #{OBJ}"
 end
       
+task :deploy do
+  sh "ln -sf #{Dir.pwd}/#{lib} #{BUILD_DIR}/#{lib}"
+end
+
+task :dirs do
+  mkdir BUILD_DIR unless File.exists?(BUILD_DIR)
+end
+
 # File dependencies go here ...
-# do not need to specify dependency if it is obvious
 #file 'libfruit.a' => ['fruit.o', 'fruit_utility.o']
 #file 'fruit.o' => ['fruit.f90', 'fruit_utility.o']
 #file 'fruit_utlity.o' => ['fruit_utility.f90']

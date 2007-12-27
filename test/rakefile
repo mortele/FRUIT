@@ -1,21 +1,28 @@
 require 'rake/clean'
 
+BUILD_DIR='../build'
+goal = 'fruit_driver'
+
 CLEAN.include(['*.o', '*.mod'])
 CLOBBER.include('fruit_driver')
 
-task :default => ["fruit_driver"]
+task :default => ["fruit_driver", :deploy]
 
 SRC = FileList['*.f90']
 OBJ = SRC.ext('o')
 
 rule '.o' => '.f90' do |t|
-  sh "ifort -c -o #{t.name} #{t.source} -L ../src/ -module ../src/"
+  sh "ifort -c -o #{t.name} #{t.source} -L#{BUILD_DIR} -module #{BUILD_DIR}"
 end
 
-file "fruit_driver" => OBJ do
-  sh "ifort -o fruit_driver #{OBJ} -module ../src/ -lfruit -L../src"
+file goal  => OBJ do
+  sh "ifort -o #{goal} #{OBJ} -module #{BUILD_DIR} -lfruit -L#{BUILD_DIR}"
 end
-      
+
+task :deploy do
+  sh "ln -sf #{Dir.pwd}/#{goal} #{BUILD_DIR}/#{goal}"
+end
+
 # File dependencies go here ...
 file 'fruit_driver.o' => ['fruit_data_test.o', 'fruit_test.o']
 file 'fruit_data_test.o' => ['fruit_data_test.f90']
