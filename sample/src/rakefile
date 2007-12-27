@@ -1,0 +1,31 @@
+require 'rake/clean'
+
+lib='libcalculator.a'
+
+CLEAN.include(['*.o', '*.mod'])
+CLOBBER.include('*.a')
+
+BUILD_DIR='../../build'
+
+task :default => [lib, :deploy]
+
+SRC = FileList['*.f90']
+OBJ = SRC.ext('o')
+
+rule '.o' => '.f90' do |t|
+  Rake::Task[:dirs].invoke
+  sh "ifort -c -o #{t.name} #{t.source} -module #{BUILD_DIR}"
+end
+
+file lib => OBJ do
+  sh "ar cr #{lib} #{OBJ}"
+end
+
+task :deploy do
+  ln_sf("#{Dir.pwd}/#{lib}", "#{BUILD_DIR}/#{lib}" )
+end
+
+task :dirs do
+  Dir.mkdir BUILD_DIR unless File.exist?(BUILD_DIR)
+end  
+

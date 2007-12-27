@@ -1,0 +1,26 @@
+require 'rake/clean'
+
+goal='fruit_driver'
+
+CLEAN.include(['*.o', '*.mod'])
+CLOBBER.include(goal)
+
+BUILD_DIR='../../build'
+
+task :default => [goal, :deploy]
+
+SRC = FileList['*.f90']
+OBJ = SRC.ext('o')
+
+rule '.o' => '.f90' do |t|
+  sh "ifort -c -o #{t.name} #{t.source} -module #{BUILD_DIR}"
+end
+
+file goal  => OBJ do
+  sh "ifort -o #{goal} #{OBJ} -module ../src/ -lfruit -lcalculator -L#{BUILD_DIR}"
+end
+
+task :deploy do
+  sh "ln -sf #{Dir.pwd}/#{goal} #{BUILD_DIR}/#{goal}"
+end
+
