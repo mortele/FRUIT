@@ -1,26 +1,39 @@
 require 'rake/clean'
+require 'fruit_processor'
 
 goal='fruit_driver'
 
-CLEAN.include(['*.o', '*.mod'])
+CLEAN.include(['*.o', '*.mod', '*_gen_fruit.*'])
 CLOBBER.include(goal)
 
 BUILD_DIR='../../build'
-
-task :default => [goal, :deploy]
-
 SRC = FileList['*.f90']
 OBJ = SRC.ext('o')
 
-rule '.o' => '.f90' do |t|
+task :default => [goal, :deploy]
+
+rule '.o' => ['.f90'] do |t|
   sh "ifort -c -o #{t.name} #{t.source} -module #{BUILD_DIR}"
 end
 
-file goal  => OBJ do
+task :compile => :gen do
+  src = FileList['*.f90']
+  src.each do |source|
+    sh "ifort -c -o #{source.ext('o')} #{source} -module #{BUILD_DIR}"
+  end
+end
+
+file goal  => [:compile] do
   sh "ifort -o #{goal} #{OBJ} -module ../src/ -lfruit -lcalculator -L#{BUILD_DIR}"
 end
 
 task :deploy do
   sh "ln -sf #{Dir.pwd}/#{goal} #{BUILD_DIR}/#{goal}"
+end
+
+task :gen do
+  FruitProcessor.new.pre_process
+  SRC = FileList['*.f90']
+  OBJ = SRC.ext('o')
 end
 
