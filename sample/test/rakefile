@@ -7,17 +7,12 @@ CLEAN.include(['*.o', '*.mod', '*_gen_fruit.*'])
 CLOBBER.include(goal)
 
 BUILD_DIR='../../build'
-SRC = FileList['*.f90']
-OBJ = SRC.ext('o')
 
-task :default => [goal, :deploy]
-
-rule '.o' => ['.f90'] do |t|
-  sh "ifort -c -o #{t.name} #{t.source} -module #{BUILD_DIR}"
-end
+task :default => [goal, :deploy, :task_list]
 
 task :compile => :gen do
   src = FileList['*.f90']
+  OBJ = src.ext('.o')
   src.each do |source|
     sh "ifort -c -o #{source.ext('o')} #{source} -module #{BUILD_DIR}"
   end
@@ -33,7 +28,9 @@ end
 
 task :gen do
   FruitProcessor.new.pre_process
-  SRC = FileList['*.f90']
-  OBJ = SRC.ext('o')
+end
+
+task :task_list do
+  FruitProcessor.new.generate_task_list
 end
 

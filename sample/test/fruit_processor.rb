@@ -7,6 +7,7 @@ class FruitProcessor
 
   def initialize
     @driver_file='fruit_driver_gen_fruit'
+    @files = FileList['*_test.f90']
     @module_names=[]
   end
 
@@ -16,9 +17,8 @@ class FruitProcessor
   end
 
   def create_module
-    files = FileList['*_test.f90']
 
-    files.each do |file|
+    @files.each do |file|
       fruit_file = file.gsub('.f90', '_gen_fruit.f90')
       file_name=file.gsub(".f90", "")
       module_name = "#{file_name}_gen_fruit"
@@ -28,20 +28,35 @@ class FruitProcessor
         f.write "module #{module_name}\n"
         f.write "  use fruit\n"
         f.write "   contains\n"
-        f.write "     subroutine all_#{file_name}\n"
+        f.write "     subroutine all_#{module_name}\n"
         f.write "       use #{file_name}\n"
 
         f.write "\n"
-        f.write "       call setup\n"
-        f.write "       call test_calculator_should_produce_4_when_2_and_2_are_inputs\n"
-        f.write "       call teardown\n"
 
-        f.write "     end subroutine all_#{file_name}\n"
+        method_names = grep_test_method_names(file)
+        method_names.each do |method_name|
+          f.write "       call setup\n"
+          f.write "       write (*, *) \"  ..running #{method_name}\"\n"
+          f.write "       call #{method_name}\n"
+          f.write "       call teardown\n"
+        end
+
+        f.write "     end subroutine all_#{module_name}\n"
         f.write "end module #{module_name}\n"
       end
-
     end
+  end
 
+  def grep_test_method_names file
+    names=[]
+    File.open(file, 'r') do |source_file|
+      source_file.grep( /^\s*subroutine\s*(\w+)\s*$/i ) do 
+        next if $1.downcase== "setup"
+        next if $1.downcase== "teardown"
+        names << $1
+      end
+    end
+    names
   end
 
   def create_driver
@@ -52,12 +67,23 @@ class FruitProcessor
           f.write "  use #{name}\n"
         end
         f.write "  call initializeFruit\n"
-        f.write "  call all_calculator_test\n"
+        @module_names.each do |name|
+          f.write "  call all_#{name}\n"
+        end
         f.write "  call getTestSummary\n"
         f.write "end program #{@driver_file}\n"
       end
   end
 
+  def generate_task_list
+    puts "All executable specifications from tests :"
+    @files.each do |file|
+      puts "  #{file.gsub('_test.f90', '')}"
+      puts "  --"
+      grep_test_method_names(file).each do |method_name|
+        puts "    -- #{method_name.gsub(/^test_/, '').gsub('_', ' ')}"
+      end
+    end
+  end
+
 end
-
-

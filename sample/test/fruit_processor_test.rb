@@ -11,4 +11,8 @@ class FruitProcessorTest < Test::Unit::TestCase
     @fixture.create_driver
   end
 
+  def test_task_list
+    @fixture.generate_task_list
+  end
+
 end
