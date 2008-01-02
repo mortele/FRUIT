@@ -1,34 +1,12 @@
-require 'rake/clean'
-
-lib='libcalculator.a'
+GOAL='libcalculator.a'
 BUILD_DIR='../../build'
 
-SRC = FileList['*.f90']
-OBJ = SRC.ext('o')
-module_with_path=[]
-SRC.ext('mod').each do |file| 
-  module_with_path << "#{BUILD_DIR}/#{file}" 
+load 'rake_fruit.rb'
+include RakeFruit
+
+task :default => [GOAL, :deploy]
+
+file GOAL => OBJ do
+  sh "ar cr #{GOAL} #{OBJ}"
 end
-
-CLEAN.include(['*.o', module_with_path])
-CLOBBER.include('*.a', "#{BUILD_DIR}/#{lib}")
-
-task :default => [lib, :deploy]
-
-rule '.o' => '.f90' do |t|
-  Rake::Task[:dirs].invoke
-  sh "ifort -c -o #{t.name} #{t.source} -module #{BUILD_DIR}"
-end
-
-file lib => OBJ do
-  sh "ar cr #{lib} #{OBJ}"
-end
-
-task :deploy do
-  ln_sf("#{Dir.pwd}/#{lib}", "#{BUILD_DIR}/#{lib}" )
-end
-
-task :dirs do
-  Dir.mkdir BUILD_DIR unless File.exist?(BUILD_DIR)
-end  
 
