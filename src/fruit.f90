@@ -34,7 +34,6 @@ module fruit
   integer, private, save :: successfulAssertCount = 0
   integer, private, save :: failedAssertCount = 0
   character (len = MSG_LENGTH), private, DIMENSION (MSG_STACK_SIZE), save :: messageArray
-!   This here "stack" should be turned into a linked list structure. I can do that sometime - BRF  YOYO
   integer, private, save :: messageIndex = 1
 
   !-------

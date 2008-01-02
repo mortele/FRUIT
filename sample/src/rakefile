@@ -1,16 +1,19 @@
 require 'rake/clean'
 
 lib='libcalculator.a'
-
-CLEAN.include(['*.o', '*.mod'])
-CLOBBER.include('*.a')
-
 BUILD_DIR='../../build'
-
-task :default => [lib, :deploy]
 
 SRC = FileList['*.f90']
 OBJ = SRC.ext('o')
+module_with_path=[]
+SRC.ext('mod').each do |file| 
+  module_with_path << "#{BUILD_DIR}/#{file}" 
+end
+
+CLEAN.include(['*.o', module_with_path])
+CLOBBER.include('*.a', "#{BUILD_DIR}/#{lib}")
+
+task :default => [lib, :deploy]
 
 rule '.o' => '.f90' do |t|
   Rake::Task[:dirs].invoke

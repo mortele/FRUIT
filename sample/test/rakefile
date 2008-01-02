@@ -8,7 +8,7 @@ CLOBBER.include(goal)
 
 BUILD_DIR='../../build'
 
-task :default => [goal, :deploy, :task_list]
+task :default => [goal, :deploy, :spec]
 
 task :compile => :gen do
   src = FileList['*.f90']
@@ -30,7 +30,7 @@ task :gen do
   FruitProcessor.new.pre_process
 end
 
-task :task_list do
-  FruitProcessor.new.generate_task_list
+task :spec do
+  FruitProcessor.new.generate_spec
 end
 

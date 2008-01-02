@@ -38,6 +38,7 @@ class FruitProcessor
           f.write "       call setup\n"
           f.write "       write (*, *) \"  ..running #{method_name}\"\n"
           f.write "       call #{method_name}\n"
+          # get failed count, added failed spec name into array
           f.write "       call teardown\n"
         end
 
@@ -51,9 +52,10 @@ class FruitProcessor
     names=[]
     File.open(file, 'r') do |source_file|
       source_file.grep( /^\s*subroutine\s*(\w+)\s*$/i ) do 
-        next if $1.downcase== "setup"
-        next if $1.downcase== "teardown"
-        names << $1
+        subroutine_name=$1
+        next if subroutine_name.downcase== "setup"
+        next if subroutine_name.downcase== "teardown"
+        names << subroutine_name
       end
     end
     names
@@ -71,11 +73,31 @@ class FruitProcessor
           f.write "  call all_#{name}\n"
         end
         f.write "  call getTestSummary\n"
+        # print all spec result array
         f.write "end program #{@driver_file}\n"
       end
   end
 
-  def generate_task_list
+  def generate_spec
+
+    @files.each do |file|
+      puts "  #{file.gsub('_test.f90', '')}"
+      puts "  --"
+      File.open(file, 'r') do |infile|
+        while (line = infile.gets)
+          if line =~ /^\s*subroutine\s+(\w+)\s*$/i
+            subroutine_name=$1
+            next if subroutine_name.downcase== "setup"
+            next if subroutine_name.downcase== "teardown"
+            # look forward for spec variable
+            while (inside_subroutine = infile.gets)
+              #next if inside_subroutine !~ /^\s*character\w*/i
+            end
+          end
+        end
+      end
+    end
+
     puts "All executable specifications from tests :"
     @files.each do |file|
       puts "  #{file.gsub('_test.f90', '')}"
@@ -85,5 +107,4 @@ class FruitProcessor
       end
     end
   end
-
 end

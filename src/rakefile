@@ -13,6 +13,7 @@ OBJ = SRC.ext('o')
 lib = 'libfruit.a'
 
 rule '.o' => '.f90' do |t|
+  #next if t.name == 'obsolete.f90'
   Rake::Task[:dirs].invoke
   sh "ifort -c -o #{t.name} #{t.source} -module #{BUILD_DIR} -lfruit -L#{BUILD_DIR}"
 end

@@ -1,24 +1,25 @@
 module calculator
   implicit none
 
-  real, save :: result =0.0
+  interface add
+    module procedure add_integer
+    module procedure add_real
+  end interface add
 
+  private:: add_integer, add_real
 contains
 
-  subroutine reset
-    result = 0.0
-  end subroutine reset
+  subroutine add_integer (a, b, output)
+    integer, intent (in) :: a, b
+    integer, intent (inout) :: output
+    output=a+b
+  end subroutine add_integer
 
-  subroutine add (a, b, output)
+  subroutine add_real (a, b, output)
     real, intent (in) :: a, b
     real, intent (inout) :: output
-    result=a+b
-    output=result
-  end subroutine add
-
-  real function get_result
-    get_result=result
-  end function get_result
+    output=a+b
+  end subroutine add_real
 
 end module calculator
 
