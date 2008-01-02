@@ -1,7 +1,7 @@
 require 'rake/clean'
 require 'fruit_processor'
 
-goal='fruit_driver'
+goal='calculator_fruit_driver'
 
 CLEAN.include(['*.o', '*.mod', '*_gen_fruit.*'])
 CLOBBER.include(goal)
@@ -31,6 +31,6 @@ task :gen do
 end
 
 task :spec do
-  FruitProcessor.new.generate_spec
+  FruitProcessor.new.spec_report
 end
 

@@ -26,7 +26,8 @@ contains
   use fruit
     use calculator, only: add
     character :: spec = 'calculation should produce 4.0 when 2.0 and 2.0 &
-      are inputs'
+      are &
+      inputs'
     real:: result, a, b
     a=2.0
     b=2.0

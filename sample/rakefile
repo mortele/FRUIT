@@ -10,6 +10,6 @@ task :compile do
 end
 
 task :test => :compile do
-  sh 'cd test;rake;./fruit_driver'
+  sh 'cd test;rake;./calculator_fruit_driver'
 end
 
