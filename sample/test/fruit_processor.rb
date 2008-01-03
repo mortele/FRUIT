@@ -10,6 +10,14 @@ class FruitProcessor
     @files = FileList['*_test.f90']
     @source_file_names=[]
     @spec_hash={}
+    @files.each do |file|
+      grep_test_method_names file
+    end
+    get_specs
+
+  end
+
+  def process_file
   end
 
   def pre_process
@@ -33,13 +41,27 @@ class FruitProcessor
 
         f.write "\n"
 
-        method_names = grep_test_method_names(file)
+        method_names = @spec_hash[file]['methods']['name']
+
+        if @spec_hash[file]['setup']=='all'
+          f.write "       call setup_before_all\n"
+        end
+
         method_names.each do |method_name|
-          f.write "       call setup\n"
+          if @spec_hash[file]['setup']=='each'
+            f.write "       call setup\n"
+          end
           f.write "       write (*, *) \"  ..running #{method_name}\"\n"
           f.write "       call #{method_name}\n"
           # get failed count, added failed spec name into array
-          f.write "       call teardown\n"
+          if @spec_hash[file]['teardown']=='each'
+            f.write "       call teardown\n"
+          end
+          f.write "\n"
+        end
+
+        if @spec_hash[file]['teardown']=='all'
+          f.write "       call teardown_after_all\n"
         end
 
         f.write "     end subroutine all_#{module_name}\n"
@@ -48,17 +70,34 @@ class FruitProcessor
     end
   end
 
-  def grep_test_method_names file
-    names=[]
-    File.open(file, 'r') do |source_file|
+  def grep_test_method_names file_name
+    File.open(file_name, 'r') do |source_file|
+      @spec_hash[file_name]={}
+      @spec_hash[file_name]['methods'] = {}
+      @spec_hash[file_name]['methods']['name'] =[]
+      @spec_hash[file_name]['methods']['spec'] =[]
+
       source_file.grep( /^\s*subroutine\s*(\w+)\s*$/i ) do |dummy|
         subroutine_name=$1
-        next if subroutine_name.downcase== "setup"
-        next if subroutine_name.downcase== "teardown"
-        names << subroutine_name
+        if subroutine_name.downcase == "setup"
+          @spec_hash[file_name]['setup']='each'
+          next
+        end
+        if subroutine_name.downcase == "setup_before_all"
+          @spec_hash[file_name]['setup']='all'
+          next
+        end
+        if subroutine_name.downcase == "teardown"
+          @spec_hash[file_name]['teardown']='each'
+          next
+        end
+        if subroutine_name.downcase == "teardown_after_all"
+          @spec_hash[file_name]['teardown']='all'
+          next
+        end
+        @spec_hash[file_name]['methods']['name'] << subroutine_name
       end
     end
-    names
   end
 
   def create_driver
@@ -85,8 +124,9 @@ class FruitProcessor
     @files.each do |file|
       File.open(file, 'r') do |infile|
         while (line = infile.gets)
-          if line =~ /^\s*subroutine\s+test_(\w+)\s*$/i
+          if line =~ /^\s*subroutine\s+(\w+)\s*$/i
             subroutine_name=$1
+            next if subroutine_name !~ /^test_/
             spec_var=nil
 
             while (inside_subroutine = infile.gets)
@@ -107,10 +147,12 @@ class FruitProcessor
             end # end of inside subroutine lines
 
             if spec_var == nil
-              spec=subroutine_name.gsub('_', ' ')
+              spec=subroutine_name.gsub('test_', '').gsub('_', ' ')
             else
               spec = spec_var
             end
+
+            @spec_hash[file]['methods']['spec'] << spec
 
             specs << spec
           end # end of test match
