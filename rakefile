@@ -2,8 +2,8 @@ require 'rake/clean'
 require 'rubygems'
 require 'fruit_processor'
 
-$prj_root=Dir.pwd
-$build_dir = "#{$prj_root}/build"
+$base_dir=Dir.pwd
+$build_dir = "#{$base_dir}/build"
 
 task :default => [:anchor_root, :dirs, :compile, :test, :sample]
 
@@ -16,7 +16,7 @@ end
 
 task :test => :compile do
   sh 'cd test;rake;'
-  driver_programs = FileList["#{$build_dir}/*fruit_driver"]
+  driver_programs = FileList["#{$build_dir}/fruit_driver"]
   driver_programs.each do |driver|
     sh driver
   end
