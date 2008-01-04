@@ -186,20 +186,20 @@ class FruitProcessor
     found_dir=''
     protection_counter = 0
     while true
-      if File.exist? anchor_file_name 
+      if File.exist? "ROOT_ANCHOR" 
         found_dir=Dir.pwd
         break
       end
       if Dir.pwd == "/" or protection_counter > 100
-        FileUtils.cd (orig_path)
-        FileUtils.cd ("../")
+        FileUtils.cd(orig_path)
+        FileUtils.cd("../")
         found_dir=Dir.pwd
         break
       end
-      FileUtils.cd ("../")
+      FileUtils.cd("../")
       protection_counter +=1
     end
-    FileUtils.cd (orig_path)
+    FileUtils.cd(orig_path)
     return found_dir
   end
   

@@ -27,5 +27,5 @@ task :sample => :compile do
   sh "cd #{$build_dir};./calculator_fruit_driver"
 end
 
-load 'rake_fruit.rb'
-include RakeFruit
+load 'rake_base.rb'
+include RakeBase

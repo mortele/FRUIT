@@ -2,35 +2,19 @@ require 'rubygems'
 require 'fruit_processor'
 require 'rake/clean'
 
-BUILD_DIR='../build'
+lib = 'libfruit.a'
 
-CLEAN.include(['*.o', '*.mod'])
-CLOBBER.include(['*.a', "#{BUILD_DIR}"])
-
-task :default => ["libfruit.a", :deploy]
+task :default => [lib, :deploy]
 
 SRC = FileList['*.f90']
 OBJ = SRC.ext('o')
 
-lib = 'libfruit.a'
-
-rule '.o' => '.f90' do |t|
-  #next if t.name == 'obsolete.f90'
-  Rake::Task[:dirs].invoke
-  sh "ifort -c -o #{t.name} #{t.source} -module #{BUILD_DIR} -lfruit -L#{BUILD_DIR}"
-end
-
 file lib => OBJ do
   sh "ar cr #{lib} #{OBJ}"
 end
-      
-task :deploy do
-  sh "ln -sf #{Dir.pwd}/#{lib} #{BUILD_DIR}/#{lib}"
-end
 
-task :dirs do
-  mkdir BUILD_DIR unless File.exists?(BUILD_DIR)
-end
+load "#{FruitProcessor.new.find_base_dir}/rake_base.rb"
+include RakeBase
 
 # File dependencies go here ...
 #file 'libfruit.a' => ['fruit.o', 'fruit_utility.o']
