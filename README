@@ -1,0 +1,4 @@
+Rake file and the pre-processor require fruit_processor.rb.  It is packaged in ruby gem.:
+
+To install gem:
+gem install fruit_processor-2.0.gem 

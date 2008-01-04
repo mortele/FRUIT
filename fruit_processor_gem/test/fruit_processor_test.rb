@@ -1,5 +1,4 @@
 require 'test/unit'
-require 'rubygems'
 require 'fruit_processor'
 
 class FruitProcessorTest < Test::Unit::TestCase
