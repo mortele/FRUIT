@@ -1,25 +1,38 @@
 require 'rake/clean'
 
-BUILD_DIR='../build'
+COMPILER = 'ifort'
 goal = 'fruit_driver'
+
+BUILD_DIR='../build'
 
 CLEAN.include(['*.o', '*.mod'])
 CLOBBER.include('fruit_driver')
 
 task :default => ["fruit_driver", :deploy]
 
+lib_bases = {'fruit' => BUILD_DIR}
+
+lib_base_files =[]
+lib_bases.each_pair { |key, value| lib_base_files << "#{BUILD_DIR}/lib#{key}.a" }
+
+lib_name_flag = ''
+lib_bases.keys.each { |key| lib_name_flag += "-l#{key} " }
+
+lib_dir_flag = ''
+lib_bases.values.uniq.each {|value| lib_dir_flag += "-L#{value} " }
+
 SRC = FileList['*.f90']
 OBJ = SRC.ext('o')
 
 rule '.o' => '.f90' do |t|
-  sh "ifort -c -o #{t.name} #{t.source} -L#{BUILD_DIR} -module #{BUILD_DIR}"
+  sh "#{COMPILER} -c -o #{t.name} #{t.source} -L#{BUILD_DIR} -module #{BUILD_DIR}"
 end
 
-file goal  => OBJ do
-  sh "ifort -o #{goal} #{OBJ} -module #{BUILD_DIR} -lfruit -L#{BUILD_DIR}"
+file goal   do
+  sh "#{COMPILER} -o #{goal} #{OBJ} -module #{BUILD_DIR} #{lib_name_flag} #{lib_dir_flag}"
 end
 
-task :deploy do
+task :deploy => goal do
   sh "ln -sf #{Dir.pwd}/#{goal} #{BUILD_DIR}/#{goal}"
 end
 
@@ -28,3 +41,5 @@ file 'fruit_driver.o' => ['fruit_data_test.o', 'fruit_test.o']
 file 'fruit_data_test.o' => ['fruit_data_test.f90']
 file 'fruit_test.o' => ['fruit_test.f90']
 
+task goal => OBJ
+task goal => lib_base_files

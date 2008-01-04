@@ -1,8 +1,7 @@
 !------------------------
 ! FORTRAN unit test utility
 !
-! Author: Andrew H. Chen chena@westinghouse.com
-! Modified for use by BAI:  B. Frank, and likely others
+! Author: Andrew H. Chen meihome @at@ gmail.com
 !------------------------
 !!
 ! Unit test framework for FORTRAN.  (FoRtran UnIT)
@@ -12,13 +11,10 @@
 ! The method used most is: call assertTrue (logical [, message])
 !
 !  TODO list
-!    1) Make available some public variables like maybe failedAssertCount
-!       Then, the test program could check this and stop with a non-zero
-!       return code so Unix scripts can check on it
-!    2) Maybe read some options from a "fruit.ini" type file - like the
+!    1) Print out Number of tests, and number of assertions, such as those in Ruby Unit
+!    1) Maybe read some options from a "fruit.ini" type file - like the
 !       maximum number of messages to allow before exiting.
-!    3) Make all messages optional
-!    4) Added test for all arrays
+!   
 !
 !
 module fruit
@@ -36,9 +32,12 @@ module fruit
   character (len = MSG_LENGTH), private, DIMENSION (MSG_STACK_SIZE), save :: messageArray
   integer, private, save :: messageIndex = 1
 
-  !-------
-  ! Assert true methods
-  !-------
+  integer, private, save :: successfulTestCount = 0
+  integer, private, save :: failedTestCount = 0
+  character (len = MSG_LENGTH), private, DIMENSION (1000), save :: testCaseNamesArray
+  character (len = MSG_LENGTH), private, DIMENSION (1000), save :: testCaseMessageArray
+  integer, private, save :: testCaseIndex = 1
+
   interface assertTrue
       module procedure assertTrue_single
       module procedure assertTrue_result
@@ -106,19 +105,37 @@ module fruit
     module procedure addFail_UnitNameMessage
   end interface
 
-  !------------
-  ! Retrieve number of total cases.  Used for future report generator
-  !------------
   interface getTotalCount
     module procedure getTotalCount
   end interface
 
-  !------------
-  ! Retrieve number of failed cases.  Used for future report generator
-  !------------
   interface getFailedCount
     module procedure getFailedCount
   end interface
+
+!  interface addTestCase
+!    module procedure addTestCase
+!  end interface
+
+!  interface addCaseResult
+!    module procedure addCaseResult
+!  end interface
+
+!  interface getTotalTestCount
+!    module procedure getTotalTestCount
+!  end interface
+
+!  interface getTotalFailedTestCount
+!    module procedure getTotalFailedTestCount
+!  end interface
+
+!  interface getTestCases
+!    module procedure getTestCases
+!  end interface
+
+!  interface getTestCaseResults
+!    module procedure getTestCaseResults
+!  end interface
 
   !-------
   ! Access definition, to protect private methods
@@ -249,7 +266,6 @@ contains
       failedAssertCount = failedAssertCount + 1
     call failedMark()
     end if
-
   end subroutine assertTrue_single
 
   subroutine assertTrue_single_message (inputBoolValue, message)
@@ -372,7 +388,7 @@ contains
       write (*,*) 'Total test run :   ', successfulAssertCount + failedAssertCount
       write (*,*) 'Successful :       ', successfulAssertCount
       write (*,*) 'Failed :           ', failedAssertCount
-      write (*,*) 'Successful rate:   ', real(successfulAssertCount) * 100.0 / real (successfulAssertCount + failedAssertCount), '%'
+      write (*,'("Successful rate:   ",f6.2,"%")')  real(successfulAssertCount) * 100.0 / real (successfulAssertCount + failedAssertCount)
       write (*, *)
       write (*, *) '  -- end of FRUIT summary'
 

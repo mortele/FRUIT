@@ -1,4 +1,7 @@
 require 'rake/clean'
+require 'rubygems'
+require 'fruit_processor'
+
 PRJ_ROOT=Dir.pwd
 BUILD_DIR = "#{PRJ_ROOT}/build"
 
