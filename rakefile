@@ -2,13 +2,13 @@ require 'rake/clean'
 require 'rubygems'
 require 'fruit_processor'
 
-PRJ_ROOT=Dir.pwd
-BUILD_DIR = "#{PRJ_ROOT}/build"
+$prj_root=Dir.pwd
+$build_dir = "#{$prj_root}/build"
 
-task :default => [:compile, :test, :sample]
+task :default => [:anchor_root, :dirs, :compile, :test, :sample]
 
 CLEAN.include(FileList['**/*.o', '**/*.mod', '**/*.a' ])
-CLOBBER.include(BUILD_DIR)
+CLOBBER.include($build_dir)
 
 task :compile do
   sh 'cd src;rake'
@@ -16,7 +16,7 @@ end
 
 task :test => :compile do
   sh 'cd test;rake;'
-  driver_programs = FileList["#{BUILD_DIR}/*fruit_driver"]
+  driver_programs = FileList["#{$build_dir}/*fruit_driver"]
   driver_programs.each do |driver|
     sh driver
   end
@@ -24,6 +24,8 @@ end
 
 task :sample => :compile do
   sh 'cd sample;rake;'
-  sh "cd #{BUILD_DIR};./calculator_fruit_driver"
+  sh "cd #{$build_dir};./calculator_fruit_driver"
 end
 
+load 'rake_fruit.rb'
+include RakeFruit
