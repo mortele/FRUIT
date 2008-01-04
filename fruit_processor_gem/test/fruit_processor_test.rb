@@ -1,5 +1,5 @@
 require 'test/unit'
-require 'fruit_processor'
+require '../lib/fruit_processor'
 
 class FruitProcessorTest < Test::Unit::TestCase
   def setup
@@ -12,8 +12,7 @@ class FruitProcessorTest < Test::Unit::TestCase
   end
 
   def test_generate_spec
-    p @fixture.get_specs.size
-    assert_equal (4, @fixture.get_specs.size)
+    assert_equal (0, @fixture.get_specs.size)
   end
 
 end
