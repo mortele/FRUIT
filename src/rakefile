@@ -2,16 +2,12 @@ require 'rubygems'
 require 'fruit_processor'
 require 'rake/clean'
 
-lib = 'libfruit.a'
+$goal = 'libfruit.a'
 
-task :default => [lib, :deploy]
+task :default => [:deploy]
 
 SRC = FileList['*.f90']
 OBJ = SRC.ext('o')
-
-file lib => OBJ do
-  sh "ar cr #{lib} #{OBJ}"
-end
 
 load "#{FruitProcessor.new.find_base_dir}/rake_base.rb"
 include RakeBase

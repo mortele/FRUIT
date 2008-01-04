@@ -6,7 +6,7 @@ module RakeBase
   anchor_file_name='ROOT_ANCHOR'
   $compiler = 'ifort'
   
-  goal = '' if !goal
+  $goal = '' if !$goal
   
   $base_dir = FruitProcessor.new.find_base_dir if ! $base_dir
   $build_dir = "#{$base_dir}/build" if ! $build_dir
@@ -30,23 +30,27 @@ module RakeBase
   lib_bases.values.uniq.each {|value| lib_dir_flag += "-L#{value} " }
   
   CLEAN.include(['*.o', '*.a', '*.mod', module_with_path])
-  CLOBBER.include("#{$build_dir}/#{goal}")
+  CLOBBER.include("#{$build_dir}/#{$goal}")
   
   rule '.o' => '.f90' do |t|
     Rake::Task[:dirs].invoke
     sh "#{$compiler} -c -o #{t.name} #{t.source} -module #{$build_dir} #{lib_name_flag} #{lib_dir_flag}"
   end
   
-  file goal   do
-    sh "#{$compiler} -o #{goal} #{OBJ} -module #{$build_dir} #{lib_name_flag} #{lib_dir_flag}"
+  file $goal => OBJ do
+    if $goal =~ /.a$/
+      sh "ar cr #{$goal} #{OBJ}"
+    else
+      sh "#{$compiler} -o #{$goal} #{OBJ} -module #{$build_dir} #{lib_name_flag} #{lib_dir_flag}"
+    end
   end
   
   task :dirs do
     Dir.mkdir $build_dir unless File.exist?($build_dir)
   end  
   
-  task :deploy do
-    ln_sf("#{Dir.pwd}/#{goal}", "#{$build_dir}/#{goal}" )
+  task :deploy => $goal do
+    ln_sf("#{Dir.pwd}/#{$goal}", "#{$build_dir}/#{$goal}" )
   end
   
   task :anchor_root do
