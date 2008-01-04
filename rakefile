@@ -1,0 +1,26 @@
+require 'rake/clean'
+PRJ_ROOT=Dir.pwd
+BUILD_DIR = "#{PRJ_ROOT}/build"
+
+task :default => [:compile, :test, :sample]
+
+CLEAN.include(FileList['**/*.o', '**/*.mod', '**/*.a' ])
+CLOBBER.include(BUILD_DIR)
+
+task :compile do
+  sh 'cd src;rake'
+end
+
+task :test => :compile do
+  sh 'cd test;rake;'
+  driver_programs = FileList["#{BUILD_DIR}/*fruit_driver"]
+  driver_programs.each do |driver|
+    sh driver
+  end
+end
+
+task :sample => :compile do
+  sh 'cd sample;rake;'
+  sh "cd #{BUILD_DIR};./calculator_fruit_driver"
+end
+
