@@ -1,12 +1,10 @@
-GOAL='libcalculator.a'
-BUILD_DIR='../../build'
+require 'rubygems'
+require 'fruit_processor'
 
-load 'rake_fruit.rb'
-include RakeFruit
+$goal='libcalculator.a'
 
-task :default => [GOAL, :deploy]
+$lib_bases = {'fruit' => FruitProcessor.new.build_dir}
 
-file GOAL => OBJ do
-  sh "ar cr #{GOAL} #{OBJ}"
-end
+load "#{FruitProcessor.new.base_dir}/rake_base.rb"
+include RakeBase
 

@@ -1,9 +1,6 @@
-require 'rake/clean'
+require 'rubygems'
+require 'fruit_processor'
 
-task :default => [:test]
-
-CLEAN.include(FileList['**/*.o', '**/*.mod'])
-CLOBBER.include(FileList['**/*.a'])
 
 task :compile do
   sh 'cd src;rake'
@@ -13,3 +10,7 @@ task :test => :compile do
   sh 'cd test;rake;./calculator_fruit_driver'
 end
 
+load "#{FruitProcessor.new.base_dir}/rake_base.rb"
+include RakeBase
+
+task :default => [:test]

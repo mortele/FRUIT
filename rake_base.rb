@@ -38,7 +38,8 @@ module RakeBase
   CLOBBER.include("#{$build_dir}/#{$goal}")
   
   task :default => [:deploy]
-  task $goal => lib_base_files
+  # if any of the lib is new, then the $goal should be rebuilt
+  #  file $goal => lib_base_files
   
   rule '.o' => '.f90' do |t|
     Rake::Task[:dirs].invoke
@@ -46,7 +47,8 @@ module RakeBase
   end
   
   file $goal => OBJ do
-    if $goal =~ /.a$/
+    if OBJ.size == 0
+    elsif $goal =~ /.a$/
       sh "ar cr #{$goal} #{OBJ}"
     else
       sh "#{$compiler} -o #{$goal} #{OBJ} -module #{$build_dir} #{lib_name_flag} #{lib_dir_flag}"

@@ -8,8 +8,8 @@ $lib_bases = {'fruit' => FruitProcessor.new.build_dir}
 
 # File dependencies go here ...
 file 'fruit_driver.o' => ['fruit_data_test.o', 'fruit_test.o']
-file 'fruit_data_test.o' => ['fruit_data_test.f90']
-file 'fruit_test.o' => ['fruit_test.f90']
+#file 'fruit_data_test.o' => ['fruit_data_test.f90']
+#file 'fruit_test.o' => ['fruit_test.f90']
 
 load "#{FruitProcessor.new.base_dir}/rake_base.rb"
 include RakeBase
