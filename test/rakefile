@@ -1,28 +1,16 @@
+require 'rubygems'
+require 'fruit_processor'
 require 'rake/clean'
 
-COMPILER = 'ifort'
-goal = 'fruit_driver'
+$goal = 'fruit_driver'
 
-BUILD_DIR='../build'
-
-CLEAN.include(['*.o', '*.mod'])
-CLOBBER.include('fruit_driver')
-
-task :default => ["fruit_driver", :deploy]
-
-lib_bases = {'fruit' => $build_dir}
-
-SRC = FileList['*.f90']
-OBJ = SRC.ext('o')
+$lib_bases = {'fruit' => FruitProcessor.new.build_dir}
 
 # File dependencies go here ...
 file 'fruit_driver.o' => ['fruit_data_test.o', 'fruit_test.o']
 file 'fruit_data_test.o' => ['fruit_data_test.f90']
 file 'fruit_test.o' => ['fruit_test.f90']
 
-task goal => OBJ
+load "#{FruitProcessor.new.base_dir}/rake_base.rb"
+include RakeBase
 
-load 'rake_fruit.rb'
-include RakeFruit
-
-task goal => lib_base_files

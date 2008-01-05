@@ -4,12 +4,10 @@ require 'rake/clean'
 
 $goal = 'libfruit.a'
 
-task :default => [:deploy]
-
 SRC = FileList['*.f90']
 OBJ = SRC.ext('o')
 
-load "#{FruitProcessor.new.find_base_dir}/rake_base.rb"
+load "#{FruitProcessor.new.base_dir}/rake_base.rb"
 include RakeBase
 
 # File dependencies go here ...

@@ -8,10 +8,10 @@ module RakeBase
   
   $goal = '' if !$goal
   
-  $base_dir = FruitProcessor.new.find_base_dir if ! $base_dir
-  $build_dir = "#{$base_dir}/build" if ! $build_dir
+  $base_dir = FruitProcessor.new.base_dir if ! $base_dir
+  $build_dir = FruitProcessor.new.build_dir if ! $build_dir
   
-  lib_bases = {} if !lib_bases
+  $lib_bases = {} if !$lib_bases
   
   SRC = FileList['*.f90']
   OBJ = SRC.ext('o')
@@ -21,16 +21,24 @@ module RakeBase
   end
   
   lib_base_files =[]
-  lib_bases.each_pair { |key, value| lib_base_files << "#{BUILD_DIR}/lib#{key}.a" }
+  $lib_bases.each_pair { |key, value| lib_base_files << "#{$build_dir}/lib#{key}.a" }
   
   lib_name_flag = ''
-  lib_bases.keys.each { |key| lib_name_flag += "-l#{key} " }
+  $lib_bases.keys.each { |key| lib_name_flag += "-l#{key} " }
   
   lib_dir_flag = ''
-  lib_bases.values.uniq.each {|value| lib_dir_flag += "-L#{value} " }
+  _libs=[]
+  $lib_bases.each_pair do |key, value| 
+    value = $build_dir if value == nil
+    _libs << value
+  end
+  _libs.uniq.each { |value|  lib_dir_flag += "-L#{value} " }
   
   CLEAN.include(['*.o', '*.a', '*.mod', module_with_path])
   CLOBBER.include("#{$build_dir}/#{$goal}")
+  
+  task :default => [:deploy]
+  task $goal => lib_base_files
   
   rule '.o' => '.f90' do |t|
     Rake::Task[:dirs].invoke

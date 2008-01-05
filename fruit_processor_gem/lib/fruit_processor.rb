@@ -181,7 +181,7 @@ class FruitProcessor
     end
   end
   
-  def find_base_dir
+  def base_dir
     orig_path = Dir.pwd
     found_dir=''
     protection_counter = 0
@@ -201,6 +201,10 @@ class FruitProcessor
     end
     FileUtils.cd(orig_path)
     return found_dir
+  end
+  
+  def build_dir
+    "#{base_dir}/build"
   end
   
 end
