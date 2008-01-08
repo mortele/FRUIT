@@ -15,35 +15,25 @@ module RakeBase
   
   SRC = FileList['*.f90']
   OBJ = SRC.ext('o')
-  module_with_path=[]
-  SRC.ext('mod').each do |file| 
-    module_with_path << "#{$build_dir}/#{file}" 
-  end
   
-  lib_base_files =[]
-  $lib_bases.each_pair { |key, value| lib_base_files << "#{$build_dir}/lib#{key}.a" }
-  
-  lib_name_flag = ''
-  $lib_bases.keys.each { |key| lib_name_flag += "-l#{key} " }
-  
-  lib_dir_flag = ''
-  _libs=[]
-  $lib_bases.each_pair do |key, value| 
-    value = $build_dir if value == nil
-    _libs << value
-  end
-  _libs.uniq.each { |value|  lib_dir_flag += "-L#{value} " }
-  
-  CLEAN.include(['*.o', '*.a', '*.mod', '*_gen_fruit.f90', module_with_path])
+  CLEAN.include(['*.o', '*.a', '*.mod', '*_gen_fruit.f90', FruitProcessor.new.module_files(SRC, $build_dir)])
   CLOBBER.include("#{$build_dir}/#{$goal}")
   
   task :default => [:deploy]
+  task :default => [:before_all]
+  task :default => [:compile]
+  
   # if any of the lib is new, then the $goal should be rebuilt
   #  file $goal => lib_base_files
   
+  task :compile => :before_all do
+    SRC.each do |t|    
+      sh "#{$compiler} -c -o #{t.gsub('.f90', '.o')} #{t} -module #{$build_dir}"
+    end
+  end
+
   rule '.o' => '.f90' do |t|
-    Rake::Task[:dirs].invoke
-    sh "#{$compiler} -c -o #{t.name} #{t.source} -module #{$build_dir} #{lib_name_flag} #{lib_dir_flag}"
+    sh "#{$compiler} -c -o #{t.name} #{t.source} -module #{$build_dir}"
   end
   
   file $goal => OBJ do
@@ -51,7 +41,7 @@ module RakeBase
     elsif $goal =~ /.a$/
       sh "ar cr #{$goal} #{OBJ}"
     else
-      sh "#{$compiler} -o #{$goal} #{OBJ} -module #{$build_dir} #{lib_name_flag} #{lib_dir_flag}"
+      sh "#{$compiler} -o #{$goal} #{OBJ} -module #{$build_dir} #{FruitProcessor.new.lib_name_flag($lib_bases, $build_dir)} #{FruitProcessor.new.lib_dir_flag($lib_bases, $build_dir)}"
     end
   end
   
@@ -68,4 +58,12 @@ module RakeBase
     FileUtils.touch anchor_file_name
   end
   
+  task :before_all do
+    Rake::Task[:dirs].invoke if Rake::Task.task_defined?('dirs')
+    if Rake::Task.task_defined?('gen')
+      Rake::Task[:gen].invoke 
+      SRC = FileList['*.f90']
+      OBJ = SRC.ext('o')
+    end
+  end
 end

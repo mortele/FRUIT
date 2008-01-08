@@ -7,7 +7,7 @@ $build_dir = "#{$base_dir}/build"
 
 task :default => [:anchor_root, :dirs, :compile, :test, :sample]
 
-CLEAN.include(FileList['**/*.o', '**/*.mod', '**/*.a' ])
+CLEAN.include(FileList['**/*.o', '**/*.mod', '**/*.a', '**/*_gen_fruit.f90', '**/*fruit_driver' ])
 CLOBBER.include($build_dir)
 
 task :compile do

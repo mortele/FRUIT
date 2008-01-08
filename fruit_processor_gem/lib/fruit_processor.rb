@@ -207,4 +207,40 @@ class FruitProcessor
     "#{base_dir}/build"
   end
   
+  def module_files(all_f90_files, build_dir)
+    return [] if all_f90_files == nil or all_f90_files.size == 0
+    module_with_path=[]
+    # assume each source .f90 has a module.  This is a cleanup task, doesn't matter if removed non-existing file
+    all_f90_files.ext('mod').each do |file| 
+      module_with_path << "#{build_dir}/#{file}" 
+    end
+    return module_with_path
+  end
+  
+  def lib_base_files(lib_bases, build_dir)
+    return if lib_bases == nil 
+    lib_base_files =[]
+    lib_bases.each_pair { |key, value| lib_base_files << "#{build_dir}/lib#{key}.a" }
+    return lib_base_files
+  end
+  
+  def lib_name_flag (lib_bases, build_dir)
+    return if lib_bases == nil 
+    lib_name_flag = ''
+    lib_bases.keys.each { |key| lib_name_flag += "-l#{key} " }
+    return lib_name_flag
+  end
+  
+  def lib_dir_flag(lib_bases, build_dir)
+    return if lib_bases == nil 
+    lib_dir_flag = ''
+    _libs=[]
+    lib_bases.each_pair do |key, value|
+      value = build_dir if value == nil
+      _libs << value
+    end
+    _libs.uniq.each { |value|  lib_dir_flag += "-L#{value} " }
+    return lib_dir_flag
+  end
+  
 end
