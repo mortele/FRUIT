@@ -34,7 +34,7 @@ module RakeBase
   end
   _libs.uniq.each { |value|  lib_dir_flag += "-L#{value} " }
   
-  CLEAN.include(['*.o', '*.a', '*.mod', module_with_path])
+  CLEAN.include(['*.o', '*.a', '*.mod', '*_gen_fruit.f90', module_with_path])
   CLOBBER.include("#{$build_dir}/#{$goal}")
   
   task :default => [:deploy]
