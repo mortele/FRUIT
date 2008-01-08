@@ -20,19 +20,9 @@ module RakeBase
   CLOBBER.include("#{$build_dir}/#{$goal}")
   
   task :default => [:deploy]
-  task :default => [:before_all]
-  task :default => [:compile]
   
-  # if any of the lib is new, then the $goal should be rebuilt
-  #  file $goal => lib_base_files
-  
-  task :compile => :before_all do
-    SRC.each do |t|    
-      sh "#{$compiler} -c -o #{t.gsub('.f90', '.o')} #{t} -module #{$build_dir}"
-    end
-  end
-
   rule '.o' => '.f90' do |t|
+    Rake::Task[:dirs].invoke if Rake::Task.task_defined?('dirs')
     sh "#{$compiler} -c -o #{t.name} #{t.source} -module #{$build_dir}"
   end
   
@@ -57,13 +47,5 @@ module RakeBase
     require 'fileutils'
     FileUtils.touch anchor_file_name
   end
-  
-  task :before_all do
-    Rake::Task[:dirs].invoke if Rake::Task.task_defined?('dirs')
-    if Rake::Task.task_defined?('gen')
-      Rake::Task[:gen].invoke 
-      SRC = FileList['*.f90']
-      OBJ = SRC.ext('o')
-    end
-  end
+ 
 end
