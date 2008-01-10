@@ -180,7 +180,8 @@ class FruitProcessor
   
   def spec_report
     puts "All executable specifications from tests :"
-    @spec_hash.each_pair do |file, method_hash|
+    @spec_hash.keys.sort.each do |file|
+      method_hash=@spec_hash[file]
       #@spec_hash[file]['methods']['spec']
       puts "  #{file.gsub('_test.f90', '')}"
       puts "  --"
