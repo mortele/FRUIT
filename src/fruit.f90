@@ -28,6 +28,22 @@ module fruit
   character (len = MSG_LENGTH), private, dimension (1000), save :: testCaseMessageArray
   integer, private, save :: testCaseIndex = 1
 
+  interface init_fruit
+     module procedure init_fruit_
+  end interface
+
+  interface initializeFruit
+     module procedure initialize_fruit_
+  end interface
+
+  interface fruit_summary
+     module procedure fruit_summary_
+  end interface
+
+  interface getTestSummary
+     module procedure get_test_summary_  
+  end interface
+
   interface assertTrue
      module procedure assert_true_single
   end interface
@@ -116,16 +132,14 @@ module fruit
   !    module procedure getTestCaseResults
   !  end interface
 
-  private :: assertTrue_single, assertTrue_result, &
+  private :: init_fruit_, initialize_fruit_, fruit_summary_, get_test_summary_, &
+       warning_, assertTrue_single, assertTrue_result, &
        add_success, &
        add_fail, add_fail_unit, increaseMessageStack
 
 contains
 
-  ! ----
-  ! Initialize all test modules
-  ! ----
-  subroutine initializeFruit
+  subroutine init_fruit_
     successfulAssertCount = 0
     failedAssertCount = 0
     messageIndex = 1
@@ -134,7 +148,62 @@ contains
     write (*,*)
     write (*,*) "   . : successful assert,   F : failed assert "
     write (*,*)
-  end subroutine initializeFruit
+  end subroutine init_fruit_
+
+  subroutine initialize_fruit_
+    write (*,*)
+    write (*,*) "initializeFruit is OBSOLETE.  replaced by init_fruit"
+    write (*,*)
+    call init_fruit
+  end subroutine initialize_fruit_
+
+  subroutine get_test_summary_
+    call warning_ ( "getTestSummary is OBSOLETE.  replaced by fruit_summary")
+    call fruit_summary
+  end subroutine get_test_summary_
+
+  subroutine fruit_summary_
+    implicit none
+
+    integer :: i
+
+    write (*,*)
+    write (*,*)
+    write (*,*) '    Start of FRUIT summary: '
+    write (*,*)
+
+    if (failedAssertCount > 0) then
+       write (*,*) 'Some tests failed!'
+    else
+       write (*,*) 'SUCCESSFUL!'
+    end if
+
+    !----------------
+    ! Dump message stack
+    !----------------
+    if ( messageIndex > 1) then
+       write (*,*) '  -- Messages are:'
+
+       do i = 1, messageIndex - 1
+          write (*,"(A)") trim(messageArray(i))
+       end do
+
+       write (*,*) '  -- end of messages.'
+    else
+       write (*,*) '  No messages '
+    end if
+
+    if (successfulAssertCount + failedAssertCount /= 0) then
+
+       write (*,*) 'Total test run :   ', successfulAssertCount + failedAssertCount
+       write (*,*) 'Successful :       ', successfulAssertCount
+       write (*,*) 'Failed :           ', failedAssertCount
+       write (*,'("Successful rate:   ",f6.2,"%")')  real(successfulAssertCount) * 100.0 / real (successfulAssertCount + failedAssertCount)
+       write (*, *)
+       write (*, *) '  -- end of FRUIT summary'
+
+    end if
+  end subroutine fruit_summary_
 
   subroutine assert_equals_string (var1, var2, message)
     implicit none
@@ -244,52 +313,6 @@ contains
 
     return
   end subroutine isAllSuccessful
-
-  ! -----
-  ! Return summary of all tests in this instance
-  ! -----
-  subroutine getTestSummary
-    implicit none
-
-    integer :: i
-
-    write (*,*)
-    write (*,*)
-    write (*,*) '    Start of FRUIT summary: '
-    write (*,*)
-
-    if (failedAssertCount > 0) then
-       write (*,*) 'Some tests failed!'
-    else
-       write (*,*) 'SUCCESSFUL!'
-    end if
-
-    !----------------
-    ! Dump message stack
-    !----------------
-    if ( messageIndex > 1) then
-       write (*,*) '  -- Messages are:'
-
-       do i = 1, messageIndex - 1
-          write (*,"(A)") trim(messageArray(i))
-       end do
-
-       write (*,*) '  -- end of messages.'
-    else
-       write (*,*) '  No messages '
-    end if
-
-    if (successfulAssertCount + failedAssertCount /= 0) then
-
-       write (*,*) 'Total test run :   ', successfulAssertCount + failedAssertCount
-       write (*,*) 'Successful :       ', successfulAssertCount
-       write (*,*) 'Failed :           ', failedAssertCount
-       write (*,'("Successful rate:   ",f6.2,"%")')  real(successfulAssertCount) * 100.0 / real (successfulAssertCount + failedAssertCount)
-       write (*, *)
-       write (*, *) '  -- end of FRUIT summary'
-
-    end if
-  end subroutine getTestSummary
 
   subroutine successfulMark
     write(*,"(A1)",ADVANCE='NO') '.'
@@ -928,5 +951,12 @@ contains
     count = failedAssertCount
 
   end subroutine getFailedCount
+
+  subroutine warning_ (message)
+    character (*), intent (in), optional :: message
+    write (*,*) "start: ---!!!--------WARNING from FRUIT------!!!----"
+    write (*,*) message
+    write (*,*) "end: ---!!!--------WARNING from FRUIT------!!!----"
+  end subroutine warning_
 
 end module fruit

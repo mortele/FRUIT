@@ -7,12 +7,12 @@ class FruitProcessorTest < Test::Unit::TestCase
   end
 
   def test_init
-    @fixture.create_module
+    @fixture.fruit_picker
     @fixture.create_driver
   end
 
   def test_generate_spec
-    assert_equal (0, @fixture.get_specs.size)
+    assert_equal(0, @fixture.get_specs.size)
   end
 
 end

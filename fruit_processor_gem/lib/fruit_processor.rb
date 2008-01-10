@@ -6,7 +6,7 @@ require 'rake'
 class FruitProcessor
   
   def initialize
-    @driver_file='fruit_driver_gen_fruit'
+    @driver_file='fruit_driver_gen'
     @files = FileList['*_test.f90']
     @source_file_names=[]
     @spec_hash={}
@@ -21,52 +21,68 @@ class FruitProcessor
   end
   
   def pre_process
-    create_module
+    fruit_picker
     create_driver
   end
   
-  def create_module
-    @files.each do |file|
-      fruit_file = file.gsub('.f90', '_gen_fruit.f90')
-      file_name=file.gsub(".f90", "")
-      module_name = "#{file_name}_gen_fruit"
-      @source_file_names << module_name
-      
-      File.open(fruit_file, 'w') do |f| 
-        f.write "module #{module_name}\n"
-        f.write "  use fruit\n"
-        f.write "   contains\n"
-        f.write "     subroutine all_#{module_name}\n"
-        f.write "       use #{file_name}\n"
-        
+  # create one fruit package in one directory
+  def fruit_picker lib_name=nil
+    test_subroutine_names=[]
+    lib_name = "#{lib_name}_" if lib_name != nil
+    module_name = "#{lib_name}fruit_basket_gen"
+    fruit_file = "#{module_name}.f90"
+    File.open(fruit_file, 'w') do |f| 
+      f.write "module #{module_name}\n"
+      f.write "  use fruit\n"
+      f.write "contains\n"
+    end
+    
+    File.open(fruit_file, 'a') do |f| 
+      @files.each do |file|
+        test_module_name=file.gsub(".f90", "")
+        @source_file_names << module_name
+        subroutine_name="#{test_module_name}_all_tests"
+        test_subroutine_names << subroutine_name
+        f.write "  subroutine #{subroutine_name}\n"
+        f.write "    use #{test_module_name}\n"
         f.write "\n"
         
         method_names = @spec_hash[file]['methods']['name']
         
         if @spec_hash[file]['setup']=='all'
-          f.write "       call setup_before_all\n"
+          f.write "    call setup_before_all\n"
         end
         
         method_names.each do |method_name|
           if @spec_hash[file]['setup']=='each'
-            f.write "       call setup\n"
+            f.write "    call setup\n"
           end
-          f.write "       write (*, *) \"  ..running #{method_name}\"\n"
-          f.write "       call #{method_name}\n"
+          f.write "    write (*, *) \"  ..running #{method_name}\"\n"
+          f.write "    call #{method_name}\n"
           # get failed count, added failed spec name into array
           if @spec_hash[file]['teardown']=='each'
-            f.write "       call teardown\n"
+            f.write "    call teardown\n"
           end
           f.write "\n"
         end
         
         if @spec_hash[file]['teardown']=='all'
-          f.write "       call teardown_after_all\n"
+          f.write "    call teardown_after_all\n"
         end
         
-        f.write "     end subroutine all_#{module_name}\n"
-        f.write "end module #{module_name}\n"
+        f.write "  end subroutine #{subroutine_name}\n"
+        f.write "\n"
       end
+    end
+    
+    File.open(fruit_file, 'a') do |f| 
+      f.write "  subroutine fruit_basket\n"
+      test_subroutine_names.each do |test_subroutine_name|
+        f.write "    call #{test_subroutine_name}\n"
+      end
+      f.write "  end subroutine fruit_basket\n"
+      f.write "\n"
+      f.write "end module #{module_name}"
     end
   end
   
@@ -107,11 +123,11 @@ class FruitProcessor
       @source_file_names.each do |name|
         f.write "  use #{name}\n"
       end
-      f.write "  call initializeFruit\n"
+      f.write "  call init_fruit\n"
       @source_file_names.each do |name|
-        f.write "  call all_#{name}\n"
+        f.write "  call fruit_basket\n"
       end
-      f.write "  call getTestSummary\n"
+      f.write "  call fruit_summary\n"
       # print all spec result array
       f.write "end program #{@driver_file}\n"
     end
