@@ -1,8 +1,0 @@
-#!/usr/bin/env python
-
-Import('env','Glob')
-
-sources = Glob('*.f90') + Glob('*.f')
-objs = env.Object(sources)
-
-Return('objs')

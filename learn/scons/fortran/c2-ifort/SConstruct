@@ -1,4 +1,0 @@
-import os
-env = Environment(FORTRAN ='ifort', ENV = os.environ, CC='ifort')
-env.Program(target = 'hello' , source = 'hello.f90') 
-
