@@ -12,41 +12,35 @@ module fruit_test
 contains
   ! Run all the test sub routines 
   ! -----------------------------
-  subroutine allFruitTest  
+  subroutine fruit_test_package
     implicit none
 
     ! test printing and formats
     !--------------------------
-    call progressMarkTest()
+    call test_progress_mark
     
-    call showOutputTest
+    call test_show_output
     call getTestSummaryTest
     call showOutputForReport
     
     ! the following should give 100% pass
     !------------------------------------
-    call assertTrueResultMessageTest
     call getTestSummary
 
-    call assertTrueResultTest
-    call assertTrueResultTest_invalid
+    call test_assert_true
     
-    call assertTrueTest
-    call assertTrueMessageTest
-    
-    call addSuccessTest
-    call addSuccessMessageTest
-    call addFailTest
+    call test_add_success
+    call test_add_success_message
+    call test_add_fail
 
-    call addFailMessageTest
-    call isAllSuccessfulTest
+    call test_is_all_successful
 
-    call testAssertEqualsFloat
+    call test_assert_equals_float
     call getTestSummary
 
-  end subroutine allFruitTest
+  end subroutine fruit_test_package
   
-  subroutine progressMarkTest
+  subroutine test_progress_mark
     write (*,*) "Should see . here:"
     call successfulMark()
     write (*,*) "Should see .. here:"
@@ -63,75 +57,9 @@ contains
     call failedMark()
   
     write (*,*) 
-  end subroutine progressMarkTest
+  end subroutine test_progress_mark
   
-  ! ----
-  subroutine assertTrueResultTest 
-    implicit none
-    logical :: inputValue
-    logical :: resultValue = .FALSE.
-    
-    inputValue = .true.
-    
-    call assertTrue (inputValue, resultValue)
-    
-    IF (resultValue .eqv. .true.) then 
-      write (*,*) 'assertTrueResultTest Successful'
-    else 
-      write (*,*) 'assertTrueResultTest FAILED!!!'
-    end IF
-    
-    return
-  end subroutine assertTrueResultTest
-  
-  ! ----
-  subroutine assertTrueResultTest_invalid
-    implicit none
-    logical :: inputValue
-    logical :: resultValue = .FALSE.
-    
-    inputValue = .FALSE.
-    
-    call assertTrue (inputValue, resultValue)
-    
-    IF (resultValue .neqv. .true.) then 
-      write (*,*) 'assertTrueResultTest_invalid Successful'
-    else 
-      write (*,*) 'assertTrueResultTest_invalid FAILED!!!'
-    end IF
-    
-  end subroutine assertTrueResultTest_invalid
-
-  !------------
-  ! Test assert with result and message
-  !------------  
-  subroutine assertTrueResultMessageTest
-    implicit none
-    logical :: inputValue
-    logical :: resultValue
-    
-    inputValue = .true.
-    resultValue = .FALSE.
-    
-    call initializeFruit
-    call assertTrue (inputValue, 'Test assertTrue (input, msg, result) message.', resultValue)
-    
-    IF (resultValue .eqv. .true.) then 
-      write (*,*) 'assertTrueResultMessageTest Successful'
-    else 
-      write (*,*) 'assertTrueResultMessageTest FAILED!!!'
-    end IF
-    
-    write (*,*) 'Should see 1 successful case'
-
-    call addSuccess ('assertTrueResultMessageTest', 'success')
-    call getTestSummary
-    
-  end subroutine assertTrueResultMessageTest
-  
-  ! Test assertTrue
-  ! ---------------
-  subroutine assertTrueTest 
+  subroutine test_assert_true
     implicit none
 
     call initializeFruit
@@ -142,7 +70,7 @@ contains
     call assertTrue (.FALSE.)
     
     call getTestSummary
-  end subroutine assertTrueTest
+  end subroutine test_assert_true
   
   ! Test assertTrue with message
   ! ----------------------------
@@ -159,7 +87,7 @@ contains
   
   ! Test addSuccess and isAllSuccessful
   ! -----------------------------------
-  subroutine addSuccessTest
+  subroutine test_add_success
     implicit none
     
     logical :: result = .FALSE.
@@ -177,22 +105,22 @@ contains
 
     call getTestSummary
     
-  end subroutine addSuccessTest
+  end subroutine test_add_success
   
-  subroutine addSuccessMessageTest
+  subroutine test_add_success_message
     implicit none
 
     call initializeFruit
-    call addSuccess ('Success in this subroutine: addSuccessMessageTest')
+    call addSuccess ('Success in this subroutine: test_add_success_message')
     
-    call addSuccess ('addSuccessMessageTest', 'Success in this subroutine: addSuccessMessageTest')
+    call addSuccess ('test_add_success_message', 'Success in this subroutine: test_add_success_message')
     
     call getTestSummary
-  end subroutine addSuccessMessageTest
+  end subroutine test_add_success_message
   
   ! Test addSuccess and isAllSuccessful
   ! -----------------------------------
-  subroutine addFailTest
+  subroutine test_add_fail
     implicit none
     
     logical :: result = .FALSE.
@@ -207,31 +135,30 @@ contains
       write (*, *)
     end IF
     
-    call addFail('addFailTest', 'testing addFail')
+    call addFail('test_add_fail', 'testing addFail')
     call getTestSummary
 
-  end subroutine addFailTest
+  end subroutine test_add_fail
   
   ! Test addSuccess and isAllSuccessful
   ! -----------------------------------
-  subroutine addFailMessageTest
+  subroutine test_add_fail_message
     implicit none
     
     logical :: result = .FALSE.
 
     call initializeFruit
     call addFail ('Add a failed case')
-    call addFail ('addFailMessageTest', 'Add a failed case')
+    call addFail ('test_add_fail_message', 'Add a failed case')
     call isAllSuccessful (result)
 
     IF (result .neqv. .FALSE.) then
       write (*, *)
-      write (*, *) 'FAILED addFail !!!'
+      write (*, *) 'FAILED add_fail !!!'
       write (*, *)
     end IF
 
-    call getTestSummary
-  end subroutine addFailMessageTest
+  end subroutine test_add_fail_message
   
   ! Test successful and failed summary
   ! ----------------------------------
@@ -264,7 +191,7 @@ contains
   ! Add one failed case and assert false
   ! Add all success case, and assert true
   ! -------------------------------------
-  subroutine isAllSuccessfulTest  
+  subroutine test_is_all_successful  
     implicit none
     
     logical :: result = .true.
@@ -277,7 +204,7 @@ contains
     
     IF (result .neqv. .FALSE.) then
       write (*, *)
-      write (*, *) 'FAILED isAllSuccessfulTest!!! (addFail)'
+      write (*, *) 'FAILED test_is_all_successful!!! (addFail)'
       write (*, *)
     end IF
 
@@ -291,7 +218,7 @@ contains
     
     IF (result .neqv. .true.) then
       write (*, *)
-      write (*, *) 'FAILED isAllSuccessfulTest!!! (addSuccess)'
+      write (*, *) 'FAILED test_is_all_successful!!! (addSuccess)'
       write (*, *)
     end IF
     call getTestSummary
@@ -299,14 +226,14 @@ contains
     call initializeFruit
     IF (result .neqv. .true.) then
       write (*, *)
-      write (*, *) 'FAILED isAllSuccessfulTest!!! (addSuccess)'
+      write (*, *) 'FAILED test_is_all_successful!!! (addSuccess)'
       write (*, *)
     end IF
     call getTestSummary
 
-  end subroutine isAllSuccessfulTest
+  end subroutine test_is_all_successful
   
-  subroutine showOutputTest 
+  subroutine test_show_output 
     implicit none
     logical :: trueValue = .TRUE.
     logical :: falseValue = .FALSE.
@@ -323,7 +250,7 @@ contains
     END DO
     call getTestSummary
     
-  end subroutine showOutputTest
+  end subroutine test_show_output
   
   subroutine showOutputForReport 
     implicit none
@@ -356,7 +283,7 @@ contains
     call getTestSummary
   end subroutine showOutputForReport
   
-  subroutine testAssertEqualsFloat
+  subroutine test_assert_equals_float
     implicit none
     
     real :: variable = 2.3
@@ -367,6 +294,6 @@ contains
     call assertEquals (variable + 0.1, result)
     call getTestSummary
     
-  end subroutine testAssertEqualsFloat
+  end subroutine test_assert_equals_float
   
 end module fruit_test

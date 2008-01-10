@@ -5,19 +5,19 @@
 ! Author: Andrew H. Chen chena@westinghouse.com
 !------------------------
 !
-PROGRAM fruit_driver
+program fruit_driver
 
-  USE fruit
-  USE fruit_utility
-  USE fruit_test
-  USE fruit_data_test
+  use fruit
+  use fruit_utility
+  use fruit_test
+  use fruit_data_test
   
   call initializeFruit
   
-  call allFruitTest
+  call fruit_test_package
 
   call allFruitDataTest
 
   call getTestSummary
      
-END PROGRAM fruit_driver
+end program fruit_driver
