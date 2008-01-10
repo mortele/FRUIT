@@ -6,7 +6,7 @@ require 'rake'
 class FruitProcessor
   
   def initialize
-    @driver_file='fruit_driver_gen'
+    @driver_file='zzz_fruit_driver_gen'
     @files = FileList['*_test.f90']
     @source_file_names=[]
     @spec_hash={}
@@ -29,7 +29,7 @@ class FruitProcessor
   def fruit_picker lib_name=nil
     test_subroutine_names=[]
     lib_name = "#{lib_name}_" if lib_name != nil
-    module_name = "#{lib_name}fruit_basket_gen"
+    module_name = "zz_fruit_basket_#{lib_name}gen"
     fruit_file = "#{module_name}.f90"
     File.open(fruit_file, 'w') do |f| 
       f.write "module #{module_name}\n"
@@ -134,9 +134,7 @@ class FruitProcessor
   end
   
   def get_specs
-    specs=[]
     spec=''
-    
     @files.each do |file|
       File.open(file, 'r') do |infile|
         while (line = infile.gets)
@@ -169,13 +167,10 @@ class FruitProcessor
             end
             
             @spec_hash[file]['methods']['spec'] << spec
-            
-            specs << spec
           end # end of test match
         end # end of each line in file
       end # end of file open
     end # end of each file
-    specs
   end
   
   def end_match (string, match)
@@ -185,15 +180,23 @@ class FruitProcessor
   
   def spec_report
     puts "All executable specifications from tests :"
-    @files.each do |file|
+    @spec_hash.each_pair do |file, method_hash|
+      #@spec_hash[file]['methods']['spec']
       puts "  #{file.gsub('_test.f90', '')}"
       puts "  --"
-      spaces = "    -- "
-      indent = "  " + spaces.gsub("-", " ")
-      get_specs.each do |spec|
-        line = spec.gsub("\n", "\n#{indent}")
-        puts "#{spaces}#{line}"
+      
+      method_hash.each_pair do |method, method_values|
+        next if !method_values['spec']
+        spaces = "    -- "
+        indent = "  " + spaces.gsub("-", " ")
+        
+        method_values['spec'].each do |spec|
+          line = spec.gsub("\n", "\n#{indent}")
+          puts "#{spaces}#{line}"
+        end
       end
+      puts "\n"
+      
     end
   end
   
