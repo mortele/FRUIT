@@ -3,6 +3,7 @@ require 'fruit_processor'
 # include this if there is generated code in this dir
 FruitProcessor.new.pre_process
 
+
 $goal='calculator_fruit_driver'
 
 $lib_bases = {'fruit' => FruitProcessor.new.build_dir, 

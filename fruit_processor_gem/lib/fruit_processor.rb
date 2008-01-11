@@ -6,15 +6,14 @@ require 'rake'
 class FruitProcessor
   
   def initialize
-    @driver_file='zzz_fruit_driver_gen'
+    @driver_program_name='zzz_fruit_driver_gen'
+    @fruit_basket_module_name = 'zz_fruit_basket_gen'
     @files = FileList['*_test.f90']
-    @source_file_names=[]
     @spec_hash={}
     @files.each do |file|
       grep_test_method_names file
     end
     get_specs
-    
   end
   
   def process_file
@@ -25,14 +24,12 @@ class FruitProcessor
     create_driver
   end
   
-  # create one fruit package in one directory
+  # create one fruit basket in one directory, this can go multiple directories
   def fruit_picker lib_name=nil
     test_subroutine_names=[]
-    lib_name = "#{lib_name}_" if lib_name != nil
-    module_name = "zz_fruit_basket_#{lib_name}gen"
-    fruit_file = "#{module_name}.f90"
+    fruit_file = "#{@fruit_basket_module_name}.f90"
     File.open(fruit_file, 'w') do |f| 
-      f.write "module #{module_name}\n"
+      f.write "module #{@fruit_basket_module_name}\n"
       f.write "  use fruit\n"
       f.write "contains\n"
     end
@@ -40,7 +37,6 @@ class FruitProcessor
     File.open(fruit_file, 'a') do |f| 
       @files.each do |file|
         test_module_name=file.gsub(".f90", "")
-        @source_file_names << module_name
         subroutine_name="#{test_module_name}_all_tests"
         test_subroutine_names << subroutine_name
         f.write "  subroutine #{subroutine_name}\n"
@@ -82,7 +78,7 @@ class FruitProcessor
       end
       f.write "  end subroutine fruit_basket\n"
       f.write "\n"
-      f.write "end module #{module_name}"
+      f.write "end module #{@fruit_basket_module_name}"
     end
   end
   
@@ -116,20 +112,18 @@ class FruitProcessor
     end
   end
   
-  def create_driver
-    File.open("#{@driver_file}.f90", 'w') do |f| 
-      f.write "program #{@driver_file}\n"
+  # look into all files lib_test_*.a in build_dir, then generate driver files
+  def create_driver build_dir=nil
+    File.open("#{@driver_program_name}.f90", 'w') do |f| 
+      f.write "program #{@driver_program_name}\n"
       f.write "  use fruit\n"
-      @source_file_names.each do |name|
-        f.write "  use #{name}\n"
-      end
+      f.write "  use #{@fruit_basket_module_name}\n"
       f.write "  call init_fruit\n"
-      @source_file_names.each do |name|
-        f.write "  call fruit_basket\n"
-      end
+      
+      f.write "  call fruit_basket\n"
+      
       f.write "  call fruit_summary\n"
-      # print all spec result array
-      f.write "end program #{@driver_file}\n"
+      f.write "end program #{@driver_program_name}\n"
     end
   end
   
@@ -179,7 +173,8 @@ class FruitProcessor
   end
   
   def spec_report
-    puts "All executable specifications from tests :"
+    puts "\n"
+    puts "All executable specifications from tests:"
     @spec_hash.keys.sort.each do |file|
       method_hash=@spec_hash[file]
       #@spec_hash[file]['methods']['spec']

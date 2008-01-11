@@ -1,10 +1,3 @@
-!------------------------
-!
-! Test for FORTRAN unit test codes
-!
-! Author: Andrew H. Chen chena@westinghouse.com
-!------------------------
-!
 program fruit_driver
 
   use fruit
@@ -12,12 +5,12 @@ program fruit_driver
   use fruit_test
   use fruit_data_test
   
-  call initializeFruit
+  call init_fruit
   
   call fruit_test_package
 
-  call allFruitDataTest
+  call fruit_data_test_package
 
-  call getTestSummary
+  call fruit_summary
      
 end program fruit_driver

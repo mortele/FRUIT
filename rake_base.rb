@@ -13,10 +13,10 @@ module RakeBase
   
   $lib_bases = {} if !$lib_bases
   
-  SRC = FileList['*.f90']
+  SRC = FileList['*.f90'].sort
   OBJ = SRC.ext('o')
   
-  CLEAN.include(['*.o', '*.a', '*.mod', '*_gen_fruit.f90', FruitProcessor.new.module_files(SRC, $build_dir)])
+  CLEAN.include(['*.o', '*.a', '*.mod', '*_gen.f90', '*fruit_driver', FruitProcessor.new.module_files(SRC, $build_dir)])
   CLOBBER.include("#{$build_dir}/#{$goal}")
   
   task :default => [:deploy]

@@ -24,7 +24,7 @@ end
 
 task :sample => :compile do
   sh 'cd sample;rake;'
-  sh "cd #{$build_dir};./calculator_fruit_driver"
+  sh "cd #{$build_dir};./fruit_driver"
 end
 
 load 'rake_base.rb'
