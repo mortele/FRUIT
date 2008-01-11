@@ -46,57 +46,47 @@ module fruit
   end interface
 
   interface assertTrue
-     module procedure assert_true_single
+     module procedure assert_true_logical_
   end interface
 
   interface assertEquals
-     module procedure assert_equals_string
-     module procedure assert_equals_logical
-     module procedure assert_equals_single_int
-     module procedure assert_equals_1darray_int
-     module procedure assert_equals_1darray_string
+     module procedure assert_equals_int_
+     module procedure assert_equals_double_
+     module procedure assert_equals_real_
+     module procedure assert_equals_logical_
+     module procedure assert_equals_string_
+     module procedure assert_equals_real_difference_
+     module procedure assert_equals_double_difference_
+
+     module procedure assert_equals_1darray_int_
+     module procedure assert_equals_1darray_double_
+     module procedure assert_equals_1d_array_real_
+     module procedure assert_equals_1darray_string_
+     module procedure assert_equals_1darray_complex_
 
      module procedure assert_equals_2d_array_int_
+     module procedure assert_equals_2darray_double_
+     module procedure assert_equals_2darray_real_
+     module procedure assert_equals_2darray_complex_
 
-     module procedure assert_equals_single_real_
-
-     module procedure assert_equals_1d_array_real_
-
-     module procedure assert_equals_2darray_real
-
-     module procedure assert_equals_single_double
-     module procedure assert_equals_1darray_double
-     module procedure assert_equals_2darray_double
-
-     module procedure assert_equals_single_single_single_message
-     module procedure assert_equals_spArr_spArr_int_sp_message
-
-     module procedure assert_equals_2darray_real_message
-     module procedure assert_equals_double_double_double_message
-     module procedure assert_equals_single_double_message
-     module procedure assert_equals_dpArr_dpArr_int_dp_message
-     module procedure assert_equals_1darray_double_message
-     module procedure assert_equals_2darray_double_message
-     module procedure assert_equals_1darray_complex
-     module procedure assert_equals_1darray_complex_message
-     module procedure assert_equals_2darray_complex
-     module procedure assert_equals_2darray_complex_message
+     module procedure assert_equals_spArr_spArr_int_sp_
+     module procedure assert_equals_dpArr_dpArr_int_dp_
   end interface
 
   interface assertNotEquals
-     module procedure assert_not_equals_single_real_
+     module procedure assert_not_equals_real_
      module procedure assert_not_equals_1d_array_real_
-     module procedure assertNotEquals_single_double
+     module procedure assert_not_equals_double_
   end interface
 
   interface addSuccess
-     module procedure add_success
-     module procedure add_success_unit
+     module procedure add_success_
+     module procedure add_success_unit_
   end interface
 
   interface addFail
-     module procedure add_fail
-     module procedure add_fail_unit
+     module procedure add_fail_
+     module procedure add_fail_unit_
   end interface
 
   interface getTotalCount
@@ -142,10 +132,30 @@ module fruit
   private :: init_fruit_, initialize_fruit_, fruit_summary_, get_test_summary_, &
        warning_, get_total_count_, assertTrue_single, assertTrue_result, &
        add_success, &
-       add_fail, add_fail_unit, increaseMessageStack, &
+       add_fail_, add_fail_unit_, increaseMessageStack, &
        success_case_action_, failed_case_action_, success_mark_, failed_mark_, &
-       assert_not_equals_single_real_, assert_equals_single_real_,  assert_not_equals_1d_array_real_, assert_equals_1d_array_real_, &
-       assert_equals_2d_array_int_
+       assert_not_equals_real_, &
+       assert_not_equals_double_, &
+       assert_not_equals_1d_array_real_, &
+       assert_equals_int_, &
+       assert_equals_double_, &
+       assert_equals_real_, &
+       assert_equals_logical_, &
+       assert_equals_string_, &
+       assert_equals_real_difference_, &
+       assert_equals_double_difference_, &
+       assert_equals_1darray_int_, &
+       assert_equals_1darray_double_, &
+       assert_equals_1d_array_real_, &
+       assert_equals_1darray_string_, &
+       assert_equals_1darray_complex_, &
+       assert_equals_2d_array_int_, &
+       assert_equals_2darray_double_, &
+       assert_equals_2darray_real_, &
+       assert_equals_2darray_complex_, &
+       assert_equals_spArr_spArr_int_sp_, &
+       assert_equals_dpArr_dpArr_int_dp_, &
+       add_success_, add_success_unit_
 
 contains
 
@@ -186,9 +196,6 @@ contains
        write (*,*) 'SUCCESSFUL!'
     end if
 
-    !----------------
-    ! Dump message stack
-    !----------------
     if ( messageIndex > 1) then
        write (*,*) '  -- Messages are:'
 
@@ -213,97 +220,55 @@ contains
     end if
   end subroutine fruit_summary_
 
-  subroutine assert_equals_string (var1, var2, message)
+
+  subroutine assert_true_logical_ (var1, message)
     implicit none
-    character(*), intent (in)  :: var1, var2
+    logical, intent (in) :: var1
     character (*), intent (in), optional :: message
-
-    if ( trim( var1) == trim( var2)) then
-       successfulAssertCount = successfulAssertCount + 1
-       call success_case_action_
-    else
-       call failed_case_action_
-       if (present(message)) then
-          call increaseMessageStack(trim(message) // ' (Expected ' // trim(var1) // ' got ' // trim(var2) // ')')
-       else
-          call increaseMessageStack(' (Expected ' // trim(var1) // ' got ' // trim(var2) // ')')
-       end if
-    end if
-  end subroutine assert_equals_string
-
-  subroutine assert_equals_logical (var1, var2, message)
-    implicit none
-    logical, intent (in)  :: var1, var2
-    character (*), intent (in), optional :: message
-
     character(MSG_LENGTH) :: msg
 
-    if ( var1 .eqv. var2 ) then
-       successfulAssertCount = successfulAssertCount + 1
+    if ( var1 .eqv. .true.) then
        call success_case_action_
     else
        call failed_case_action_
        if (present(message)) then
-          write(msg, '(A, L1, A, L1)') 'Expected ', var1, ' got ', var2
+          write(msg, '(A, L1, A, L1)') 'Expected ', var1, ' got ', .false.
        endif
        call increaseMessageStack(trim(message) // ' (' // trim(msg) // ')')
     end if
-  end subroutine assert_equals_logical
+  end subroutine assert_true_logical_
 
-  subroutine assert_true_single (input, message)
-    implicit none
-    logical, intent (in) :: input
-    character (*), intent (in), optional :: message
-
-    if ( input .eqv. .true.) then
-       successfulAssertCount = successfulAssertCount + 1
-       call success_case_action_
-    else
-       call failed_case_action_
-       if (present(message)) then
-          call increaseMessageStack(message)
-       end if
-    end if
-  end subroutine assert_true_single
-
-  subroutine add_success (message)
+  subroutine add_success_ (message)
     implicit none
     character (*), intent (in), optional :: message
+
     if (present(message)) then
        call increaseMessageStack(message)
     end if
     call success_case_action_
-  end subroutine add_success
+  end subroutine add_success_
 
-  ! -----
-  ! Just add one success case with message and subroutine name
-  ! -----
-  subroutine add_success_unit (unitName, message)
+  subroutine add_success_unit_ (unitName, message)
     character (*), intent (in) :: unitName
     character (*), intent (in) :: message
+    call add_success_ (trim(message) // "[in " //  unitName // "(ok)] ")
+  end subroutine add_success_unit_
 
-    call add_success ("[in " //  unitName // "(ok)] : " //  message)
-
-  end subroutine add_success_unit
-
-  subroutine add_fail (message)
+  subroutine add_fail_ (message)
     character (*), intent (in), optional :: message
     if (present(message)) then
        call increaseMessageStack(message)
     end if
     call failed_case_action_
-  end subroutine add_fail
+  end subroutine add_fail_
 
-  subroutine add_fail_unit (unitName, message)
+  subroutine add_fail_unit_ (unitName, message)
     character (*), intent (in) :: unitName
     character (*), intent (in) :: message
 
-    call add_fail ("[in " //  unitName // "(fail)]: " //  message)
-  end subroutine add_fail_unit
+    call add_fail_ ("[in " //  unitName // "(fail)]: " //  message)
+  end subroutine add_fail_unit_
 
-  ! -----
-  ! Just add one successful case
-  ! -----
   subroutine isAllSuccessful (result)
     implicit none
     logical, intent (out) :: result
@@ -334,6 +299,71 @@ contains
     messageArray (messageIndex) = message
     messageIndex = messageIndex + 1
   end subroutine increaseMessageStack
+
+  subroutine assert_equals_string_ (var1, var2, message)
+    implicit none
+    character(*), intent (in)  :: var1, var2
+    character (*), intent (in), optional :: message
+
+    if ( trim( var1) == trim( var2)) then
+       call success_case_action_
+    else
+       call failed_case_action_
+       if (present(message)) then
+          call increaseMessageStack(trim(message) // ' (Expected ' // trim(var1) // ' got ' // trim(var2) // ')')
+       else
+          call increaseMessageStack(' (Expected ' // trim(var1) // ' got ' // trim(var2) // ')')
+       end if
+    end if
+  end subroutine assert_equals_string_
+
+  subroutine assert_equals_logical_ (var1, var2, message)
+    implicit none
+    logical, intent (in)  :: var1, var2
+    character (*), intent (in), optional :: message
+    character(MSG_LENGTH) :: msg
+
+    if ( var1 .eqv. var2 ) then
+       call success_case_action_
+    else
+       call failed_case_action_
+       if (present(message)) then
+          write(msg, '(A, L1, A, L1)') 'Expected ', var1, ' got ', var2
+       endif
+       call increaseMessageStack(trim(message) // ' (' // trim(msg) // ')')
+    end if
+  end subroutine assert_equals_logical_
+
+  subroutine assert_equals_real_ (var1, var2, message)
+    implicit none
+    real, intent (in) :: var1, var2
+    character (*), intent (in), optional :: message
+
+    if ( var1 .eq. var2) then
+       successfulAssertCount = successfulAssertCount + 1
+       call success_case_action_
+    else
+       if (present(message)) then
+          call increaseMessageStack(message)
+       end if
+       call failed_case_action_
+    end if
+  end subroutine assert_equals_real_
+
+  subroutine assert_not_equals_real_ (var1, var2, message)
+    implicit none
+    real, intent (in) :: var1, var2
+    character (*), intent (in), optional :: message
+
+    if ( var1 .ne. var2) then
+       call success_case_action_
+    else
+       if (present(message)) then
+          call increaseMessageStack(message)
+       end if
+       call failed_case_action_
+    end if
+  end subroutine assert_not_equals_real_
 
   subroutine assert_not_equals_1d_array_real_ (var1, var2, n)
     implicit none
@@ -373,7 +403,7 @@ contains
 
   end subroutine assert_equals_2darray_real
 
-  subroutine assert_equals_single_single_single_message(var1, var2, var3, message)
+  subroutine assert_equals_real_difference_(var1, var2, var3, message)
     implicit none
     real, intent (in) :: var1, var2, var3
     character(*), intent(in), optional :: message
@@ -387,13 +417,13 @@ contains
        end if
     end if
 
-  end subroutine assert_equals_single_single_single_message
+  end subroutine assert_equals_real_difference_
 
   ! ----
   ! Assert the single precision arrays are equal within a tolerance
   ! print error messages and return error
   ! ----
-  subroutine assert_equals_spArr_spArr_int_sp_message(var1, var2, n, var3, message)
+  subroutine assert_equals_spArr_spArr_int_sp_(var1, var2, n, var3, message)
     implicit none
     integer, intent(in) :: n
     real, intent (in) :: var1(n), var2(n), var3
@@ -408,13 +438,9 @@ contains
           call increaseMessageStack(message)
        end if
     end if
-  end subroutine assert_equals_spArr_spArr_int_sp_message
+  end subroutine assert_equals_spArr_spArr_int_sp_
 
-  ! ----
-  ! Assert the double precision arrays are equal within a tolerance
-  ! print error messages and return error
-  ! ----
-  subroutine assert_equals_dpArr_dpArr_int_dp_message(var1, var2, n, var3, message)
+  subroutine assert_equals_dpArr_dpArr_int_dp_(var1, var2, n, var3, message)
     implicit none
     integer, intent(in) :: n
     double precision, intent (in) :: var1(n), var2(n), var3
@@ -429,9 +455,9 @@ contains
           call increaseMessageStack(message)
        end if
     end if
-  end subroutine assert_equals_dpArr_dpArr_int_dp_message
+  end subroutine assert_equals_dpArr_dpArr_int_dp_
 
-  subroutine assert_equals_double_double_double_message(var1, var2, var3, message)
+  subroutine assert_equals_double_difference_(var1, var2, var3, message)
     implicit none
     double precision, intent (in) :: var1, var2, var3
     character(*), intent(in), optional :: message
@@ -445,29 +471,37 @@ contains
           call increaseMessageStack(message)
        end if
     end if
-  end subroutine assert_equals_double_double_double_message
+  end subroutine assert_equals_double_difference_
 
-  subroutine assert_equals_single_double (var1, var2)
+  subroutine assert_equals_double (var1, var2, message)
     implicit none
     double precision, intent (in) :: var1, var2
+    character(*), intent(in), optional :: message
 
     if ( var1 .eq. var2) then
        call success_case_action_
     else
        call failed_case_action_
+       if (present(message)) then
+          call increaseMessageStack(message)
+       end if
     end if
-  end subroutine assert_equals_single_double
+  end subroutine assert_equals_double
 
-  subroutine assertNotEquals_single_double (var1, var2)
+  subroutine assert_not_equals_double_ (var1, var2, message)
     implicit none
     double precision, intent (in) :: var1, var2
+    character(*), intent(in), optional :: message
 
     if ( var1 .ne. var2) then
        call success_case_action_
     else
        call failed_case_action_
+       if (present(message)) then
+          call increaseMessageStack(message)
+       end if
     end if
-  end subroutine assertNotEquals_single_double
+  end subroutine assert_not_equals_double_
 
   subroutine assert_equals_1darray_double (var1, var2, n)
     implicit none
@@ -505,7 +539,7 @@ contains
     call success_case_action_
   end subroutine assert_equals_2darray_double
 
-  subroutine assert_equals_single_int (var1, var2, message)
+  subroutine assert_equals_int_ (var1, var2, message)
     implicit none
     integer, intent (in) :: var1, var2
     character (*), intent (in), optional :: message
@@ -518,9 +552,9 @@ contains
           call increaseMessageStack(message)
        endif
     end if
-  end subroutine assert_equals_single_int
+  end subroutine assert_equals_int_
 
-  subroutine assert_equals_1darray_int (var1, var2, n, message)
+  subroutine assert_equals_1darray_int_ (var1, var2, n, message)
     implicit none
     integer, intent (in) :: n
     integer, intent (in) :: var1(n), var2(n)
@@ -539,9 +573,9 @@ contains
     end do loop_dim1
 
     call success_case_action_
-  end subroutine assert_equals_1darray_int
+  end subroutine assert_equals_1darray_int_
 
-  subroutine assert_equals_1darray_string (var1, var2, n, message)
+  subroutine assert_equals_1darray_string_ (var1, var2, n, message)
     implicit none
     integer, intent (in) :: n
     character(*), intent (in) :: var1(n), var2(n)
@@ -569,7 +603,7 @@ contains
     end do loop_dim1
 
     call success_case_action_
-  end subroutine assert_equals_1darray_string
+  end subroutine assert_equals_1darray_string_
 
   subroutine assert_equals_2d_array_int_ (var1, var2, n, m, message)
     implicit none
@@ -592,39 +626,7 @@ contains
     end do loop_dim2
 
     call success_case_action_
-
   end subroutine assert_equals_2d_array_int_
-
-  subroutine assert_equals_single_real_ (var1, var2, message)
-    implicit none
-    real, intent (in) :: var1, var2
-    character (*), intent (in), optional :: message
-
-    if ( var1 .eq. var2) then
-       successfulAssertCount = successfulAssertCount + 1
-       call success_case_action_
-    else
-       if (present(message)) then
-          call increaseMessageStack(message)
-       end if
-       call failed_case_action_
-    end if
-  end subroutine assert_equals_single_real_
-
-  subroutine assert_not_equals_single_real_ (var1, var2, message)
-    implicit none
-    real, intent (in) :: var1, var2
-    character (*), intent (in), optional :: message
-
-    if ( var1 .ne. var2) then
-       call success_case_action_
-    else
-       if (present(message)) then
-          call increaseMessageStack(message)
-       end if
-       call failed_case_action_
-    end if
-  end subroutine assert_not_equals_single_real_
 
   subroutine assert_equals_1d_array_real_ (var1, var2, n, message)
     implicit none
@@ -646,19 +648,20 @@ contains
     call success_case_action_
   end subroutine assert_equals_1d_array_real_
 
-  subroutine assert_equals_2darray_real_message (var1, var2, n, m, message)
+  subroutine assert_equals_2darray_real_ (var1, var2, n, m, message)
     implicit none
     integer, intent (in) :: n, m
     real, intent (in) :: var1(n,m), var2(n,m)
-    character (*), intent (in) :: message
+    character (*), intent(in), optional :: message
 
     integer count1, count2
 
     loop_dim2: do count2 = 1, m
        loop_dim1: do count1 = 1, n
           if ( var1(count1,count2) .ne. var2(count1,count2)) then
-             failedAssertCount = failedAssertCount + 1
-             call increaseMessageStack(message)
+             if (present(message)) then
+                call increaseMessageStack(message)
+             end if
              call failed_case_action_
              exit loop_dim2
           end if
@@ -670,13 +673,9 @@ contains
        call success_case_action_
     endif
 
-  end subroutine assert_equals_2darray_real_message
+  end subroutine assert_equals_2darray_real_
 
-  ! ----
-  ! Assert the double precision values are equal
-  ! print error messages and return error
-  ! ----
-  subroutine assert_equals_single_double_message (var1, var2, message)
+  subroutine assert_equals_double_ (var1, var2, message)
     implicit none
     double precision, intent (in) :: var1, var2
     character (*), intent (in) :: message
@@ -690,9 +689,9 @@ contains
        call failed_case_action_
     end if
 
-  end subroutine assert_equals_single_double_message
+  end subroutine assert_equals_double_
 
-  subroutine assert_equals_1darray_double_message (var1, var2, n, message)
+  subroutine assert_equals_1darray_double_ (var1, var2, n, message)
     implicit none
     integer, intent (in) :: n
     double precision, intent (in) :: var1(n), var2(n)
@@ -714,9 +713,9 @@ contains
        call success_case_action_
     endif
 
-  end subroutine assert_equals_1darray_double_message
+  end subroutine assert_equals_1darray_double_
 
-  subroutine assert_equals_2darray_double_message (var1, var2, n, m, message)
+  subroutine assert_equals_2darray_double_ (var1, var2, n, m, message)
     implicit none
     integer, intent (in) :: n, m
     double precision, intent (in) :: var1(n,m), var2(n,m)
@@ -740,7 +739,7 @@ contains
        call success_case_action_
     endif
 
-  end subroutine assert_equals_2darray_double_message
+  end subroutine assert_equals_2darray_double_
 
   subroutine assert_equals_1darray_complex (var1, var2, n)
     implicit none
@@ -764,7 +763,7 @@ contains
 
   end subroutine assert_equals_1darray_complex
 
-  subroutine assert_equals_1darray_complex_message (var1, var2, n, message)
+  subroutine assert_equals_1darray_complex_ (var1, var2, n, message)
     implicit none
     integer,          intent(IN) :: n
     double complex,   intent(IN) :: var1(n), var2(n)
@@ -786,7 +785,7 @@ contains
        call success_case_action_
     endif
 
-  end subroutine assert_equals_1darray_complex_message
+  end subroutine assert_equals_1darray_complex_
 
   subroutine assert_equals_2darray_complex (var1, var2, n, m)
     implicit none
@@ -811,7 +810,7 @@ contains
 
   end subroutine assert_equals_2darray_complex
 
-  subroutine assert_equals_2darray_complex_message (var1, var2, n, m, message)
+  subroutine assert_equals_2darray_complex_ (var1, var2, n, m, message)
     implicit none
     integer,          intent(IN) :: n, m
     double complex,   intent(IN) :: var1(n,m), var2(n,m)
@@ -834,7 +833,7 @@ contains
        call success_case_action_
     endif
 
-  end subroutine assert_equals_2darray_complex_message
+  end subroutine assert_equals_2darray_complex_
 
   subroutine get_total_count_ (count)
     implicit none
