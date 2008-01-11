@@ -17,7 +17,7 @@ contains
 
     ! test printing and formats
     !--------------------------
-    call test_progress_mark
+    call test_case_action
     
     call test_show_output
     call getTestSummaryTest
@@ -40,24 +40,24 @@ contains
 
   end subroutine fruit_test_package
   
-  subroutine test_progress_mark
+  subroutine test_case_action
     write (*,*) "Should see . here:"
-    call successfulMark()
+    call success_case_action
     write (*,*) "Should see .. here:"
-    call successfulMark()
-    call successfulMark()
+    call success_case_action
+    call success_case_action
 
     write (*,*) 
 
     write (*,*) "Should see F here:"
-    call failedMark()
+    call failed_case_action
   
     write (*,*) "Should see FF here:"
-    call failedMark()
-    call failedMark()
+    call failed_case_action
+    call failed_case_action
   
     write (*,*) 
-  end subroutine test_progress_mark
+  end subroutine test_case_action
   
   subroutine test_assert_true
     implicit none

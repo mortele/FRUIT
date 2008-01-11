@@ -27,6 +27,7 @@ module fruit
   character (len = MSG_LENGTH), private, dimension (1000), save :: testCaseNamesArray
   character (len = MSG_LENGTH), private, dimension (1000), save :: testCaseMessageArray
   integer, private, save :: testCaseIndex = 1
+  logical, private, save :: last_case_passed = .false.
 
   interface init_fruit
      module procedure init_fruit_
@@ -101,11 +102,19 @@ module fruit
   end interface
 
   interface getTotalCount
-     module procedure getTotalCount
+     module procedure get_total_count_
   end interface
 
   interface getFailedCount
      module procedure getFailedCount
+  end interface
+
+  interface success_case_action
+     module procedure success_case_action_
+  end interface
+
+  interface failed_case_action
+     module procedure failed_case_action_
   end interface
 
   !  interface addTestCase
@@ -133,9 +142,10 @@ module fruit
   !  end interface
 
   private :: init_fruit_, initialize_fruit_, fruit_summary_, get_test_summary_, &
-       warning_, assertTrue_single, assertTrue_result, &
+       warning_, get_total_count_, assertTrue_single, assertTrue_result, &
        add_success, &
-       add_fail, add_fail_unit, increaseMessageStack
+       add_fail, add_fail_unit, increaseMessageStack, &
+       success_case_action_, failed_case_action_, success_mark_
 
 contains
 
@@ -151,9 +161,7 @@ contains
   end subroutine init_fruit_
 
   subroutine initialize_fruit_
-    write (*,*)
-    write (*,*) "initializeFruit is OBSOLETE.  replaced by init_fruit"
-    write (*,*)
+    call warning_ ("initializeFruit is OBSOLETE.  replaced by init_fruit")
     call init_fruit
   end subroutine initialize_fruit_
 
@@ -212,7 +220,7 @@ contains
 
     if ( trim( var1) == trim( var2)) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     else
        failedAssertCount = failedAssertCount + 1
        call failedMark()
@@ -233,7 +241,7 @@ contains
 
     if ( var1 .eqv. var2 ) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     else
        failedAssertCount = failedAssertCount + 1
        call failedMark()
@@ -251,7 +259,7 @@ contains
 
     if ( input .eqv. .true.) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     else
        failedAssertCount = failedAssertCount + 1
        if (present(message)) then
@@ -268,7 +276,7 @@ contains
     if (present(message)) then
        call increaseMessageStack(message)
     end if
-    call successfulMark()
+    call success_case_action_
 
   end subroutine add_success
 
@@ -314,9 +322,9 @@ contains
     return
   end subroutine isAllSuccessful
 
-  subroutine successfulMark
+  subroutine success_mark_
     write(*,"(A1)",ADVANCE='NO') '.'
-  end subroutine successfulMark
+  end subroutine success_mark_
 
   subroutine failedMark
     write(*,"(A1)",ADVANCE='NO') 'F'
@@ -354,7 +362,7 @@ contains
 
     if ((count2 > m) .and. (count1 > n)) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     endif
 
   end subroutine assert_equals_2darray_int
@@ -365,7 +373,7 @@ contains
 
     if ( var1 .eq. var2) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     else
        failedAssertCount = failedAssertCount + 1
        call failedMark()
@@ -378,7 +386,7 @@ contains
 
     if ( var1 .ne. var2) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     else
        failedAssertCount = failedAssertCount + 1
        call failedMark()
@@ -403,7 +411,7 @@ contains
 
     if (count > n) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     endif
 
   end subroutine assertNotEquals_1darray_real
@@ -427,7 +435,7 @@ contains
 
     if ((count2 > m) .and. (count1 > n)) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     endif
 
   end subroutine assert_equals_2darray_real
@@ -439,7 +447,7 @@ contains
 
     if ( abs( var1 - var2) .le. var3) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     else
        failedAssertCount = failedAssertCount + 1
        call failedMark()
@@ -460,7 +468,7 @@ contains
 
     if ( maxval( abs( var1 - var2)) .le. var3) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     else
        failedAssertCount = failedAssertCount + 1
        call failedMark()
@@ -481,7 +489,7 @@ contains
 
     if ( maxval( abs( var1 - var2)) .le. var3) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     else
        failedAssertCount = failedAssertCount + 1
        call failedMark()
@@ -497,7 +505,7 @@ contains
 
     if ( abs( var1 - var2) .le. var3) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     else
        failedAssertCount = failedAssertCount + 1
        call failedMark()
@@ -512,7 +520,7 @@ contains
 
     if ( var1 .eq. var2) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     else
        failedAssertCount = failedAssertCount + 1
        call failedMark()
@@ -526,7 +534,7 @@ contains
 
     if ( var1 .ne. var2) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     else
        failedAssertCount = failedAssertCount + 1
        call failedMark()
@@ -555,7 +563,7 @@ contains
 
     if (count > n) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     endif
 
   end subroutine assert_equals_1darray_double
@@ -579,7 +587,7 @@ contains
 
     if ((count2 > m) .and. (count1 > n)) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     endif
 
   end subroutine assert_equals_2darray_double
@@ -591,7 +599,7 @@ contains
 
     if ( var1 .eq. var2) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     else
        failedAssertCount = failedAssertCount + 1
        if (present(message)) then
@@ -622,7 +630,7 @@ contains
     end do loop_dim1
 
     successfulAssertCount = successfulAssertCount + 1
-    call successfulMark()
+    call success_case_action_
   end subroutine assert_equals_1darray_int
 
   subroutine assert_equals_1darray_string (var1, var2, n, message)
@@ -655,7 +663,7 @@ contains
     end do loop_dim1
 
     successfulAssertCount = successfulAssertCount + 1
-    call successfulMark()
+    call success_case_action_
   end subroutine assert_equals_1darray_string
 
   subroutine assert_equals_2darray_int_message (var1, var2, n, m, message)
@@ -678,7 +686,7 @@ contains
     end do loop_dim2
 
     successfulAssertCount = successfulAssertCount + 1
-    call successfulMark()
+    call success_case_action_
 
   end subroutine assert_equals_2darray_int_message
 
@@ -689,7 +697,7 @@ contains
 
     if ( var1 .eq. var2) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     else
        failedAssertCount = failedAssertCount + 1
        call increaseMessageStack(message)
@@ -715,7 +723,7 @@ contains
 
     if (count > n) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     endif
 
   end subroutine assert_equals_1darray_real
@@ -739,7 +747,7 @@ contains
 
     if (count > n) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     endif
 
   end subroutine assert_equals_1darray_real_message
@@ -765,7 +773,7 @@ contains
 
     if ((count2 > m) .and. (count1 > n)) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     endif
 
   end subroutine assert_equals_2darray_real_message
@@ -781,7 +789,7 @@ contains
 
     if ( var1 .eq. var2) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     else
        failedAssertCount = failedAssertCount + 1
        call increaseMessageStack(message)
@@ -809,7 +817,7 @@ contains
 
     if (count > n) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     endif
 
   end subroutine assert_equals_1darray_double_message
@@ -835,7 +843,7 @@ contains
 
     if ((count2 > m) .and. (count1 > n)) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     endif
 
   end subroutine assert_equals_2darray_double_message
@@ -857,7 +865,7 @@ contains
 
     if (count > n) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     endif
 
   end subroutine assert_equals_1darray_complex
@@ -881,7 +889,7 @@ contains
 
     if (count > n) then
        successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     endif
 
   end subroutine assert_equals_1darray_complex_message
@@ -904,8 +912,7 @@ contains
     enddo loop_dim2
 
     if ((count2 > m) .and. (count1 > n)) then
-       successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     endif
 
   end subroutine assert_equals_2darray_complex
@@ -930,19 +937,18 @@ contains
     enddo loop_dim2
 
     if ((count2 > m) .and. (count1 > n)) then
-       successfulAssertCount = successfulAssertCount + 1
-       call successfulMark()
+       call success_case_action_
     endif
 
   end subroutine assert_equals_2darray_complex_message
 
-  subroutine getTotalCount (count)
+  subroutine get_total_count_ (count)
     implicit none
     integer, intent (out) :: count
 
     count = successfulAssertCount + failedAssertCount
 
-  end subroutine getTotalCount
+  end subroutine get_total_count_
 
   subroutine getFailedCount (count)
     implicit none
@@ -959,4 +965,13 @@ contains
     write (*,*) "end: ---!!!--------WARNING from FRUIT------!!!----"
   end subroutine warning_
 
+  subroutine success_case_action_
+    successfulAssertCount = successfulAssertCount + 1
+    call success_mark_  
+  end subroutine success_case_action_
+
+  subroutine failed_case_action_
+    failedAssertCount = failedAssertCount + 1
+    call failedMark
+  end subroutine failed_case_action_
 end module fruit
