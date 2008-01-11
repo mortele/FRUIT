@@ -49,6 +49,10 @@ module fruit
      module procedure assert_true_logical_
   end interface
 
+  interface get_last_message
+     module procedure get_last_message_
+  end interface
+
   interface assertEquals
      module procedure assert_equals_int_
      module procedure assert_equals_double_
@@ -144,11 +148,11 @@ module fruit
   private :: &
        init_fruit_, initializa_fruit_obsolete_, &
        fruit_summary_, getTestSummary_obsolete_, &
-       obsolete_, &
+       get_last_message_, obsolete_, &
        get_total_count_, getTotalCount_obsolete_,&
        assertTrue_single, assertTrue_result, &
        add_success, &
-       add_fail_, add_fail_unit_, increaseMessageStack, &
+       add_fail_, add_fail_unit_, increase_message_stack_, &
        success_case_action_, failed_case_action_, success_mark_, failed_mark_, &
        assert_not_equals_real_, &
        assert_not_equals_double_, &
@@ -242,7 +246,7 @@ contains
     character (*), intent (in), optional :: message
 
     if (present(message)) then
-       call increaseMessageStack(message)
+       call increase_message_stack_(message)
     end if
     call success_case_action_
   end subroutine add_success_
@@ -256,7 +260,7 @@ contains
   subroutine add_fail_ (message)
     character (*), intent (in), optional :: message
     if (present(message)) then
-       call increaseMessageStack(message)
+       call increase_message_stack_(message)
     end if
     call failed_case_action_
   end subroutine add_fail_
@@ -288,7 +292,7 @@ contains
     write(*,"(A1)",ADVANCE='NO') 'F'
   end subroutine failed_mark_
 
-  subroutine increaseMessageStack (message)
+  subroutine increase_message_stack_ (message)
     character(*), intent (in) :: message
 
     if (messageIndex > MSG_STACK_SIZE ) then
@@ -297,9 +301,18 @@ contains
        stop 1
     end if
 
-    messageArray (messageIndex) = message
+    messageArray (messageIndex) = trim(message)
     messageIndex = messageIndex + 1
-  end subroutine increaseMessageStack
+  end subroutine increase_message_stack_
+
+  function get_last_message_
+    character(len=MSG_LENGTH) :: get_last_message_
+    if (messageIndex > 1) then
+       get_last_message_ = trim(messageArray(messageIndex-1))
+    else
+       get_last_message_ = ''
+    end if
+  end function get_last_message_
 
   subroutine getTotalCount_obsolete_ (count)
     implicit none
@@ -359,7 +372,7 @@ contains
        if (present(message)) then
           write (msg, '(A)') trim(message) // ' (' // trim(msg) // ')'
        endif
-       call increaseMessageStack(trim(msg))
+       call increase_message_stack_(trim(msg))
     end if
   end subroutine assert_true_logical_
 
@@ -373,9 +386,9 @@ contains
     else
        call failed_case_action_
        if (present(message)) then
-          call increaseMessageStack(trim(message) // ' (Expected ' // trim(var1) // ' got ' // trim(var2) // ')')
+          call increase_message_stack_(trim(message) // ' (Expected ' // trim(var1) // ' got ' // trim(var2) // ')')
        else
-          call increaseMessageStack(' (Expected ' // trim(var1) // ' got ' // trim(var2) // ')')
+          call increase_message_stack_(' (Expected ' // trim(var1) // ' got ' // trim(var2) // ')')
        end if
     end if
   end subroutine assert_equals_string_
@@ -393,7 +406,7 @@ contains
        if (present(message)) then
           write(msg, '(A, L1, A, L1)') 'Expected ', var1, ' got ', var2
        endif
-       call increaseMessageStack(trim(message) // ' (' // trim(msg) // ')')
+       call increase_message_stack_(trim(message) // ' (' // trim(msg) // ')')
     end if
   end subroutine assert_equals_logical_
 
@@ -406,7 +419,7 @@ contains
        call success_case_action_
     else
        if (present(message)) then
-          call increaseMessageStack(message)
+          call increase_message_stack_(message)
        end if
        call failed_case_action_
     end if
@@ -421,7 +434,7 @@ contains
        call success_case_action_
     else
        if (present(message)) then
-          call increaseMessageStack(message)
+          call increase_message_stack_(message)
        end if
        call failed_case_action_
     end if
@@ -475,7 +488,7 @@ contains
     else
        call failed_case_action
        if (present(message)) then
-          call increaseMessageStack(message)
+          call increase_message_stack_(message)
        end if
     end if
 
@@ -496,7 +509,7 @@ contains
     else
        call failed_case_action_
        if (present(message)) then
-          call increaseMessageStack(message)
+          call increase_message_stack_(message)
        end if
     end if
   end subroutine assert_equals_spArr_spArr_int_sp_
@@ -512,7 +525,7 @@ contains
     else
        call failed_case_action_
        if (present(message)) then
-          call increaseMessageStack(message)
+          call increase_message_stack_(message)
        end if
     end if
   end subroutine assert_equals_dpArr_dpArr_int_dp_
@@ -527,7 +540,7 @@ contains
     else
        call failed_case_action_
        if (present(message)) then
-          call increaseMessageStack(message)
+          call increase_message_stack_(message)
        end if
     end if
   end subroutine assert_equals_double_difference_
@@ -542,7 +555,7 @@ contains
     else
        call failed_case_action_
        if (present(message)) then
-          call increaseMessageStack(message)
+          call increase_message_stack_(message)
        end if
     end if
   end subroutine assert_equals_double
@@ -557,7 +570,7 @@ contains
     else
        call failed_case_action_
        if (present(message)) then
-          call increaseMessageStack(message)
+          call increase_message_stack_(message)
        end if
     end if
   end subroutine assert_not_equals_double_
@@ -608,7 +621,7 @@ contains
     else
        call failed_case_action_
        if (present(message)) then
-          call increaseMessageStack(message)
+          call increase_message_stack_(message)
        endif
     end if
   end subroutine assert_equals_int_
@@ -625,7 +638,7 @@ contains
        if ( var1(count) .ne. var2(count)) then
           call failed_case_action_
           if (present(message)) then
-             call increaseMessageStack(message)
+             call increase_message_stack_(message)
           endif
           return
        end if
@@ -645,7 +658,7 @@ contains
     loop_dim1: do count = 1, n
        if ( trim(var1(count)) .ne. trim(var2(count))) then
           if (present(message)) then
-             call increaseMessageStack(message)
+             call increase_message_stack_(message)
           end if
 
           write (msg,1000) count
@@ -655,7 +668,7 @@ contains
           msg = msg // 'expected value: ' // trim(var1(count))
           msg = msg // 'real value: ' // trim(var2(count))
 
-          call increaseMessageStack(msg)
+          call increase_message_stack_(msg)
           call failed_case_action_
           return
        end if
@@ -676,7 +689,7 @@ contains
        loop_dim1: do count1 = 1, n
           if ( var1(count1,count2) .ne. var2(count1,count2)) then
              if (present(message)) then
-                call increaseMessageStack(message)
+                call increase_message_stack_(message)
              end if
              call failed_case_action_
              return
@@ -698,7 +711,7 @@ contains
     loop_dim1: do count = 1, n
        if ( var1(count) .ne. var2(count)) then
           if (present(message)) then
-             call increaseMessageStack(message)
+             call increase_message_stack_(message)
           end if
           call failed_case_action_
           return
@@ -719,7 +732,7 @@ contains
        loop_dim1: do count1 = 1, n
           if ( var1(count1,count2) .ne. var2(count1,count2)) then
              if (present(message)) then
-                call increaseMessageStack(message)
+                call increase_message_stack_(message)
              end if
              call failed_case_action_
              return
@@ -727,7 +740,7 @@ contains
        end do loop_dim1
     end do loop_dim2
 
-       call success_case_action_
+    call success_case_action_
   end subroutine assert_equals_2darray_real_
 
   subroutine assert_equals_double_ (var1, var2, message)
@@ -752,7 +765,7 @@ contains
     loop_dim1: do count = 1, n
        if ( var1(count) .ne. var2(count)) then
           if (present(message)) then             
-             call increaseMessageStack(message)
+             call increase_message_stack_(message)
           end if
           call failed_case_action_
           return
@@ -773,7 +786,7 @@ contains
        loop_dim1: do count1 = 1, n
           if ( var1(count1,count2) .ne. var2(count1,count2)) then
              if (present(message)) then             
-                call increaseMessageStack(message)
+                call increase_message_stack_(message)
              end if
              call failed_case_action_
              return
@@ -794,7 +807,7 @@ contains
     loop_dim1: do count = 1, n
        if ( var1(count) .ne. var2(count)) then
           if (present(message)) then             
-             call increaseMessageStack(message)
+             call increase_message_stack_(message)
           end if
           call failed_case_action_
           return
@@ -814,7 +827,7 @@ contains
     loop_dim1: do count = 1, n
        if ( var1(count) .ne. var2(count)) then
           if (present(message)) then             
-             call increaseMessageStack(message)
+             call increase_message_stack_(message)
           end if
           call failed_case_action_
           return
@@ -835,7 +848,7 @@ contains
        loop_dim1: do count1 = 1, n
           if ( var1(count1,count2) .ne. var2(count1,count2)) then
              if (present(message)) then             
-                call increaseMessageStack(message)
+                call increase_message_stack_(message)
              end if
              call failed_case_action_
              return
@@ -859,7 +872,7 @@ contains
        loop_dim1: do count1 = 1, n
           if ( var1(count1,count2) .ne. var2(count1,count2)) then
              if (present(message)) then             
-                call increaseMessageStack(message)
+                call increase_message_stack_(message)
              end if
              call failed_case_action_
              return

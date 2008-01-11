@@ -239,17 +239,19 @@ contains
     logical :: falseValue = .FALSE.
     integer :: i
     integer :: count
-    
+
     call initializeFruit
     DO i=1,5
-      call assertTrue (.true.)
+       call assertTrue (.true.)
     END DO
-    
+    call assertEquals (trim(get_last_message()), '')
+
     DO i=1,5
-      call assertTrue (.false.)
+       call assertTrue (.false.)
     END DO
+    call assertEquals (trim(get_last_message()), 'Expected T got F')
     call getTestSummary
-    
+
   end subroutine test_show_output
   
   subroutine showOutputForReport 
