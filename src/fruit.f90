@@ -34,7 +34,7 @@ module fruit
   end interface
 
   interface initializeFruit
-     module procedure initialize_fruit_
+     module procedure initializa_fruit_obsolete_
   end interface
 
   interface fruit_summary
@@ -42,7 +42,7 @@ module fruit
   end interface
 
   interface getTestSummary
-     module procedure get_test_summary_  
+     module procedure getTestSummary_obsolete_  
   end interface
 
   interface assertTrue
@@ -90,6 +90,10 @@ module fruit
   end interface
 
   interface getTotalCount
+     module procedure getTotalCount_obsolete_
+  end interface
+
+  interface get_total_count
      module procedure get_total_count_
   end interface
 
@@ -103,6 +107,14 @@ module fruit
 
   interface failed_case_action
      module procedure failed_case_action_
+  end interface
+
+  interface isAllSuccessful
+     module procedure isAllSuccessful_
+  end interface
+
+  interface is_all_successful
+     module procedure is_all_successful_
   end interface
 
   !  interface addTestCase
@@ -129,8 +141,12 @@ module fruit
   !    module procedure getTestCaseResults
   !  end interface
 
-  private :: init_fruit_, initialize_fruit_, fruit_summary_, get_test_summary_, &
-       warning_, get_total_count_, assertTrue_single, assertTrue_result, &
+  private :: &
+       init_fruit_, initializa_fruit_obsolete_, &
+       fruit_summary_, getTestSummary_obsolete_, &
+       obsolete_, &
+       get_total_count_, getTotalCount_obsolete_,&
+       assertTrue_single, assertTrue_result, &
        add_success, &
        add_fail_, add_fail_unit_, increaseMessageStack, &
        success_case_action_, failed_case_action_, success_mark_, failed_mark_, &
@@ -155,7 +171,8 @@ module fruit
        assert_equals_2darray_complex_, &
        assert_equals_spArr_spArr_int_sp_, &
        assert_equals_dpArr_dpArr_int_dp_, &
-       add_success_, add_success_unit_
+       add_success_, add_success_unit_,&
+       is_all_successful_, isAllSuccessful_
 
 contains
 
@@ -170,15 +187,15 @@ contains
     write (*,*)
   end subroutine init_fruit_
 
-  subroutine initialize_fruit_
-    call warning_ ("initializeFruit is OBSOLETE.  replaced by init_fruit")
+  subroutine initializa_fruit_obsolete_
+    call obsolete_ ("initializeFruit is OBSOLETE.  replaced by init_fruit")
     call init_fruit
-  end subroutine initialize_fruit_
+  end subroutine initializa_fruit_obsolete_
 
-  subroutine get_test_summary_
-    call warning_ ( "getTestSummary is OBSOLETE.  replaced by fruit_summary")
+  subroutine getTestSummary_obsolete_
+    call obsolete_ ( "getTestSummary is OBSOLETE.  replaced by fruit_summary")
     call fruit_summary
-  end subroutine get_test_summary_
+  end subroutine getTestSummary_obsolete_
 
   subroutine fruit_summary_
     implicit none
@@ -220,24 +237,6 @@ contains
     end if
   end subroutine fruit_summary_
 
-
-  subroutine assert_true_logical_ (var1, message)
-    implicit none
-    logical, intent (in) :: var1
-    character (*), intent (in), optional :: message
-    character(MSG_LENGTH) :: msg
-
-    if ( var1 .eqv. .true.) then
-       call success_case_action_
-    else
-       call failed_case_action_
-       if (present(message)) then
-          write(msg, '(A, L1, A, L1)') 'Expected ', var1, ' got ', .false.
-       endif
-       call increaseMessageStack(trim(message) // ' (' // trim(msg) // ')')
-    end if
-  end subroutine assert_true_logical_
-
   subroutine add_success_ (message)
     implicit none
     character (*), intent (in), optional :: message
@@ -269,15 +268,17 @@ contains
     call add_fail_ ("[in " //  unitName // "(fail)]: " //  message)
   end subroutine add_fail_unit_
 
-  subroutine isAllSuccessful (result)
+  subroutine isAllSuccessful_(result)
     implicit none
-    logical, intent (out) :: result
-    if ( failedAssertCount > 0 ) then
-       result = .false.
-    else
-       result = .true.
-    end if
-  end subroutine isAllSuccessful
+    logical, intent(out) :: result
+    call obsolete_ ('subroutine isAllSuccessful is changed to function is_all_successful.')
+    result = is_all_successful()
+  end subroutine isAllSuccessful_
+
+  logical function is_all_successful_
+    implicit none
+    is_all_successful_ = (failedAssertCount .eq. 0 )
+  end function is_all_successful_
 
   subroutine success_mark_
     write(*,"(A1)",ADVANCE='NO') '.'
@@ -299,6 +300,68 @@ contains
     messageArray (messageIndex) = message
     messageIndex = messageIndex + 1
   end subroutine increaseMessageStack
+
+  subroutine getTotalCount_obsolete_ (count)
+    implicit none
+    integer, intent (out) :: count
+    call obsolete_ (' getTotalCount subroutine is replaced by function get_total_count')
+    count = get_total_count_()
+  end subroutine getTotalCount_obsolete_
+
+  integer function get_total_count_ 
+    implicit none
+
+    get_total_count_ = successfulAssertCount + failedAssertCount
+  end function get_total_count_
+
+  subroutine getFailedCount (count)
+    implicit none
+    integer, intent (out) :: count
+
+    count = failedAssertCount
+
+  end subroutine getFailedCount
+
+  subroutine obsolete_ (message)
+    character (*), intent (in), optional :: message
+    write (*,*) "start: ---!!!--------WARNING from FRUIT------!!!----"
+    write (*,*) message
+    write (*,*) "--- old calls will be replaced in the next release ----"
+    write (*,*) "end: ---!!!--------WARNING from FRUIT------!!!----"
+  end subroutine obsolete_
+
+  subroutine success_case_action_
+    successfulAssertCount = successfulAssertCount + 1
+    last_case_passed = .true.
+    call success_mark_  
+  end subroutine success_case_action_
+
+  subroutine failed_case_action_
+    failedAssertCount = failedAssertCount + 1
+    last_case_passed = .false.
+    call failed_mark_
+  end subroutine failed_case_action_
+
+  !---------
+  ! Start of all assertions
+  !--------
+  subroutine assert_true_logical_ (var1, message)
+    implicit none
+    logical, intent (in) :: var1
+    character (*), intent (in), optional :: message
+    character(MSG_LENGTH) :: msg
+
+    if ( var1 .eqv. .true.) then
+       call success_case_action_
+    else
+       call failed_case_action_
+       write(msg, '(A, L1)') 'Expected T got ', .false.
+       if (present(message)) then
+          write (msg, '(A)') trim(message) // ' (' // trim(msg) // ')'
+       endif
+       call increaseMessageStack(trim(msg))
+    end if
+  end subroutine assert_true_logical_
 
   subroutine assert_equals_string_ (var1, var2, message)
     implicit none
@@ -340,7 +403,6 @@ contains
     character (*), intent (in), optional :: message
 
     if ( var1 .eq. var2) then
-       successfulAssertCount = successfulAssertCount + 1
        call success_case_action_
     else
        if (present(message)) then
@@ -430,7 +492,6 @@ contains
     character(*), intent(in), optional :: message
 
     if ( maxval( abs( var1 - var2)) .le. var3) then
-       successfulAssertCount = successfulAssertCount + 1
        call success_case_action_
     else
        call failed_case_action_
@@ -447,7 +508,6 @@ contains
     character(*), intent(in), optional :: message
 
     if ( maxval( abs( var1 - var2)) .le. var3) then
-       successfulAssertCount = successfulAssertCount + 1
        call success_case_action_
     else
        call failed_case_action_
@@ -463,7 +523,6 @@ contains
     character(*), intent(in), optional :: message
 
     if ( abs( var1 - var2) .le. var3) then
-       successfulAssertCount = successfulAssertCount + 1
        call success_case_action_
     else
        call failed_case_action_
@@ -663,16 +722,12 @@ contains
                 call increaseMessageStack(message)
              end if
              call failed_case_action_
-             exit loop_dim2
+             return
           end if
        end do loop_dim1
     end do loop_dim2
 
-    if ((count2 > m) .and. (count1 > n)) then
-       successfulAssertCount = successfulAssertCount + 1
        call success_case_action_
-    endif
-
   end subroutine assert_equals_2darray_real_
 
   subroutine assert_equals_double_ (var1, var2, message)
@@ -681,132 +736,114 @@ contains
     character (*), intent (in) :: message
 
     if ( var1 .eq. var2) then
-       successfulAssertCount = successfulAssertCount + 1
        call success_case_action_
     else
-       failedAssertCount = failedAssertCount + 1
-       call increaseMessageStack(message)
        call failed_case_action_
     end if
-
   end subroutine assert_equals_double_
 
   subroutine assert_equals_1darray_double_ (var1, var2, n, message)
     implicit none
     integer, intent (in) :: n
     double precision, intent (in) :: var1(n), var2(n)
-    character (*), intent (in) :: message
-
+    character (*), intent (in), optional :: message
     integer count
 
     loop_dim1: do count = 1, n
        if ( var1(count) .ne. var2(count)) then
-          failedAssertCount = failedAssertCount + 1
-          call increaseMessageStack(message)
+          if (present(message)) then             
+             call increaseMessageStack(message)
+          end if
           call failed_case_action_
-          exit loop_dim1
+          return
        end if
     end do loop_dim1
 
-    if (count > n) then
-       successfulAssertCount = successfulAssertCount + 1
-       call success_case_action_
-    endif
-
+    call success_case_action_
   end subroutine assert_equals_1darray_double_
 
   subroutine assert_equals_2darray_double_ (var1, var2, n, m, message)
     implicit none
     integer, intent (in) :: n, m
     double precision, intent (in) :: var1(n,m), var2(n,m)
-    character (*), intent (in) :: message
-
+    character (*), intent (in), optional :: message
     integer count1, count2
 
     loop_dim2: do count2 = 1, m
        loop_dim1: do count1 = 1, n
           if ( var1(count1,count2) .ne. var2(count1,count2)) then
-             failedAssertCount = failedAssertCount + 1
-             call increaseMessageStack(message)
+             if (present(message)) then             
+                call increaseMessageStack(message)
+             end if
              call failed_case_action_
-             exit loop_dim2
+             return
           end if
        end do loop_dim1
     end do loop_dim2
 
-    if ((count2 > m) .and. (count1 > n)) then
-       successfulAssertCount = successfulAssertCount + 1
-       call success_case_action_
-    endif
-
+    call success_case_action_
   end subroutine assert_equals_2darray_double_
 
-  subroutine assert_equals_1darray_complex (var1, var2, n)
+  subroutine assert_equals_1darray_complex (var1, var2, n, message)
     implicit none
     integer,          intent(IN) :: n
     double complex,   intent(IN) :: var1(n), var2(n)
-
+    character (*),    intent(IN), optional :: message
     integer count
 
     loop_dim1: do count = 1, n
        if ( var1(count) .ne. var2(count)) then
-          failedAssertCount = failedAssertCount + 1
+          if (present(message)) then             
+             call increaseMessageStack(message)
+          end if
           call failed_case_action_
-          exit loop_dim1
+          return
        end if
     enddo loop_dim1
 
-    if (count > n) then
-       successfulAssertCount = successfulAssertCount + 1
-       call success_case_action_
-    endif
-
+    call success_case_action_
   end subroutine assert_equals_1darray_complex
 
   subroutine assert_equals_1darray_complex_ (var1, var2, n, message)
     implicit none
     integer,          intent(IN) :: n
     double complex,   intent(IN) :: var1(n), var2(n)
-    character (*),    intent(IN) :: message
-
+    character (*),    intent(IN), optional :: message
     integer count
 
     loop_dim1: do count = 1, n
        if ( var1(count) .ne. var2(count)) then
-          failedAssertCount = failedAssertCount + 1
-          call increaseMessageStack(message)
+          if (present(message)) then             
+             call increaseMessageStack(message)
+          end if
           call failed_case_action_
-          exit loop_dim1
+          return
        end if
     enddo loop_dim1
 
-    if (count > n) then
-       successfulAssertCount = successfulAssertCount + 1
-       call success_case_action_
-    endif
-
+    call success_case_action_
   end subroutine assert_equals_1darray_complex_
 
-  subroutine assert_equals_2darray_complex (var1, var2, n, m)
+  subroutine assert_equals_2darray_complex (var1, var2, n, m, message)
     implicit none
     integer,        intent(IN) :: n, m
     double complex, intent(IN) :: var1(n,m), var2(n,m)
-
+    character (*),    intent(IN), optional :: message
     integer count1, count2
 
     loop_dim2: do count2 = 1, m
        loop_dim1: do count1 = 1, n
           if ( var1(count1,count2) .ne. var2(count1,count2)) then
-             failedAssertCount = failedAssertCount + 1
+             if (present(message)) then             
+                call increaseMessageStack(message)
+             end if
              call failed_case_action_
-             exit loop_dim2
+             return
           endif
        enddo loop_dim1
     enddo loop_dim2
 
-    if ((count2 > m) .and. (count1 > n)) then
-       call success_case_action_
-    endif
+    call success_case_action_
 
   end subroutine assert_equals_2darray_complex
 
@@ -814,59 +851,22 @@ contains
     implicit none
     integer,          intent(IN) :: n, m
     double complex,   intent(IN) :: var1(n,m), var2(n,m)
-    character (*),    intent(IN) :: message
+    character (*),    intent(IN), optional :: message
 
     integer count1, count2
 
     loop_dim2: do count2 = 1, m
        loop_dim1: do count1 = 1, n
           if ( var1(count1,count2) .ne. var2(count1,count2)) then
-             failedAssertCount = failedAssertCount + 1
-             call increaseMessageStack(message)
+             if (present(message)) then             
+                call increaseMessageStack(message)
+             end if
              call failed_case_action_
-             exit loop_dim2
+             return
           endif
        enddo loop_dim1
     enddo loop_dim2
 
-    if ((count2 > m) .and. (count1 > n)) then
-       call success_case_action_
-    endif
-
+    call success_case_action_
   end subroutine assert_equals_2darray_complex_
-
-  subroutine get_total_count_ (count)
-    implicit none
-    integer, intent (out) :: count
-
-    count = successfulAssertCount + failedAssertCount
-
-  end subroutine get_total_count_
-
-  subroutine getFailedCount (count)
-    implicit none
-    integer, intent (out) :: count
-
-    count = failedAssertCount
-
-  end subroutine getFailedCount
-
-  subroutine warning_ (message)
-    character (*), intent (in), optional :: message
-    write (*,*) "start: ---!!!--------WARNING from FRUIT------!!!----"
-    write (*,*) message
-    write (*,*) "end: ---!!!--------WARNING from FRUIT------!!!----"
-  end subroutine warning_
-
-  subroutine success_case_action_
-    successfulAssertCount = successfulAssertCount + 1
-    last_case_passed = .true.
-    call success_mark_  
-  end subroutine success_case_action_
-
-  subroutine failed_case_action_
-    failedAssertCount = failedAssertCount + 1
-    last_case_passed = .false.
-    call failed_mark_
-  end subroutine failed_case_action_
 end module fruit

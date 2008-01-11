@@ -241,12 +241,12 @@ contains
     integer :: count
     
     call initializeFruit
-    DO i=1,100
-      call assertTrue (trueValue)
+    DO i=1,5
+      call assertTrue (.true.)
     END DO
     
-    DO i=1,100
-      call assertTrue (falseValue)
+    DO i=1,5
+      call assertTrue (.false.)
     END DO
     call getTestSummary
     
