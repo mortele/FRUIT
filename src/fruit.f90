@@ -381,7 +381,6 @@ contains
   subroutine set_last_unit_name_(unit_name)
     character(*), intent(in) :: unit_name
     last_unit_name = trim(unit_name)
-    write (*,*) last_unit_name
   end subroutine set_last_unit_name_
 
   subroutine get_last_unit_name_(unit_name)

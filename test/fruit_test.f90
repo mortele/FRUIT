@@ -295,7 +295,7 @@ contains
     real :: result = 2.3
     
     call assertEquals (variable, result)
-    call assertEquals (variable + 0.1, result)
+    call assertNotEquals (variable + 0.1, result)
   end subroutine test_assert_equals_float
   
   subroutine test_last_unit_name
@@ -304,6 +304,7 @@ contains
     character(len=300) :: result
     
     call set_last_unit_name ('sample_unit_name')
+    call get_last_unit_name (result)
     call assertEquals ('sample_unit_name', trim(result))
     
   end subroutine test_last_unit_name
