@@ -38,7 +38,8 @@ contains
     ! using fruit to test fruit
     call init_fruit
     call test_assert_equals_float
-    call test_last_unit_name
+    call test_unit_name
+    call test_assert_int_int
     call fruit_summary
 
   end subroutine fruit_test_package
@@ -298,15 +299,22 @@ contains
     call assertNotEquals (variable + 0.1, result)
   end subroutine test_assert_equals_float
   
-  subroutine test_last_unit_name
+  subroutine test_unit_name
     implicit none
     
     character(len=300) :: result
     
-    call set_last_unit_name ('sample_unit_name')
-    call get_last_unit_name (result)
+    call set_unit_name ('sample_unit_name')
+    call get_unit_name (result)
     call assertEquals ('sample_unit_name', trim(result))
     
-  end subroutine test_last_unit_name
+  end subroutine test_unit_name
   
+  subroutine test_assert_int_int
+    implicit none
+    call set_unit_name('test_assert_int_int')
+    call assertEquals(1,1)
+    call assertEquals(1,2)
+    call assertEquals(1,2, "optional message in assert equal int int")
+  end subroutine test_assert_int_int
 end module fruit_test

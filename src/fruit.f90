@@ -21,7 +21,7 @@ module fruit
   integer, private, save :: failedAssertCount = 0
   character (len = MSG_LENGTH), private, dimension (MSG_STACK_SIZE), save :: messageArray
   character (len = MSG_LENGTH), private, save :: msg = '[unit name not set from set_name]: '
-  character (len = MSG_LENGTH), save :: last_unit_name  = '_not_set_'
+  character (len = MSG_LENGTH), save :: unit_name  = '_not_set_'
   integer, private, save :: messageIndex = 1
 
   integer, private, save :: successfulTestCount = 0
@@ -93,12 +93,12 @@ module fruit
      module procedure add_fail_unit_
   end interface
 
-  interface set_last_unit_name
-     module procedure set_last_unit_name_
+  interface set_unit_name
+     module procedure set_unit_name_
   end interface
 
-  interface get_last_unit_name
-     module procedure get_last_unit_name_
+  interface get_unit_name
+     module procedure get_unit_name_
   end interface
 
   interface getTotalCount
@@ -190,7 +190,7 @@ module fruit
        assert_equals_dpArr_dpArr_int_dp_, &
        add_success_, add_success_unit_,&
        is_all_successful_, isAllSuccessful_, &
-       set_last_unit_name_, get_last_unit_name_ 
+       set_unit_name_, get_unit_name_ 
 
 contains
 
@@ -248,7 +248,8 @@ contains
        write (*,*) 'Total test run :   ', successfulAssertCount + failedAssertCount
        write (*,*) 'Successful :       ', successfulAssertCount
        write (*,*) 'Failed :           ', failedAssertCount
-       write (*,'("Successful rate:   ",f6.2,"%")')  real(successfulAssertCount) * 100.0 / real (successfulAssertCount + failedAssertCount)
+       write (*,'("Successful rate:   ",f6.2,"%")')  real(successfulAssertCount) * 100.0 / &
+            real (successfulAssertCount + failedAssertCount)
        write (*, *)
        write (*, *) '  -- end of FRUIT summary'
 
@@ -373,20 +374,36 @@ contains
   end subroutine success_case_action_
 
   subroutine failed_case_action_
+    call set_unit_name_in_msg__
     failedAssertCount = failedAssertCount + 1
     last_case_passed = .false.
     call failed_mark_
   end subroutine failed_case_action_
 
-  subroutine set_last_unit_name_(unit_name)
-    character(*), intent(in) :: unit_name
-    last_unit_name = trim(unit_name)
-  end subroutine set_last_unit_name_
+  subroutine set_unit_name_(value)
+    character(*), intent(in) :: value
+    unit_name = trim(value)
+  end subroutine set_unit_name_
 
-  subroutine get_last_unit_name_(unit_name)
-    character(*), intent(out) :: unit_name
-    unit_name = trim(last_unit_name)
-  end subroutine get_last_unit_name_
+  subroutine get_unit_name_(value)
+    character(*), intent(out) :: value
+    value = trim(unit_name)
+  end subroutine get_unit_name_
+
+  subroutine set_unit_name_in_msg__
+    msg = 'in [' // unit_name // ']: '
+  end subroutine set_unit_name_in_msg__
+
+  subroutine make_error_msg__ (var1, var2, message)
+    character(*), intent(in) :: var1, var2
+    character(*), intent(in), optional :: message
+    if (present(message)) then
+       msg = 'in [' // unit_name // '] Expected: ' // trim(var1) // ' Got: ' // trim(var2) // &
+            ' User message: [' // message // ']'
+    else
+       msg = 'in [' // unit_name // '] Expected: ' // trim(var1) // ' Got: ' // trim(var2)
+    endif
+  end subroutine make_error_msg__
 
   !--------------------------------------------------------------------------------
   ! all assertions
@@ -400,10 +417,11 @@ contains
        call success_case_action_
     else
        call failed_case_action_
-       write(msg, '(A, I, A, I)') 'Expected ', var1, ' got ', var2
-       if (present(message)) then
-          write (msg, '(A)') trim(message) // ' (' // trim(msg) // ')'
-       endif
+       !call make_error_msg__ (var1, var2, message)
+       !       write(msg, '(A, A, I, A, I)') trim(msg), ' Expected ', var1, ' got ', var2
+       !      if (present(message)) then
+       !        write (msg, '(A)') trim(message) // ' (' // trim(msg) // ')'
+       !    endif
        call increase_message_stack_(msg)
     end if
   end subroutine assert_equals_int_
