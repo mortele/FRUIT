@@ -1,3 +1,8 @@
+# TODO
+#  1. Figure out how to do filee dependency
+#      1) can be applied to 1) library dependencies, (all .f90 in the dir are rebuilt if lib_base is newer
+#     2) make fruit basket not have name zz_
+
 module RakeBase
   require 'rubygems'
   require 'fruit_processor'
@@ -21,7 +26,7 @@ module RakeBase
   
   task :default => [:deploy]
   
-  rule '.o' => '.f90' do |t|
+  rule '.o' => ['.f90'] do |t|
     Rake::Task[:dirs].invoke if Rake::Task.task_defined?('dirs')
     sh "#{$compiler} -c -o #{t.name} #{t.source} -module #{$build_dir}"
   end

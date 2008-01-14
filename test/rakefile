@@ -13,4 +13,3 @@ file 'fruit_driver.o' => ['fruit_data_test.o', 'fruit_test.o']
 
 load "#{FruitProcessor.new.base_dir}/rake_base.rb"
 include RakeBase
-

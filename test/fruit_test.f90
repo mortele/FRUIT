@@ -18,25 +18,28 @@ contains
     ! test printing and formats
     !--------------------------
     call test_case_action
-    
+
     call test_show_output
-    call getTestSummaryTest
+    call fruit_summary_test
     call showOutputForReport
-    
+
     ! the following should give 100% pass
     !------------------------------------
-    call getTestSummary
+    call fruit_summary
 
     call test_assert_true
-    
+
     call test_add_success
     call test_add_success_message
     call test_add_fail
-
     call test_is_all_successful
+    call fruit_summary
 
+    ! using fruit to test fruit
+    call init_fruit
     call test_assert_equals_float
-    call getTestSummary
+    call test_last_unit_name
+    call fruit_summary
 
   end subroutine fruit_test_package
   
@@ -62,14 +65,14 @@ contains
   subroutine test_assert_true
     implicit none
 
-    call initializeFruit
+    call init_fruit
     write (*,*) 'Should see 1 successful case'
     call assertTrue (.true.)
 
     write (*,*) 'Shoule see 1 failed case'
     call assertTrue (.FALSE.)
     
-    call getTestSummary
+    call fruit_summary
   end subroutine test_assert_true
   
   ! Test assertTrue with message
@@ -77,25 +80,25 @@ contains
   subroutine assertTrueMessageTest 
     implicit none
     
-    call initializeFruit
+    call init_fruit
     call assertTrue (.true., 'message in assertTrueTest_message true test')
 
     call assertTrue (.FALSE., 'message in assertTrueTest_message false test')
     
-    call getTestSummary
+    call fruit_summary
   end subroutine assertTrueMessageTest
   
-  ! Test addSuccess and isAllSuccessful
+  ! Test addSuccess and is_all_successful
   ! -----------------------------------
   subroutine test_add_success
     implicit none
     
     logical :: result = .FALSE.
 
-    call initializeFruit
+    call init_fruit
 
     call addSuccess
-    call isAllSuccessful (result)
+    call is_all_successful (result)
 
     IF (result .neqv. .true.) then
       write (*, *)
@@ -103,31 +106,31 @@ contains
       write (*, *)
     end IF
 
-    call getTestSummary
+    call fruit_summary
     
   end subroutine test_add_success
   
   subroutine test_add_success_message
     implicit none
 
-    call initializeFruit
+    call init_fruit
     call addSuccess ('Success in this subroutine: test_add_success_message')
     
     call addSuccess ('test_add_success_message', 'Success in this subroutine: test_add_success_message')
     
-    call getTestSummary
+    call fruit_summary
   end subroutine test_add_success_message
   
-  ! Test addSuccess and isAllSuccessful
+  ! Test addSuccess and is_all_successful
   ! -----------------------------------
   subroutine test_add_fail
     implicit none
     
     logical :: result = .FALSE.
 
-    call initializeFruit
+    call init_fruit
     call addFail
-    call isAllSuccessful (result)
+    call is_all_successful (result)
 
     IF (result .neqv. .FALSE.) then
       write (*, *)
@@ -136,21 +139,21 @@ contains
     end IF
     
     call addFail('test_add_fail', 'testing addFail')
-    call getTestSummary
+    call fruit_summary
 
   end subroutine test_add_fail
   
-  ! Test addSuccess and isAllSuccessful
+  ! Test addSuccess and is_all_successful
   ! -----------------------------------
   subroutine test_add_fail_message
     implicit none
     
     logical :: result = .FALSE.
 
-    call initializeFruit
+    call init_fruit
     call addFail ('Add a failed case')
     call addFail ('test_add_fail_message', 'Add a failed case')
-    call isAllSuccessful (result)
+    call is_all_successful (result)
 
     IF (result .neqv. .FALSE.) then
       write (*, *)
@@ -162,31 +165,31 @@ contains
   
   ! Test successful and failed summary
   ! ----------------------------------
-  subroutine getTestSummaryTest  
+  subroutine fruit_summary_test  
     implicit none
     
     write (*,*) 'Summary for successful cases without message: '
     write (*,*) 'Should see 1 successful case'
-    call initializeFruit
+    call init_fruit
     call addSuccess
-    call getTestSummary
+    call fruit_summary
     
     write (*,*) 'Summary for successful cases and 2 messages: '
     write (*,*) 'Should see 3 successful cases'
-    call initializeFruit
+    call init_fruit
     call addSuccess
     call addSuccess ('Success message 1 from test case.')
     call addSuccess ('Success message 2 from test case.')
-    call getTestSummary
+    call fruit_summary
     
     write (*,*) 'Summary for failed cases: '
     write (*,*) 'Should see 2 failed case amd 1 message'
-    call initializeFruit
+    call init_fruit
     call addFail
     call addFail('Fail message from test case.')
-    call getTestSummary
+    call fruit_summary
     
-  end subroutine getTestSummaryTest
+  end subroutine fruit_summary_test
   
   ! Add one failed case and assert false
   ! Add all success case, and assert true
@@ -196,11 +199,11 @@ contains
     
     logical :: result = .true.
     
-    call initializeFruit
+    call init_fruit
     call addSuccess
     call addFail
     call addSuccess
-    call isAllSuccessful (result)
+    call is_all_successful (result)
     
     IF (result .neqv. .FALSE.) then
       write (*, *)
@@ -208,28 +211,28 @@ contains
       write (*, *)
     end IF
 
-    call getTestSummary
+    call fruit_summary
 
-    call initializeFruit
+    call init_fruit
     call addSuccess
     call addSuccess
     call addSuccess
-    call isAllSuccessful (result)
+    call is_all_successful (result)
     
     IF (result .neqv. .true.) then
       write (*, *)
       write (*, *) 'FAILED test_is_all_successful!!! (addSuccess)'
       write (*, *)
     end IF
-    call getTestSummary
+    call fruit_summary
 
-    call initializeFruit
+    call init_fruit
     IF (result .neqv. .true.) then
       write (*, *)
       write (*, *) 'FAILED test_is_all_successful!!! (addSuccess)'
       write (*, *)
     end IF
-    call getTestSummary
+    call fruit_summary
 
   end subroutine test_is_all_successful
   
@@ -240,7 +243,7 @@ contains
     integer :: i
     integer :: count
 
-    call initializeFruit
+    call init_fruit
     DO i=1,5
        call assertTrue (.true.)
     END DO
@@ -250,7 +253,7 @@ contains
        call assertTrue (.false.)
     END DO
     call assertEquals (trim(get_last_message()), 'Expected T got F')
-    call getTestSummary
+    call fruit_summary
 
   end subroutine test_show_output
   
@@ -262,7 +265,7 @@ contains
     integer :: count
     character (100), DIMENSION (3)  :: msgs; 
     
-    call initializeFruit
+    call init_fruit
     DO i=1,2
       call assertTrue (trueValue, 'msg')
     END DO
@@ -271,10 +274,10 @@ contains
       call assertTrue (falseValue, 'msg')
     END DO
     
-    call getTotalCount (count)
+    call get_total_count (count)
     write (*, *) 'Total count is: ' , count; 
     
-    call getFailedCount (count)
+    call get_failed_count (count)
     write (*, *) 'Failed count is: ' , count; 
     
     ! to be implemented
@@ -282,20 +285,27 @@ contains
     !write (*, *) 'Messages are: '; 
     !write (*, *) msgs; 
     
-    call getTestSummary
+    call fruit_summary
   end subroutine showOutputForReport
-  
+
   subroutine test_assert_equals_float
     implicit none
     
     real :: variable = 2.3
     real :: result = 2.3
     
-    call initializeFruit
     call assertEquals (variable, result)
     call assertEquals (variable + 0.1, result)
-    call getTestSummary
-    
   end subroutine test_assert_equals_float
+  
+  subroutine test_last_unit_name
+    implicit none
+    
+    character(len=300) :: result
+    
+    call set_last_unit_name ('sample_unit_name')
+    call assertEquals ('sample_unit_name', trim(result))
+    
+  end subroutine test_last_unit_name
   
 end module fruit_test

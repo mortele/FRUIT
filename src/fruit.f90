@@ -14,18 +14,18 @@
 !
 module fruit
 
-  integer, parameter :: MSG_LENGTH = 1000
+  integer, parameter :: MSG_LENGTH = 1500
   integer, parameter :: MSG_STACK_SIZE = 300000
 
   integer, private, save :: successfulAssertCount = 0
   integer, private, save :: failedAssertCount = 0
   character (len = MSG_LENGTH), private, dimension (MSG_STACK_SIZE), save :: messageArray
+  character (len = MSG_LENGTH), private, save :: msg = '[unit name not set from set_name]: '
+  character (len = MSG_LENGTH), save :: last_unit_name  = '_not_set_'
   integer, private, save :: messageIndex = 1
 
   integer, private, save :: successfulTestCount = 0
   integer, private, save :: failedTestCount = 0
-  character (len = MSG_LENGTH), private, dimension (1000), save :: testCaseNamesArray
-  character (len = MSG_LENGTH), private, dimension (1000), save :: testCaseMessageArray
   integer, private, save :: testCaseIndex = 1
   logical, private, save :: last_case_passed = .false.
 
@@ -93,6 +93,14 @@ module fruit
      module procedure add_fail_unit_
   end interface
 
+  interface set_last_unit_name
+     module procedure set_last_unit_name_
+  end interface
+
+  interface get_last_unit_name
+     module procedure get_last_unit_name_
+  end interface
+
   interface getTotalCount
      module procedure getTotalCount_obsolete_
   end interface
@@ -102,7 +110,11 @@ module fruit
   end interface
 
   interface getFailedCount
-     module procedure getFailedCount
+     module procedure getFailedCount_obsolete_
+  end interface
+
+  interface get_failed_count
+     module procedure get_failed_count_
   end interface
 
   interface success_case_action
@@ -150,6 +162,7 @@ module fruit
        fruit_summary_, getTestSummary_obsolete_, &
        get_last_message_, obsolete_, &
        get_total_count_, getTotalCount_obsolete_,&
+       get_failed_count_, getFailedCount_obsolete_, &
        assertTrue_single, assertTrue_result, &
        add_success, &
        add_fail_, add_fail_unit_, increase_message_stack_, &
@@ -176,7 +189,8 @@ module fruit
        assert_equals_spArr_spArr_int_sp_, &
        assert_equals_dpArr_dpArr_int_dp_, &
        add_success_, add_success_unit_,&
-       is_all_successful_, isAllSuccessful_
+       is_all_successful_, isAllSuccessful_, &
+       set_last_unit_name_, get_last_unit_name_ 
 
 contains
 
@@ -276,13 +290,14 @@ contains
     implicit none
     logical, intent(out) :: result
     call obsolete_ ('subroutine isAllSuccessful is changed to function is_all_successful.')
-    result = is_all_successful()
+    result = (failedAssertCount .eq. 0 )
   end subroutine isAllSuccessful_
 
-  logical function is_all_successful_
+  subroutine is_all_successful_(result)
     implicit none
-    is_all_successful_ = (failedAssertCount .eq. 0 )
-  end function is_all_successful_
+    logical, intent(out) :: result
+    result= (failedAssertCount .eq. 0 )
+  end subroutine is_all_successful_
 
   subroutine success_mark_
     write(*,"(A1)",ADVANCE='NO') '.'
@@ -318,22 +333,30 @@ contains
     implicit none
     integer, intent (out) :: count
     call obsolete_ (' getTotalCount subroutine is replaced by function get_total_count')
-    count = get_total_count_()
+    call get_total_count_(count)
   end subroutine getTotalCount_obsolete_
 
-  integer function get_total_count_ 
+  subroutine get_total_count_(count) 
     implicit none
+    integer, intent(out) :: count
 
-    get_total_count_ = successfulAssertCount + failedAssertCount
-  end function get_total_count_
+    count = successfulAssertCount + failedAssertCount
+  end subroutine get_total_count_
 
-  subroutine getFailedCount (count)
+  subroutine getFailedCount_obsolete_ (count)
     implicit none
     integer, intent (out) :: count
 
-    count = failedAssertCount
+    call obsolete_ (' getFailedCount subroutine is replaced by function get_failed_count')
+    call get_failed_count_ (count)
 
-  end subroutine getFailedCount
+  end subroutine getFailedCount_obsolete_
+
+  subroutine get_failed_count_ (count)
+    implicit none
+    integer, intent(out) :: count
+    count = failedAssertCount
+  end subroutine get_failed_count_
 
   subroutine obsolete_ (message)
     character (*), intent (in), optional :: message
@@ -355,14 +378,41 @@ contains
     call failed_mark_
   end subroutine failed_case_action_
 
-  !---------
-  ! Start of all assertions
-  !--------
+  subroutine set_last_unit_name_(unit_name)
+    character(*), intent(in) :: unit_name
+    last_unit_name = trim(unit_name)
+    write (*,*) last_unit_name
+  end subroutine set_last_unit_name_
+
+  subroutine get_last_unit_name_(unit_name)
+    character(*), intent(out) :: unit_name
+    unit_name = trim(last_unit_name)
+  end subroutine get_last_unit_name_
+
+  !--------------------------------------------------------------------------------
+  ! all assertions
+  !--------------------------------------------------------------------------------
+  subroutine assert_equals_int_ (var1, var2, message)
+    implicit none
+    integer, intent(in) :: var1, var2
+    character (*), intent(in), optional :: message
+
+    if ( var1 .eq. var2) then
+       call success_case_action_
+    else
+       call failed_case_action_
+       write(msg, '(A, I, A, I)') 'Expected ', var1, ' got ', var2
+       if (present(message)) then
+          write (msg, '(A)') trim(message) // ' (' // trim(msg) // ')'
+       endif
+       call increase_message_stack_(msg)
+    end if
+  end subroutine assert_equals_int_
+
   subroutine assert_true_logical_ (var1, message)
     implicit none
     logical, intent (in) :: var1
     character (*), intent (in), optional :: message
-    character(MSG_LENGTH) :: msg
 
     if ( var1 .eqv. .true.) then
        call success_case_action_
@@ -397,7 +447,6 @@ contains
     implicit none
     logical, intent (in)  :: var1, var2
     character (*), intent (in), optional :: message
-    character(MSG_LENGTH) :: msg
 
     if ( var1 .eqv. var2 ) then
        call success_case_action_
@@ -494,10 +543,6 @@ contains
 
   end subroutine assert_equals_real_difference_
 
-  ! ----
-  ! Assert the single precision arrays are equal within a tolerance
-  ! print error messages and return error
-  ! ----
   subroutine assert_equals_spArr_spArr_int_sp_(var1, var2, n, var3, message)
     implicit none
     integer, intent(in) :: n
@@ -611,21 +656,6 @@ contains
     call success_case_action_
   end subroutine assert_equals_2darray_double
 
-  subroutine assert_equals_int_ (var1, var2, message)
-    implicit none
-    integer, intent (in) :: var1, var2
-    character (*), intent (in), optional :: message
-
-    if ( var1 .eq. var2) then
-       call success_case_action_
-    else
-       call failed_case_action_
-       if (present(message)) then
-          call increase_message_stack_(message)
-       endif
-    end if
-  end subroutine assert_equals_int_
-
   subroutine assert_equals_1darray_int_ (var1, var2, n, message)
     implicit none
     integer, intent (in) :: n
@@ -652,7 +682,6 @@ contains
     integer, intent (in) :: n
     character(*), intent (in) :: var1(n), var2(n)
     character (*), intent (in), optional :: message
-    character (len=200) :: msg
     integer count
 
     loop_dim1: do count = 1, n
@@ -661,12 +690,10 @@ contains
              call increase_message_stack_(message)
           end if
 
-          write (msg,1000) count
-1000      format(I5)
-
+          write (msg,'(I5)') count
           msg = 'error at count: ' // trim(msg)  
           msg = msg // 'expected value: ' // trim(var1(count))
-          msg = msg // 'real value: ' // trim(var2(count))
+          msg = msg // 'got value: ' // trim(var2(count))
 
           call increase_message_stack_(msg)
           call failed_case_action_
@@ -857,7 +884,6 @@ contains
     enddo loop_dim2
 
     call success_case_action_
-
   end subroutine assert_equals_2darray_complex
 
   subroutine assert_equals_2darray_complex_ (var1, var2, n, m, message)
