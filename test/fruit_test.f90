@@ -17,7 +17,7 @@ contains
 
     ! test printing and formats
     !--------------------------
-    call test_assert_action
+    call test_should_add_successful_or_failed_actions
 
     call test_show_output
     call fruit_summary_test
@@ -35,16 +35,16 @@ contains
     call test_is_all_successful
     call fruit_summary
 
-    ! using fruit to test fruit
+    ! using fruit to test frui
     call init_fruit
     call test_assert_equals_float
     call test_unit_name
-    call test_assert_int_int
+    call test_assert_should_handle_int_and_int_and_message
     call fruit_summary
 
   end subroutine fruit_test_package
   
-  subroutine test_assert_action
+  subroutine test_should_add_successful_or_failed_actions
     write (*,*) "Should see . here:"
     call success_assert_action
     write (*,*) "Should see .. here:"
@@ -61,7 +61,7 @@ contains
     call failed_assert_action
   
     write (*,*) 
-  end subroutine test_assert_action
+  end subroutine test_should_add_successful_or_failed_actions
   
   subroutine test_assert_true
     implicit none
@@ -310,11 +310,11 @@ contains
     
   end subroutine test_unit_name
   
-  subroutine test_assert_int_int
+  subroutine test_assert_should_handle_int_and_int_and_message
     implicit none
-    call set_unit_name('test_assert_int_int')
+    call set_unit_name('test_assert_should_handle_int_and_int_and_message')
     call assertEquals(1,1)
     call assertEquals(1,2)
     call assertEquals(1,2, "optional message in assert equal int int")
-  end subroutine test_assert_int_int
+  end subroutine test_assert_should_handle_int_and_int_and_message
 end module fruit_test

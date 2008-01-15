@@ -7,7 +7,7 @@ program fruit_driver
 
   call init_fruit
 
-  !call fruit_test_package
+  call fruit_test_package
 
   call fruit_util_test_package
   !call fruit_data_test_package

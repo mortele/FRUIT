@@ -232,14 +232,16 @@ contains
        write (*,*) 'SUCCESSFUL!'
     end if
 
+    write (*,*)
     if ( messageIndex > 1) then
-       write (*,*) '  -- Messages are:'
+       write (*,*) '  -- Failed assertion messages:'
 
        do i = 1, messageIndex - 1
-          write (*,"(A)") strip(messageArray(i))
+          write (*,"(A)") trim(strip(messageArray(i)))
        end do
 
-       write (*,*) '  -- end of messages.'
+       write (*,*) '  -- end of failed assertion messages.'
+       write (*,*)
     else
        write (*,*) '  No messages '
     end if
@@ -403,10 +405,10 @@ contains
     character(*), intent(in) :: var1, var2
     character(*), intent(in), optional :: message
     if (present(message)) then
-       msg = 'in [' // unit_name // '] Expected: ' // strip(var1) // ' Got: ' // strip(var2) // &
+       msg = '[' // trim(strip(unit_name)) // ']: Expected [' // trim(strip(var1)) // '], Got [' // trim(strip(var2)) // ']; '// &
             ' User message: [' // message // ']'
     else
-       msg = 'in [' // unit_name // '] Expected: ' // strip(var1) // ' Got: ' // strip(var2)
+       msg = '[' // trim(strip(unit_name)) // ']: Expected [' // trim(strip(var1)) // '], Got [' // trim(strip(var2)) // ']; ' 
     endif
   end subroutine make_error_msg__
 
@@ -422,11 +424,7 @@ contains
        call success_assert_action_
     else
        call failed_assert_action_
-       !call make_error_msg__ (var1, var2, message)
-       !       write(msg, '(A, A, I, A, I)') strip(msg), ' Expected ', var1, ' got ', var2
-       !      if (present(message)) then
-       !        write (msg, '(A)') strip(message) // ' (' // strip(msg) // ')'
-       !    endif
+       call make_error_msg__ (to_s(var1), to_s(var2), message)
        call increase_message_stack_(msg)
     end if
   end subroutine assert_equals_int_
