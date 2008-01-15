@@ -12,6 +12,10 @@ module fruit_util
      module procedure to_s_int_
      module procedure to_s_real_
      module procedure to_s_logical_
+     module procedure to_s_double_
+     module procedure to_s_complex_
+     module procedure to_s_double_complex_
+     module procedure to_s_string_
   end interface
 
   interface strip
@@ -19,7 +23,7 @@ module fruit_util
   end interface
 
   private:: &
-       to_s_int_, to_s_real_, to_s_logical_, &
+       to_s_int_, to_s_real_, to_s_logical_, to_s_double_, to_s_complex_, to_s_double_complex_, to_s_string_, &
        strip_
 
 contains
@@ -33,7 +37,6 @@ contains
     to_s_int_ = adjustl(trim(result))
   end function to_s_int_
 
-
   function to_s_real_ (value)
     implicit none
     character(len=500):: to_s_real_
@@ -43,6 +46,33 @@ contains
     to_s_real_ = adjustl(trim(result))
   end function to_s_real_
 
+  function to_s_double_ (value)
+    implicit none
+    character(len=500):: to_s_double_
+    double precision, intent(in) :: value
+    character(len=500) :: result
+    write (result, *) value
+    to_s_double_ = adjustl(trim(result))
+  end function to_s_double_
+
+  function to_s_complex_ (value)
+    implicit none
+    character(len=500):: to_s_complex_
+    complex, intent(in) :: value
+    character(len=500) :: result
+    write (result, *) value
+    to_s_complex_ = adjustl(trim(result))
+  end function to_s_complex_
+
+  function to_s_double_complex_ (value)
+    implicit none
+    character(len=500):: to_s_double_complex_
+    double complex, intent(in) :: value
+    character(len=500) :: result
+    write (result, *) value
+    to_s_double_complex_ = adjustl(trim(result))
+  end function to_s_double_complex_
+
   function to_s_logical_ (value)
     implicit none
     character(len=500):: to_s_logical_
@@ -51,6 +81,13 @@ contains
     write (result, *) value
     to_s_logical_ = adjustl(trim(result))
   end function to_s_logical_
+
+  function to_s_string_ (value)
+    implicit none
+    character(len=500):: to_s_string_
+    character(len=*), intent(in) :: value
+    to_s_string_ = value
+  end function to_s_string_
 
   function strip_(value)
     implicit none

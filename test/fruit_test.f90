@@ -30,7 +30,6 @@ contains
     call test_assert_true
 
     call test_add_success
-    call test_add_success_message
     call test_add_fail
     call test_is_all_successful
     call fruit_summary
@@ -54,11 +53,11 @@ contains
     write (*,*) 
 
     write (*,*) "Should see F here:"
-    call failed_assert_action
+    call failed_assert_action('','')
   
     write (*,*) "Should see FF here:"
-    call failed_assert_action
-    call failed_assert_action
+    call failed_assert_action('','')
+    call failed_assert_action('','')
   
     write (*,*) 
   end subroutine test_should_add_successful_or_failed_actions
@@ -110,17 +109,6 @@ contains
     call fruit_summary
     
   end subroutine test_add_success
-  
-  subroutine test_add_success_message
-    implicit none
-
-    call init_fruit
-    call addSuccess ('Success in this subroutine: test_add_success_message')
-    
-    call addSuccess ('test_add_success_message', 'Success in this subroutine: test_add_success_message')
-    
-    call fruit_summary
-  end subroutine test_add_success_message
   
   ! Test addSuccess and is_all_successful
   ! -----------------------------------
@@ -179,8 +167,8 @@ contains
     write (*,*) 'Should see 3 successful cases'
     call init_fruit
     call addSuccess
-    call addSuccess ('Success message 1 from test case.')
-    call addSuccess ('Success message 2 from test case.')
+    call addSuccess
+    call addSuccess
     call fruit_summary
     
     write (*,*) 'Summary for failed cases: '
