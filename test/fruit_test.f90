@@ -17,7 +17,7 @@ contains
 
     ! test printing and formats
     !--------------------------
-    call test_case_action
+    call test_assert_action
 
     call test_show_output
     call fruit_summary_test
@@ -44,24 +44,24 @@ contains
 
   end subroutine fruit_test_package
   
-  subroutine test_case_action
+  subroutine test_assert_action
     write (*,*) "Should see . here:"
-    call success_case_action
+    call success_assert_action
     write (*,*) "Should see .. here:"
-    call success_case_action
-    call success_case_action
+    call success_assert_action
+    call success_assert_action
 
     write (*,*) 
 
     write (*,*) "Should see F here:"
-    call failed_case_action
+    call failed_assert_action
   
     write (*,*) "Should see FF here:"
-    call failed_case_action
-    call failed_case_action
+    call failed_assert_action
+    call failed_assert_action
   
     write (*,*) 
-  end subroutine test_case_action
+  end subroutine test_assert_action
   
   subroutine test_assert_true
     implicit none

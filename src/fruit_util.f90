@@ -1,9 +1,3 @@
-!------------------------
-!
-! Author: Andrew H. Chen chen at meihome.com
-! Last modified: 2004/01/12
-! Version : $Revision$
-!------------------------
 module fruit_util
   interface equals
      module procedure equalEpsilon
@@ -17,10 +11,16 @@ module fruit_util
   interface to_s
      module procedure to_s_int_
      module procedure to_s_real_
+     module procedure to_s_logical_
+  end interface
+
+  interface strip
+     module procedure strip_
   end interface
 
   private:: &
-       to_s_int_, to_s_real
+       to_s_int_, to_s_real_, to_s_logical_, &
+       strip_
 
 contains
 
@@ -42,6 +42,22 @@ contains
     write (result, *) value
     to_s_real_ = adjustl(trim(result))
   end function to_s_real_
+
+  function to_s_logical_ (value)
+    implicit none
+    character(len=500):: to_s_logical_
+    logical, intent(in) :: value
+    character(len=500) :: result
+    write (result, *) value
+    to_s_logical_ = adjustl(trim(result))
+  end function to_s_logical_
+
+  function strip_(value)
+    implicit none
+    character(len=500):: strip_
+    character(len=*), intent(in) :: value
+    strip_ = trim(adjustl(value))
+  end function strip_
 
   !------------------------
   ! test if 2 values are close
