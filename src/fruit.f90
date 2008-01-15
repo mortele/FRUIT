@@ -11,7 +11,6 @@
 ! The method used most is: call assertTrue (logical [, message])
 !
 !
-!
 module fruit
   use fruit_util
   implicit none
@@ -234,7 +233,7 @@ contains
        write (*, *)
        write (*,*) 'Successful asserts / total asserts : [ ',&
             successful_assert_count, '/', successful_assert_count + failed_assert_count, ' ]'
-       write (*,*) 'Successful cases    / total cases  : [ ', successful_case_count, '/', &
+       write (*,*) 'Successful cases   / total cases   : [ ', successful_case_count, '/', &
             successful_case_count + failed_case_count, ' ]'
        write (*, *) '  -- end of FRUIT summary'
 
@@ -368,7 +367,7 @@ contains
        msg = '[' // trim(strip(unit_name)) // ']: Expected [' // trim(strip(var1)) // '], Got [' // trim(strip(var2)) // ']; '// &
             ' User message: [' // message // ']'
     else
-       msg = '[' // trim(strip(unit_name)) // ']: Expected [' // trim(strip(var1)) // '], Got [' // trim(strip(var2)) // ']; ' 
+       msg = '[' // trim(strip(unit_name)) // ']: Expected [' // trim(strip(var1)) // '], Got [' // trim(strip(var2)) // ']' 
     endif
   end subroutine make_error_msg__
 
