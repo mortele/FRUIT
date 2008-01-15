@@ -29,7 +29,7 @@ module fruit
   integer, private, save :: successful_case_count = 0
   integer, private, save :: failed_case_count = 0
   integer, private, save :: testCaseIndex = 1
-  logical, private, save :: last_case_passed = .false.
+  logical, private, save :: last_passed = .false.
 
   interface init_fruit
      module procedure init_fruit_
@@ -53,6 +53,10 @@ module fruit
 
   interface get_last_message
      module procedure get_last_message_
+  end interface
+
+  interface is_last_passed
+     module procedure is_last_passed_
   end interface
 
   interface assertEquals
@@ -135,30 +139,6 @@ module fruit
      module procedure is_all_successful_
   end interface
 
-  !  interface addTestCase
-  !    module procedure addTestCase
-  !  end interface
-
-  !  interface addCaseResult
-  !    module procedure addCaseResult
-  !  end interface
-
-  !  interface getTotalTestCount
-  !    module procedure getTotalTestCount
-  !  end interface
-
-  !  interface getTotalFailedTestCount
-  !    module procedure getTotalFailedTestCount
-  !  end interface
-
-  !  interface getTestCases
-  !    module procedure getTestCases
-  !  end interface
-
-  !  interface getTestCaseResults
-  !    module procedure getTestCaseResults
-  !  end interface
-
   private :: &
        init_fruit_, initializa_fruit_obsolete_, &
        fruit_summary_, getTestSummary_obsolete_, &
@@ -191,7 +171,7 @@ module fruit
        assert_equals_dpArr_dpArr_int_dp_, &
        add_success_, &
        is_all_successful_, isAllSuccessful_, &
-       set_unit_name_, get_unit_name_ 
+       set_unit_name_, get_unit_name_, is_last_passed_
 
 contains
 
@@ -351,7 +331,7 @@ contains
 
   subroutine success_assert_action_
     successful_assert_count = successful_assert_count + 1
-    last_case_passed = .true.
+    last_passed = .true.
     call success_mark_  
   end subroutine success_assert_action_
 
@@ -363,7 +343,7 @@ contains
     call make_error_msg__ (expected, got, message)
     call increase_message_stack_
     failed_assert_count = failed_assert_count + 1
-    last_case_passed = .false.
+    last_passed = .false.
     call failed_mark_
   end subroutine failed_assert_action_
 
@@ -391,6 +371,11 @@ contains
        msg = '[' // trim(strip(unit_name)) // ']: Expected [' // trim(strip(var1)) // '], Got [' // trim(strip(var2)) // ']; ' 
     endif
   end subroutine make_error_msg__
+
+  function is_last_passed_
+    logical:: is_last_passed_
+    is_last_passed_ = last_passed 
+  end function is_last_passed_
 
   !--------------------------------------------------------------------------------
   ! all assertions

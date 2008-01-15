@@ -49,17 +49,26 @@ class FruitProcessor
           f.write "    call setup_before_all\n"
         end
         
+        spec_counter = 0
         method_names.each do |method_name|
           if @spec_hash[file]['setup']=='each'
             f.write "    call setup\n"
           end
-          f.write "    write (*, *) \"  ..running #{method_name}\"\n"
+          f.write "    write (*, *) \"  ..running test: #{method_name}\"\n"
+          f.write "    call set_unit_name ('#{method_name}')\n"
           f.write "    call #{method_name}\n"
-          # get failed count, added failed spec name into array
+          f.write "    if (.not. is_last_passed()) then\n"
+          f.write "      write(*,*) \n"
+          f.write "      write(*,*) '  Un-satisfied spec:'\n"
+          f.write "      write(*,*) '#{format_spec(@spec_hash[file]['methods']['spec'][spec_counter], '  -- ', '&')}'\n"
+          f.write "      write(*,*) \n"
+          f.write "    end if\n"
+          
           if @spec_hash[file]['teardown']=='each'
             f.write "    call teardown\n"
           end
           f.write "\n"
+          spec_counter += 1
         end
         
         if @spec_hash[file]['teardown']=='all'
@@ -68,6 +77,7 @@ class FruitProcessor
         
         f.write "  end subroutine #{subroutine_name}\n"
         f.write "\n"
+        
       end
     end
     
@@ -184,16 +194,20 @@ class FruitProcessor
       method_hash.each_pair do |method, method_values|
         next if !method_values['spec']
         spaces = "    -- "
-        indent = "  " + spaces.gsub("-", " ")
         
         method_values['spec'].each do |spec|
-          line = spec.gsub("\n", "\n#{indent}")
-          puts "#{spaces}#{line}"
+          puts format_spec(spec, spaces)
         end
       end
       puts "\n"
       
     end
+  end
+  
+  def format_spec (spec, spaces, ending='')
+    indent = "  " + spaces.gsub("-", " ")
+    line = spec.gsub("\n", "#{ending}\n#{indent}")
+    "#{spaces}#{line}"
   end
   
   def base_dir

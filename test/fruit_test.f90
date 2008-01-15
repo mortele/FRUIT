@@ -34,13 +34,6 @@ contains
     call test_is_all_successful
     call fruit_summary
 
-    ! using fruit to test frui
-    call init_fruit
-    call test_assert_equals_float
-    call test_unit_name
-    call test_assert_should_handle_int_and_int_and_message
-    call fruit_summary
-
   end subroutine fruit_test_package
   
   subroutine test_should_add_successful_or_failed_actions
@@ -277,32 +270,4 @@ contains
     call fruit_summary
   end subroutine showOutputForReport
 
-  subroutine test_assert_equals_float
-    implicit none
-    
-    real :: variable = 2.3
-    real :: result = 2.3
-    
-    call assertEquals (variable, result)
-    call assertNotEquals (variable + 0.1, result)
-  end subroutine test_assert_equals_float
-  
-  subroutine test_unit_name
-    implicit none
-    
-    character(len=300) :: result
-    
-    call set_unit_name ('sample_unit_name')
-    call get_unit_name (result)
-    call assertEquals ('sample_unit_name', trim(result))
-    
-  end subroutine test_unit_name
-  
-  subroutine test_assert_should_handle_int_and_int_and_message
-    implicit none
-    call set_unit_name('test_assert_should_handle_int_and_int_and_message')
-    call assertEquals(1,1)
-    call assertEquals(1,2)
-    call assertEquals(1,2, "optional message in assert equal int int")
-  end subroutine test_assert_should_handle_int_and_int_and_message
 end module fruit_test

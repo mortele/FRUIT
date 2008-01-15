@@ -4,19 +4,66 @@ module fruit_data_test
 
 contains
   subroutine fruit_data_test_package
+    call init_fruit
+
+    call test_assert_equals_float
+    call test_unit_name
+    call test_assert_should_handle_int_and_int_and_message
+    call test_last_test_result_should_be_accessible
+
     call testAssertEqualsFloat
     call test1DArrayString
+
+    call fruit_summary
   end subroutine fruit_data_test_package
+
+  subroutine test_assert_equals_float
+    implicit none
+    
+    real :: variable = 2.3
+    real :: result = 2.3
+    
+    call assertEquals (variable, result)
+    call assertNotEquals (variable + 0.1, result)
+  end subroutine test_assert_equals_float
+  
+  subroutine test_unit_name
+    implicit none
+    
+    character(len=300) :: result
+    
+    call set_unit_name ('sample_unit_name')
+    call get_unit_name (result)
+    call assertEquals ('sample_unit_name', trim(result))
+    
+  end subroutine test_unit_name
+  
+  subroutine test_assert_should_handle_int_and_int_and_message
+    call set_unit_name('test_assert_should_handle_int_and_int_and_message')
+    call assertEquals(1,1)
+    call assertEquals(1,2)
+    call assertEquals(1,2, "should see 2 error messages")
+  end subroutine test_assert_should_handle_int_and_int_and_message
+
+  subroutine test_last_test_result_should_be_accessible
+    call set_unit_name('test_last_test_result_should_be_accessible')
+    call assertEquals(2,1)
+    call assertEquals(.false., is_last_passed())
+
+    call assertEquals(1,1)
+write (*,*) '----------------------------'
+    write (*,*) is_last_passed()
+    call assertEquals(.true., is_last_passed())
+
+  end subroutine test_last_test_result_should_be_accessible
 
   subroutine testAssertEqualsFloat
 
     real :: variable = 2.3
     real :: result = 2.3
 
-    call init_fruit
     call assertEquals (variable, result)
     call assertNotEquals (variable + 0.1, result)
-    call fruit_summary
 
   end subroutine testAssertEqualsFloat
 

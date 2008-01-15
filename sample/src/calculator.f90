@@ -18,7 +18,7 @@ contains
   subroutine add_real (a, b, output)
     real, intent (in) :: a, b
     real, intent (inout) :: output
-    output=a+b
+    output=a+b+0.1
   end subroutine add_real
 
 end module calculator
