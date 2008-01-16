@@ -1,8 +1,3 @@
-# TODO
-#  1. Figure out how to do filee dependency
-#      1) can be applied to 1) library dependencies, (all .f90 in the dir are rebuilt if lib_base is newer
-#     2) make fruit basket not have name zz_
-
 module RakeBase
   require 'rubygems'
   require 'fruit_processor'
@@ -26,12 +21,16 @@ module RakeBase
   CLOBBER.include("#{$build_dir}/#{$goal}")
   
   task :default => [:deploy]
-  
+
+  # generated files must be built last
   objs = FileList['*.f90'].map { |f| f.ext('o') }
   if objs.include?'fruit_basket_gen.o'
     file 'fruit_basket_gen.o' =>  objs - ['fruit_basket_gen.o', 'fruit_driver_gen.o']
     file 'fruit_driver_gen.o' =>  'fruit_basket_gen.o'
   end
+  
+  # final goal link is depending on the libraries
+  file $goal => FruitProcessor.new.lib_base_files($lib_bases, $build_dir)
   
   rule '.o' => ['.f90'] do |t|
     Rake::Task[:dirs].invoke if Rake::Task.task_defined?('dirs')
@@ -46,7 +45,8 @@ module RakeBase
       sh "#{$compiler} -o #{$goal} #{OBJ} -module #{$build_dir} #{FruitProcessor.new.lib_name_flag($lib_bases, $build_dir)} #{FruitProcessor.new.lib_dir_flag($lib_bases, $build_dir)}"
     end
   end
-  
+
+  # generate directories
   task :dirs do
     Dir.mkdir $build_dir unless File.exist?($build_dir)
   end  
