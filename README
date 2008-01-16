@@ -1,4 +1,21 @@
-Rake file and the pre-processor require fruit_processor.rb.  It is packaged in ruby gem.:
+Installation guide:
 
-To install gem:
-gem install fruit_processor-2.0.gem 
+	1. Untar the gz file
+	
+	2. Put Ruby in your path.
+	
+	3. Install rake gem
+	    gem install rake
+	    
+	4. Install fruit_processor gem
+	    cd fruit/fruit_processor_gem
+	    rake install
+	    
+	5. You may need to change your compiler from Intel FORTRAN to other
+	   modify this line in rake_base.rb :
+	     $compiler = 'ifort'
+	   
+	6. Build and run all the test
+	  cd fruit
+	  rake
+	  
