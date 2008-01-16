@@ -35,7 +35,7 @@ contains
   end subroutine test_more_with_spec_in_spec_variable
 
   subroutine test_calculator_should_remember_previous_calculation_results
-    call addSuccess
+    call add_success
   end subroutine test_calculator_should_remember_previous_calculation_results
 
 end module calculator_test

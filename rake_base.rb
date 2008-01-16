@@ -27,6 +27,12 @@ module RakeBase
   
   task :default => [:deploy]
   
+  objs = FileList['*.f90'].map { |f| f.ext('o') }
+  if objs.include?'fruit_basket_gen.o'
+    file 'fruit_basket_gen.o' =>  objs - ['fruit_basket_gen.o', 'fruit_driver_gen.o']
+    file 'fruit_driver_gen.o' =>  'fruit_basket_gen.o'
+  end
+  
   rule '.o' => ['.f90'] do |t|
     Rake::Task[:dirs].invoke if Rake::Task.task_defined?('dirs')
     sh "#{$compiler} -c -o #{t.name} #{t.source} -module #{$build_dir}"

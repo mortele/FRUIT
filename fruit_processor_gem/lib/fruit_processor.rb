@@ -4,10 +4,10 @@ require 'rubygems'
 require 'rake'
 
 class FruitProcessor
-  
+
   def initialize
-    @driver_program_name='zzz_fruit_driver_gen'
-    @fruit_basket_module_name = 'zz_fruit_basket_gen'
+    @driver_program_name='fruit_driver_gen'
+    @fruit_basket_module_name = 'fruit_basket_gen'
     @files = FileList['*_test.f90']
     @spec_hash={}
     @files.each do |file|
