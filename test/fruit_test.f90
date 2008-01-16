@@ -32,6 +32,7 @@ contains
     call test_add_success
     call test_add_fail
     call test_is_all_successful
+    call test_obsolete_message
     call fruit_summary
 
   end subroutine fruit_test_package
@@ -269,5 +270,9 @@ contains
     
     call fruit_summary
   end subroutine showOutputForReport
+
+  subroutine test_obsolete_message
+    call assertTrue(.true.)
+  end subroutine test_obsolete_message
 
 end module fruit_test
