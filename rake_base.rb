@@ -21,7 +21,8 @@ module RakeBase
   SRC = FileList['*.f90'].sort
   OBJ = SRC.ext('o')
   
-  CLEAN.include(['*.o', '*.a', '*.mod', '*_gen.f90', '*fruit_driver', FruitProcessor.new.module_files(SRC, $build_dir)])
+  CLEAN.include(['*.o', '*.a', '*.mod', '*_gen.f90', '*fruit_driver', 
+    '*_gen.f90', FruitProcessor.new.module_files(SRC, $build_dir)])
   CLOBBER.include("#{$build_dir}/#{$goal}")
   
   task :default => [:deploy]
@@ -52,5 +53,5 @@ module RakeBase
     require 'fileutils'
     FileUtils.touch anchor_file_name
   end
- 
+  
 end

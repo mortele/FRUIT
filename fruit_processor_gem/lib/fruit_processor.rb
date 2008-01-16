@@ -45,14 +45,18 @@ class FruitProcessor
         
         method_names = @spec_hash[file]['methods']['name']
         
-        if @spec_hash[file]['setup']=='all'
-          f.write "    call setup_before_all\n"
-        end
+        if @spec_hash[file]['setup'] != nil
+          if @spec_hash[file]['setup']=='all'
+            f.write "    call setup_before_all\n"
+          end
+        end        
         
         spec_counter = 0
         method_names.each do |method_name|
-          if @spec_hash[file]['setup']=='each'
-            f.write "    call setup\n"
+          if @spec_hash[file]['setup'] != nil
+            if @spec_hash[file]['setup']=='each'
+              f.write "    call setup\n"
+            end
           end
           f.write "    write (*, *) \"  ..running test: #{method_name}\"\n"
           f.write "    call set_unit_name ('#{method_name}')\n"
@@ -64,15 +68,19 @@ class FruitProcessor
           f.write "      write(*,*) \n"
           f.write "    end if\n"
           
-          if @spec_hash[file]['teardown']=='each'
-            f.write "    call teardown\n"
+          if @spec_hash[file]['setup'] != nil
+            if @spec_hash[file]['teardown']=='each'
+              f.write "    call teardown\n"
+            end
           end
           f.write "\n"
           spec_counter += 1
         end
         
-        if @spec_hash[file]['teardown']=='all'
-          f.write "    call teardown_after_all\n"
+        if @spec_hash[file]['setup'] != nil
+          if @spec_hash[file]['teardown']=='all'
+            f.write "    call teardown_after_all\n"
+          end
         end
         
         f.write "  end subroutine #{subroutine_name}\n"
