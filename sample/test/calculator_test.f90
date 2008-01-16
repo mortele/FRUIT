@@ -1,6 +1,8 @@
 module calculator_test
-use fruit
+  use fruit
+
 contains
+
   ! setup_before_all
   ! setup = setup_before_each
   subroutine setup
@@ -13,13 +15,10 @@ contains
 
   subroutine test_calculator_should_produce_4_when_2_and_2_are_inputs
     use calculator, only: add
-    integer:: result, a, b
-    a=2
-    b=2
+    integer:: result
 
-    call add (a,b,result)
+    call add (2,2,result)
     call assertEquals (4, result)
-
   end subroutine test_calculator_should_produce_4_when_2_and_2_are_inputs
 
   subroutine test_more_with_spec_in_spec_variable
@@ -35,12 +34,8 @@ contains
     call assertEquals (4.0, result)
   end subroutine test_more_with_spec_in_spec_variable
 
-   subroutine test_calculator_should_remember_previous_calculation_results
-     call addSuccess
-   end subroutine test_calculator_should_remember_previous_calculation_results
-
-  subroutine test_calculator_should_reset_when_reset_is_called
-     call addSuccess
-  end subroutine test_calculator_should_reset_when_reset_is_called
+  subroutine test_calculator_should_remember_previous_calculation_results
+    call addSuccess
+  end subroutine test_calculator_should_remember_previous_calculation_results
 
 end module calculator_test
