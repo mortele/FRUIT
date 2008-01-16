@@ -8,8 +8,12 @@
 !
 ! This package is to perform unit test for FORTRAN subroutines
 !
-! The method used most is: call assertTrue (logical [, message])
-!
+! The method used most are: assert_true, assert_equals
+! 
+! Coding convention:  
+!   1) All private subroutines end with underscore.  i.e. init_fruit_
+!   2) All methods must be exposed by interface.  i.e. interface init_fruit
+!   3) Variable and methods are lower case connected with underscores.  i.e. init_fruit_, and failed_assert_count
 !
 module fruit
   use fruit_util
@@ -22,7 +26,7 @@ module fruit
   integer, private, save :: failed_assert_count = 0
   character (len = MSG_LENGTH), private, dimension (MSG_STACK_SIZE), save :: messageArray
   character (len = MSG_LENGTH), private, save :: msg = '[unit name not set from set_name]: '
-  character (len = MSG_LENGTH), save :: unit_name  = '_not_set_'
+  character (len = MSG_LENGTH), private, save :: unit_name  = '_not_set_'
   integer, private, save :: messageIndex = 1
 
   integer, private, save :: successful_case_count = 0
@@ -35,7 +39,7 @@ module fruit
   end interface
 
   interface initializeFruit
-     module procedure initializa_fruit_obsolete_
+     module procedure obsolete_subroutine_delete_later_initializeFruit_
   end interface
 
   interface fruit_summary
@@ -43,7 +47,7 @@ module fruit
   end interface
 
   interface getTestSummary
-     module procedure getTestSummary_obsolete_  
+     module procedure obsolete_subroutine_delete_later_getTestSummary_  
   end interface
 
   interface assertTrue
@@ -65,22 +69,22 @@ module fruit
      module procedure assert_equals_logical_
      module procedure assert_equals_string_
      module procedure assert_equals_complex_
-     module procedure assert_equals_real_difference_
-     module procedure assert_equals_double_difference_
+     module procedure assert_equals_real_within_range_
+     module procedure assert_equals_double_within_range_
 
-     module procedure assert_equals_1darray_int_
-     module procedure assert_equals_1darray_double_
+     module procedure assert_equals_1d_int_
+     module procedure assert_equals_1d_double_
      module procedure assert_equals_1d_array_real_
-     module procedure assert_equals_1darray_string_
-     module procedure assert_equals_1darray_complex_
+     module procedure assert_equals_1d_string_
+     module procedure assert_equals_1d_complex_
 
      module procedure assert_equals_2d_array_int_
-     module procedure assert_equals_2darray_double_
-     module procedure assert_equals_2darray_real_
-     module procedure assert_equals_2darray_complex_
+     module procedure assert_equals_2d_double_
+     module procedure assert_equals_2d_real_
+     module procedure assert_equals_2d_complex_
 
-     module procedure assert_equals_spArr_spArr_int_sp_
-     module procedure assert_equals_dpArr_dpArr_int_dp_
+     module procedure assert_equals_real_1d_within_range_
+     module procedure assert_equals_1d_double_within_range_
   end interface
 
   interface assertNotEquals
@@ -139,9 +143,9 @@ module fruit
   end interface
 
   private :: &
-       init_fruit_, initializa_fruit_obsolete_, &
-       fruit_summary_, getTestSummary_obsolete_, &
-       get_last_message_, obsolete_, &
+       init_fruit_, obsolete_subroutine_delete_later_initializeFruit_, &
+       fruit_summary_, obsolete_subroutine_delete_later_getTestSummary_, &
+       get_last_message_, obsolete_, make_error_msg_, &
        get_total_count_, getTotalCount_obsolete_,&
        get_failed_count_, getFailedCount_obsolete_, &
        add_fail_, add_fail_unit_, increase_message_stack_, &
@@ -155,19 +159,19 @@ module fruit
        assert_equals_logical_, &
        assert_equals_string_, &
        assert_equals_complex_, &
-       assert_equals_real_difference_, &
-       assert_equals_double_difference_, &
-       assert_equals_1darray_int_, &
-       assert_equals_1darray_double_, &
+       assert_equals_real_within_range_, &
+       assert_equals_double_within_range_, &
+       assert_equals_1d_int_, &
+       assert_equals_1d_double_, &
        assert_equals_1d_array_real_, &
-       assert_equals_1darray_string_, &
-       assert_equals_1darray_complex_, &
+       assert_equals_1d_string_, &
+       assert_equals_1d_complex_, &
        assert_equals_2d_array_int_, &
-       assert_equals_2darray_double_, &
-       assert_equals_2darray_real_, &
-       assert_equals_2darray_complex_, &
-       assert_equals_spArr_spArr_int_sp_, &
-       assert_equals_dpArr_dpArr_int_dp_, &
+       assert_equals_2d_double_, &
+       assert_equals_2d_real_, &
+       assert_equals_2d_complex_, &
+       assert_equals_real_1d_within_range_, &
+       assert_equals_1d_double_within_range_, &
        add_success_, &
        is_all_successful_, isAllSuccessful_, &
        set_unit_name_, get_unit_name_, is_last_passed_
@@ -185,15 +189,15 @@ contains
     write (*,*)
   end subroutine init_fruit_
 
-  subroutine initializa_fruit_obsolete_
+  subroutine obsolete_subroutine_delete_later_initializeFruit_
     call obsolete_ ("initializeFruit is OBSOLETE.  replaced by init_fruit")
     call init_fruit
-  end subroutine initializa_fruit_obsolete_
+  end subroutine obsolete_subroutine_delete_later_initializeFruit_
 
-  subroutine getTestSummary_obsolete_
+  subroutine obsolete_subroutine_delete_later_getTestSummary_
     call obsolete_ ( "getTestSummary is OBSOLETE.  replaced by fruit_summary")
     call fruit_summary
-  end subroutine getTestSummary_obsolete_
+  end subroutine obsolete_subroutine_delete_later_getTestSummary_
 
   subroutine fruit_summary_
     integer :: i
@@ -276,7 +280,7 @@ contains
   end subroutine failed_mark_
 
   subroutine increase_message_stack_
-    if (messageIndex > MSG_STACK_SIZE ) then
+    if (messageIndex > MSG_STACK_SIZE) then
        write (*, *) "Too many errors to put into stack"
        call getTestSummary ()
        stop 1
@@ -338,8 +342,7 @@ contains
     character(*), intent(in) :: expected, got
     character(*), intent(in), optional :: message
 
-    call set_unit_name_in_msg__
-    call make_error_msg__ (expected, got, message)
+    call make_error_msg_ (expected, got, message)
     call increase_message_stack_
     failed_assert_count = failed_assert_count + 1
     last_passed = .false.
@@ -356,11 +359,7 @@ contains
     value = strip(unit_name)
   end subroutine get_unit_name_
 
-  subroutine set_unit_name_in_msg__
-    msg = 'in [' // unit_name // ']: '
-  end subroutine set_unit_name_in_msg__
-
-  subroutine make_error_msg__ (var1, var2, message)
+  subroutine make_error_msg_ (var1, var2, message)
     character(*), intent(in) :: var1, var2
     character(*), intent(in), optional :: message
     if (present(message)) then
@@ -369,7 +368,7 @@ contains
     else
        msg = '[' // trim(strip(unit_name)) // ']: Expected [' // trim(strip(var1)) // '], Got [' // trim(strip(var2)) // ']' 
     endif
-  end subroutine make_error_msg__
+  end subroutine make_error_msg_
 
   function is_last_passed_
     logical:: is_last_passed_
@@ -379,17 +378,6 @@ contains
   !--------------------------------------------------------------------------------
   ! all assertions
   !--------------------------------------------------------------------------------
-  subroutine assert_equals_int_ (var1, var2, message)
-    integer, intent(in) :: var1, var2
-    character (*), intent(in), optional :: message
-
-    if ( var1 .eq. var2) then
-       call success_assert_action_
-    else
-       call failed_assert_action_ (to_s(var1), to_s(var2), message)
-    end if
-  end subroutine assert_equals_int_
-
   subroutine assert_true_logical_ (var1, message)
     logical, intent (in) :: var1
     character (*), intent (in), optional :: message
@@ -401,16 +389,16 @@ contains
     end if
   end subroutine assert_true_logical_
 
-  subroutine assert_equals_string_ (var1, var2, message)
-    character(*), intent (in)  :: var1, var2
-    character (*), intent (in), optional :: message
+  subroutine assert_equals_int_ (var1, var2, message)
+    integer, intent(in) :: var1, var2
+    character (*), intent(in), optional :: message
 
-    if ( strip( var1) == strip( var2)) then
+    if ( var1 .eq. var2) then
        call success_assert_action_
     else
-       call failed_assert_action_(var1, var2, message)
+       call failed_assert_action_ (to_s(var1), to_s(var2), message)
     end if
-  end subroutine assert_equals_string_
+  end subroutine assert_equals_int_
 
   subroutine assert_equals_logical_ (var1, var2, message)
     logical, intent (in)  :: var1, var2
@@ -423,6 +411,17 @@ contains
     end if
   end subroutine assert_equals_logical_
 
+  subroutine assert_equals_string_ (var1, var2, message)
+    character(*), intent (in)  :: var1, var2
+    character (*), intent (in), optional :: message
+
+    if ( trim(strip(var1)) == trim(strip(var2))) then
+       call success_assert_action_
+    else
+       call failed_assert_action_(var1, var2, message)
+    end if
+  end subroutine assert_equals_string_
+
   subroutine assert_equals_real_ (var1, var2, message)
     real, intent (in) :: var1, var2
     character (*), intent (in), optional :: message
@@ -430,20 +429,9 @@ contains
     if ( var1 .eq. var2) then
        call success_assert_action_
     else
-       call failed_assert_action_(to_s(var1), to_s(var2), message)
+7      call failed_assert_action_(to_s(var1), to_s(var2), message)
     end if
   end subroutine assert_equals_real_
-
-  subroutine assert_not_equals_real_ (var1, var2, message)
-    real, intent (in) :: var1, var2
-    character (*), intent (in), optional :: message
-
-    if ( var1 .ne. var2) then
-       call success_assert_action_
-    else
-       call failed_assert_action_(to_s(var1), to_s(var2), message)
-    end if
-  end subroutine assert_not_equals_real_
 
   subroutine assert_equals_double_ (var1, var2, message)
     double precision, intent (in) :: var1, var2
@@ -469,36 +457,30 @@ contains
 
   end subroutine assert_equals_complex_
 
-  subroutine assert_not_equals_double_ (var1, var2, message)
-    double precision, intent (in) :: var1, var2
+  subroutine assert_equals_real_within_range_(var1, var2, var3, message)
+    real, intent (in) :: var1, var2, var3
     character(*), intent(in), optional :: message
 
-    if ( var1 .ne. var2) then
+    if ( abs( var1 - var2) .le. var3) then
+       call success_assert_action_
+    else
+       call failed_assert_action(to_s(var1), to_s(var2), message)
+    end if
+
+  end subroutine assert_equals_real_within_range_
+
+  subroutine assert_equals_double_within_range_(var1, var2, var3, message)
+    double precision, intent (in) :: var1, var2, var3
+    character(*), intent(in), optional :: message
+
+    if ( abs( var1 - var2) .le. var3) then
        call success_assert_action_
     else
        call failed_assert_action_(to_s(var1), to_s(var2), message)
     end if
-  end subroutine assert_not_equals_double_
+  end subroutine assert_equals_double_within_range_
 
-  subroutine assert_not_equals_1d_array_real_ (var1, var2, n)
-    integer, intent (in) :: n
-    real, intent (in) :: var1(n), var2(n)
-
-    integer count
-
-    loop_dim1: do count = 1, n
-       if ( var1(count) .ne. var2(count)) then
-          call failed_assert_action(to_s(var1(count)), to_s(var2(count)),&
-               'Array (' // to_s(count)//')')
-          return
-       end if
-    end do loop_dim1
-
-    call success_assert_action_
-
-  end subroutine assert_not_equals_1d_array_real_
-
-  subroutine assert_equals_2darray_real (var1, var2, n, m)
+  subroutine assert_equals_2d_real (var1, var2, n, m)
     integer, intent (in) :: n, m
     real, intent (in) :: var1(n,m), var2(n,m)
 
@@ -515,22 +497,9 @@ contains
     end do loop_dim2
 
     call success_assert_action_
+  end subroutine assert_equals_2d_real
 
-  end subroutine assert_equals_2darray_real
-
-  subroutine assert_equals_real_difference_(var1, var2, var3, message)
-    real, intent (in) :: var1, var2, var3
-    character(*), intent(in), optional :: message
-
-    if ( abs( var1 - var2) .le. var3) then
-       call success_assert_action_
-    else
-       call failed_assert_action(to_s(var1), to_s(var2), message)
-    end if
-
-  end subroutine assert_equals_real_difference_
-
-  subroutine assert_equals_spArr_spArr_int_sp_(var1, var2, n, var3, message)
+  subroutine assert_equals_real_1d_within_range_(var1, var2, n, var3, message)
     integer, intent(in) :: n
     real, intent (in) :: var1(n), var2(n), var3
     character(*), intent(in), optional :: message
@@ -538,11 +507,11 @@ contains
     if ( maxval( abs( var1 - var2)) .le. var3) then
        call success_assert_action_
     else
-       call failed_assert_action_(to_s(var1(1)), to_s(var2(1)), '1D array real has difference')
+       call failed_assert_action_(to_s(var1(1)), to_s(var2(1)), '1D array real has difference' // ' ' // message)
     end if
-  end subroutine assert_equals_spArr_spArr_int_sp_
+  end subroutine assert_equals_real_1d_within_range_
 
-  subroutine assert_equals_dpArr_dpArr_int_dp_(var1, var2, n, var3, message)
+  subroutine assert_equals_1d_double_within_range_(var1, var2, n, var3, message)
     integer, intent(in) :: n
     double precision, intent (in) :: var1(n), var2(n), var3
     character(*), intent(in), optional :: message
@@ -552,36 +521,27 @@ contains
     else
        call failed_assert_action_(to_s(var1(1)), to_s(var2(1)), message)
     end if
-  end subroutine assert_equals_dpArr_dpArr_int_dp_
+  end subroutine assert_equals_1d_double_within_range_
 
-  subroutine assert_equals_double_difference_(var1, var2, var3, message)
-    double precision, intent (in) :: var1, var2, var3
-    character(*), intent(in), optional :: message
-
-    if ( abs( var1 - var2) .le. var3) then
-       call success_assert_action_
-    else
-       call failed_assert_action_(to_s(var1), to_s(var2), message)
-    end if
-  end subroutine assert_equals_double_difference_
-
-  subroutine assert_equals_1darray_double (var1, var2, n)
+  subroutine assert_equals_1d_double (var1, var2, n, message)
     integer, intent (in) :: n
     double precision, intent (in) :: var1(n), var2(n)
+    character(*), intent(in), optional :: message
 
     integer count
 
     loop_dim1: do count = 1, n
        if ( var1(count) .ne. var2(count)) then
-          call failed_assert_action_(to_s(var1(count)), to_s(var2(count)), 'Array different at count: ' // to_s(count))
+          call failed_assert_action_(to_s(var1(count)), to_s(var2(count)), &
+               'Array different at count: ' // to_s(count) // ' ' // message)
           return
        end if
     end do loop_dim1
 
     call success_assert_action_
-  end subroutine assert_equals_1darray_double
+  end subroutine assert_equals_1d_double
 
-  subroutine assert_equals_2darray_double (var1, var2, n, m)
+  subroutine assert_equals_2d_double (var1, var2, n, m)
     integer, intent (in) :: n, m
     double precision, intent (in) :: var1(n,m), var2(n,m)
 
@@ -598,9 +558,9 @@ contains
     end do loop_dim2
 
     call success_assert_action_
-  end subroutine assert_equals_2darray_double
+  end subroutine assert_equals_2d_double
 
-  subroutine assert_equals_1darray_int_ (var1, var2, n, message)
+  subroutine assert_equals_1d_int_ (var1, var2, n, message)
     integer, intent (in) :: n
     integer, intent (in) :: var1(n), var2(n)
     character (*), intent (in), optional :: message
@@ -615,9 +575,9 @@ contains
     end do loop_dim1
 
     call success_assert_action_
-  end subroutine assert_equals_1darray_int_
+  end subroutine assert_equals_1d_int_
 
-  subroutine assert_equals_1darray_string_ (var1, var2, n, message)
+  subroutine assert_equals_1d_string_ (var1, var2, n, message)
     integer, intent (in) :: n
     character(*), intent (in) :: var1(n), var2(n)
     character (*), intent (in), optional :: message
@@ -631,7 +591,7 @@ contains
     end do loop_dim1
 
     call success_assert_action_
-  end subroutine assert_equals_1darray_string_
+  end subroutine assert_equals_1d_string_
 
   subroutine assert_equals_2d_array_int_ (var1, var2, n, m, message)
     integer, intent (in) :: n, m
@@ -668,7 +628,7 @@ contains
     call success_assert_action_
   end subroutine assert_equals_1d_array_real_
 
-  subroutine assert_equals_2darray_real_ (var1, var2, n, m, message)
+  subroutine assert_equals_2d_real_ (var1, var2, n, m, message)
     integer, intent (in) :: n, m
     real, intent (in) :: var1(n,m), var2(n,m)
     character (*), intent(in), optional :: message
@@ -685,9 +645,9 @@ contains
     end do loop_dim2
 
     call success_assert_action_
-  end subroutine assert_equals_2darray_real_
+  end subroutine assert_equals_2d_real_
 
-  subroutine assert_equals_1darray_double_ (var1, var2, n, message)
+  subroutine assert_equals_1d_double_ (var1, var2, n, message)
     integer, intent (in) :: n
     double precision, intent (in) :: var1(n), var2(n)
     character (*), intent (in), optional :: message
@@ -701,9 +661,9 @@ contains
     end do loop_dim1
 
     call success_assert_action_
-  end subroutine assert_equals_1darray_double_
+  end subroutine assert_equals_1d_double_
 
-  subroutine assert_equals_2darray_double_ (var1, var2, n, m, message)
+  subroutine assert_equals_2d_double_ (var1, var2, n, m, message)
     integer, intent (in) :: n, m
     double precision, intent (in) :: var1(n,m), var2(n,m)
     character (*), intent (in), optional :: message
@@ -719,9 +679,9 @@ contains
     end do loop_dim2
 
     call success_assert_action_
-  end subroutine assert_equals_2darray_double_
+  end subroutine assert_equals_2d_double_
 
-  subroutine assert_equals_1darray_complex_ (var1, var2, n, message)
+  subroutine assert_equals_1d_complex_ (var1, var2, n, message)
     integer,          intent(IN) :: n
     double complex,   intent(IN) :: var1(n), var2(n)
     character (*),    intent(IN), optional :: message
@@ -735,9 +695,9 @@ contains
     enddo loop_dim1
 
     call success_assert_action_
-  end subroutine assert_equals_1darray_complex_
+  end subroutine assert_equals_1d_complex_
 
-  subroutine assert_equals_2darray_complex_ (var1, var2, n, m, message)
+  subroutine assert_equals_2d_complex_ (var1, var2, n, m, message)
     integer,        intent(IN) :: n, m
     double complex, intent(IN) :: var1(n,m), var2(n,m)
     character (*),    intent(IN), optional :: message
@@ -753,6 +713,46 @@ contains
     enddo loop_dim2
 
     call success_assert_action_
-  end subroutine assert_equals_2darray_complex_
+  end subroutine assert_equals_2d_complex_
+
+  subroutine assert_not_equals_real_ (var1, var2, message)
+    real, intent (in) :: var1, var2
+    character (*), intent (in), optional :: message
+
+    if ( var1 .ne. var2) then
+       call success_assert_action_
+    else
+       call failed_assert_action_(to_s(var1), to_s(var2), message)
+    end if
+  end subroutine assert_not_equals_real_
+
+  subroutine assert_not_equals_double_ (var1, var2, message)
+    double precision, intent (in) :: var1, var2
+    character(*), intent(in), optional :: message
+
+    if ( var1 .ne. var2) then
+       call success_assert_action_
+    else
+       call failed_assert_action_(to_s(var1), to_s(var2), message)
+    end if
+  end subroutine assert_not_equals_double_
+
+  subroutine assert_not_equals_1d_array_real_ (var1, var2, n)
+    integer, intent (in) :: n
+    real, intent (in) :: var1(n), var2(n)
+
+    integer count
+
+    loop_dim1: do count = 1, n
+       if ( var1(count) .ne. var2(count)) then
+          call failed_assert_action(to_s(var1(count)), to_s(var2(count)),&
+               'Array (' // to_s(count)//')')
+          return
+       end if
+    end do loop_dim1
+
+    call success_assert_action_
+
+  end subroutine assert_not_equals_1d_array_real_
 
 end module fruit
