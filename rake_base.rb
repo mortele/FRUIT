@@ -23,7 +23,7 @@ module RakeBase
   task :default => [:deploy]
 
   # generated files must be built last
-  objs = FileList['*.f90'].map { |f| f.ext('o') }
+  objs = FileList['*.f90'].ext('o')
   if objs.include?'fruit_basket_gen.o'
     file 'fruit_basket_gen.o' =>  objs - ['fruit_basket_gen.o', 'fruit_driver_gen.o']
     file 'fruit_driver_gen.o' =>  'fruit_basket_gen.o'
