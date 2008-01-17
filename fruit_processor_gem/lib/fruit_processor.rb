@@ -4,7 +4,7 @@ require 'rubygems'
 require 'rake'
 
 class FruitProcessor
-
+  
   def initialize
     @driver_program_name='fruit_driver_gen'
     @fruit_basket_module_name = 'fruit_basket_gen'
@@ -169,6 +169,8 @@ class FruitProcessor
                   spec_var += "\n#{next_line.chop}"
                   break if ! end_match(next_line, '&')
                 end
+              elsif end_match(spec_var, '\'')
+                spec_var.chop!
               end 
             end # end of inside subroutine lines
             
@@ -208,7 +210,6 @@ class FruitProcessor
         end
       end
       puts "\n"
-      
     end
   end
   
@@ -279,5 +280,4 @@ class FruitProcessor
     _libs.uniq.each { |value|  lib_dir_flag += "-L#{value} " }
     return lib_dir_flag
   end
-  
 end

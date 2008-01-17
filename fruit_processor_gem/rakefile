@@ -5,7 +5,7 @@ require 'rake/gempackagetask'
 spec = Gem::Specification.new do |s|
   s.platform  =   Gem::Platform::RUBY
   s.name      =   "fruit_processor"
-  s.version   =   "2.0"
+  s.version   =   "2.2"
   s.author    =   "Andrew Chen"
   s.email     =   "meihome meihome.com"
   s.summary   =   "A package for fortranxunit (fruit)."
