@@ -1,26 +1,21 @@
 require 'rubygems'
 require 'fruit_processor'
 
-# include this if there is generated code in this dir
+# Add this line at the beginning if there are generated code involved
 FruitProcessor.new.pre_process
 
 $goal='calculator_fruit_driver'
 
+# the link of the executable depends on libfruit.a, and libcalculator.a
+# spefify where the files are here:
 $lib_bases = {'fruit' => FruitProcessor.new.build_dir, 
   'calculator' => nil}
+  # nil default to FruitProcessor.new.build_dir
 
-task :default => [$goal, :deploy, :spec]
+task :default => [:spec]
 
-task :gen do
-  FruitProcessor.new.pre_process
-end
-
-task :spec do
-  FruitProcessor.new.spec_report
-end
-
-#file ['calculator_test.o', 'module_b_test.o']  => '/users/chena/workspace/sourceforge_fruit/build/libfruit.a'
-#file 'calculator_test.o'  => '/users/chena/workspace/sourceforge_fruit/build/libfruit.a'
+# if one module has to be compiled after another module, specify like this:
+#file ['module_b_test.o']  => 'calculator_test.o'
 
 load "#{FruitProcessor.new.base_dir}/rake_base.rb"
 include RakeBase

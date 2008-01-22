@@ -1,0 +1,17 @@
+require 'rubygems'
+
+task :default => [:pack]
+
+task :clean_up do
+  sh 'rm -rf fruit'
+  sh 'cp -R sourceforge_fruit fruit'
+  `find fruit | grep -i cvs | perl -nle 'system "rm -rf $_"'`
+  sh 'rm -rf fruit/.loadpath'
+  sh 'rm -rf fruit/.project'
+  sh 'rm -rf fruit/*_AHCHOR'
+end
+
+task :pack => :clean_up do
+  sh 'tar -zcvf fruit.tar.gz fruit'
+end
+

@@ -21,7 +21,7 @@ module RakeBase
   CLOBBER.include("#{$build_dir}/#{$goal}")
   
   task :default => [:deploy]
-
+  
   # generated files must be built last
   objs = FileList['*.f90'].ext('o')
   if objs.include?'fruit_basket_gen.o'
@@ -45,7 +45,7 @@ module RakeBase
       sh "#{$compiler} -o #{$goal} #{OBJ} -module #{$build_dir} #{FruitProcessor.new.lib_name_flag($lib_bases, $build_dir)} #{FruitProcessor.new.lib_dir_flag($lib_bases, $build_dir)}"
     end
   end
-
+  
   # generate directories
   task :dirs do
     Dir.mkdir $build_dir unless File.exist?($build_dir)
@@ -58,6 +58,14 @@ module RakeBase
   task :anchor_root do
     require 'fileutils'
     FileUtils.touch anchor_file_name
+  end
+  
+  task :gen do
+    FruitProcessor.new.pre_process
+  end
+  
+  task :spec do
+    FruitProcessor.new.spec_report
   end
   
 end
