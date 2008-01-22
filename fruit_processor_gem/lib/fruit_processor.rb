@@ -8,35 +8,37 @@ class FruitProcessor
   def initialize
     @driver_program_name='fruit_driver_gen'
     @fruit_basket_module_name = 'fruit_basket_gen'
-    @files = FileList['*_test.f90']
     @spec_hash={}
+  end
+  
+  def find_files dir="."
+    @files = FileList["#{dir}/*_test.f90"]
     @files.each do |file|
-      grep_test_method_names file
+      parse_method_names file
+      gather_specs file
     end
-    get_specs
   end
   
-  def process_file
+  def pre_process dir="."
+    find_files dir
+    fruit_picker dir
+    create_driver dir
   end
   
-  def pre_process
-    fruit_picker
-    create_driver
-  end
-  
-  # create one fruit basket in one directory, this can go multiple directories
-  def fruit_picker lib_name=nil
+  def fruit_picker dir="."
     test_subroutine_names=[]
-    fruit_file = "#{@fruit_basket_module_name}.f90"
-    File.open(fruit_file, 'w') do |f| 
+    fruit_basket_file = "#{dir}/#{@fruit_basket_module_name}.f90"
+    File.open(fruit_basket_file, 'w') do |f| 
       f.write "module #{@fruit_basket_module_name}\n"
       f.write "  use fruit\n"
       f.write "contains\n"
     end
     
-    File.open(fruit_file, 'a') do |f| 
+    File.open(fruit_basket_file, 'a') do |f| 
       @files.each do |file|
         test_module_name=file.gsub(".f90", "")
+        test_module_name = test_module_name[test_module_name.rindex("/")+1 ..  -1]
+
         subroutine_name="#{test_module_name}_all_tests"
         test_subroutine_names << subroutine_name
         f.write "  subroutine #{subroutine_name}\n"
@@ -89,7 +91,7 @@ class FruitProcessor
       end
     end
     
-    File.open(fruit_file, 'a') do |f| 
+    File.open(fruit_basket_file, 'a') do |f| 
       f.write "  subroutine fruit_basket\n"
       test_subroutine_names.each do |test_subroutine_name|
         f.write "    call #{test_subroutine_name}\n"
@@ -100,7 +102,7 @@ class FruitProcessor
     end
   end
   
-  def grep_test_method_names file_name
+  def parse_method_names file_name
     File.open(file_name, 'r') do |source_file|
       @spec_hash[file_name]={}
       @spec_hash[file_name]['methods'] = {}
@@ -131,60 +133,57 @@ class FruitProcessor
   end
   
   # look into all files lib_test_*.a in build_dir, then generate driver files
-  def create_driver build_dir=nil
-    File.open("#{@driver_program_name}.f90", 'w') do |f| 
+  def create_driver dir="."
+    
+    File.open("#{dir}/#{@driver_program_name}.f90", 'w') do |f| 
       f.write "program #{@driver_program_name}\n"
       f.write "  use fruit\n"
       f.write "  use #{@fruit_basket_module_name}\n"
       f.write "  call init_fruit\n"
-      
       f.write "  call fruit_basket\n"
-      
       f.write "  call fruit_summary\n"
       f.write "end program #{@driver_program_name}\n"
     end
   end
   
-  def get_specs
+  def gather_specs file
     spec=''
-    @files.each do |file|
-      File.open(file, 'r') do |infile|
-        while (line = infile.gets)
-          if line =~ /^\s*subroutine\s+(\w+)\s*$/i
-            subroutine_name=$1
-            next if subroutine_name !~ /^test_/
-            spec_var=nil
+    File.open(file, 'r') do |infile|
+      while (line = infile.gets)
+        if line =~ /^\s*subroutine\s+(\w+)\s*$/i
+          subroutine_name=$1
+          next if subroutine_name !~ /^test_/
+          spec_var=nil
+          
+          while (inside_subroutine = infile.gets)
+            break if inside_subroutine =~ /end\s+subroutine/i
+            next if inside_subroutine !~ /^\s*character.*::.*spec.*=(.*)$/i
+            spec_var = $1.strip!
             
-            while (inside_subroutine = infile.gets)
-              break if inside_subroutine =~ /end\s+subroutine/i
-              next if inside_subroutine !~ /^\s*character.*::.*spec.*=(.*)$/i
-              spec_var = $1.strip!
-              
-              spec_var = spec_var[1, spec_var.length-1]
-              
-              if end_match(spec_var, '&')
-                spec_var.chop!
-                while (next_line = infile.gets)
-                  next_line.strip!
-                  spec_var += "\n#{next_line.chop}"
-                  break if ! end_match(next_line, '&')
-                end
-              elsif end_match(spec_var, '\'')
-                spec_var.chop!
-              end 
-            end # end of inside subroutine lines
+            spec_var = spec_var[1, spec_var.length-1]
             
-            if spec_var == nil
-              spec=subroutine_name.gsub('test_', '').gsub('_', ' ')
-            else
-              spec = spec_var
-            end
-            
-            @spec_hash[file]['methods']['spec'] << spec
-          end # end of test match
-        end # end of each line in file
-      end # end of file open
-    end # end of each file
+            if end_match(spec_var, '&')
+              spec_var.chop!
+              while (next_line = infile.gets)
+                next_line.strip!
+                spec_var += "\n#{next_line.chop}"
+                break if ! end_match(next_line, '&')
+              end
+            elsif end_match(spec_var, '\'')
+              spec_var.chop!
+            end 
+          end # end of inside subroutine lines
+          
+          if spec_var == nil
+            spec=subroutine_name.gsub('test_', '').gsub('_', ' ')
+          else
+            spec = spec_var
+          end
+          
+          @spec_hash[file]['methods']['spec'] << spec
+        end # end of test match
+      end # end of each line in file
+    end # end of file open
   end
   
   def end_match (string, match)
