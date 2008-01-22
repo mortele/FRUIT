@@ -1,11 +1,14 @@
 require 'rubygems'
 Gem::manage_gems
 require 'rake/gempackagetask'
+require 'rake/clean'
+
+CLEAN.include(FileList['pkg/*.gem'])
 
 spec = Gem::Specification.new do |s|
   s.platform  =   Gem::Platform::RUBY
   s.name      =   "fruit_processor"
-  s.version   =   "2.1.1"
+  s.version   =   "2.2"
   s.author    =   "Andrew Chen"
   s.email     =   "meihome meihome.com"
   s.summary   =   "A package for fortranxunit (fruit)."
@@ -21,7 +24,7 @@ Rake::GemPackageTask.new(spec) do |pkg|
   pkg.need_tar = true
 end
 
-task :default => "pkg/#{spec.name}-#{spec.version}.gem" do
+task :default => [:clean, "pkg/#{spec.name}-#{spec.version}.gem"] do
   puts "generated latest version"
 end
 

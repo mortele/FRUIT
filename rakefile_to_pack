@@ -1,8 +1,13 @@
 require 'rubygems'
+require 'net/ftp'
 
-task :default => [:pack]
+version='2.2'
+
+task :default => [:pack, :publish]
 
 task :clean_up do
+  sh 'cd sourceforge_fruit;rake clobber'
+  sh 'cd sourceforge_fruit/fruit_processor_gem;rake'
   sh 'rm -rf fruit'
   sh 'cp -R sourceforge_fruit fruit'
   `find fruit | grep -i cvs | perl -nle 'system "rm -rf $_"'`
@@ -12,6 +17,22 @@ task :clean_up do
 end
 
 task :pack => :clean_up do
-  sh 'tar -zcvf fruit.tar.gz fruit'
+  sh "tar -zcvf fruit_#{version}.tar.gz fruit"
+  sh "tar -cvf fruit_#{version}.tar fruit"
+  sh "zip -r fruit_#{version}.zip fruit"
 end
 
+desc "Publish package"
+task :publish => :pack do
+  Net::FTP.open("upload.sourceforge.net", 
+     "ftp", 
+     ENV['USER']+"@"+ENV['HOSTNAME']) {
+     |ftpclient|
+     ftpclient.passive = true
+     ftpclient.chdir "incoming"
+     Dir["*_#{version}.{tar,tar.gz,tgz,zip}"].each {
+       |e|
+       ftpclient.putbinaryfile(e, File.basename(e))
+     }
+  }
+end
