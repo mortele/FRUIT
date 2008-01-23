@@ -11,7 +11,8 @@ class FruitProcessor
     @spec_hash={}
   end
   
-  def find_files dir="."
+  def load_files dir="."
+    return if @spec_hash.size != 0
     @files = FileList["#{dir}/*_test.f90"]
     @files.each do |file|
       parse_method_names file
@@ -20,7 +21,7 @@ class FruitProcessor
   end
   
   def pre_process dir="."
-    find_files dir
+    load_files dir 
     fruit_picker dir
     create_driver dir
   end
@@ -38,7 +39,7 @@ class FruitProcessor
       @files.each do |file|
         test_module_name=file.gsub(".f90", "")
         test_module_name = test_module_name[test_module_name.rindex("/")+1 ..  -1]
-
+        
         subroutine_name="#{test_module_name}_all_tests"
         test_subroutine_names << subroutine_name
         f.write "  subroutine #{subroutine_name}\n"
@@ -192,6 +193,8 @@ class FruitProcessor
   end
   
   def spec_report
+    load_files 
+    
     puts "\n"
     puts "All executable specifications from tests:"
     @spec_hash.keys.sort.each do |file|
