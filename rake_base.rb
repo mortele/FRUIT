@@ -2,6 +2,7 @@ module RakeBase
   require 'rubygems'
   require 'fruit_processor'
   require 'rake/clean'
+  require 'fileutils'
   
   anchor_file_name='ROOT_ANCHOR'
   $compiler = 'ifort'
@@ -12,7 +13,8 @@ module RakeBase
   $build_dir = FruitProcessor.new.build_dir if ! $build_dir
   
   $lib_bases = {} if !$lib_bases
-  
+  $inc_dirs = [] if !$inc_dirs
+
   SRC = FileList['*.f90'].sort
   OBJ = SRC.ext('o')
   
@@ -30,11 +32,11 @@ module RakeBase
   end
   
   # final goal link is depending on the libraries
-  file $goal => FruitProcessor.new.lib_base_files($lib_bases, $build_dir)
+  file $goal => FruitProcessor.new.lib_base_files($lib_bases)
   
   rule '.o' => ['.f90'] do |t|
     Rake::Task[:dirs].invoke if Rake::Task.task_defined?('dirs')
-    sh "#{$compiler} -c -o #{t.name} #{t.source} -module #{$build_dir}"
+    sh "#{$compiler} -c -o #{t.name} #{t.source} -module #{$build_dir} #{FruitProcessor.new.inc_flag($inc_dirs)}"
   end
   
   file $goal => OBJ do
@@ -42,7 +44,7 @@ module RakeBase
     elsif $goal =~ /.a$/
       sh "ar cr #{$goal} #{OBJ}"
     else
-      sh "#{$compiler} -o #{$goal} #{OBJ} -module #{$build_dir} #{FruitProcessor.new.lib_name_flag($lib_bases, $build_dir)} #{FruitProcessor.new.lib_dir_flag($lib_bases, $build_dir)}"
+      sh "#{$compiler} -o #{$goal} #{OBJ} #{FruitProcessor.new.lib_name_flag($lib_bases, $build_dir)} #{FruitProcessor.new.lib_dir_flag($lib_bases, $build_dir)}"
     end
   end
   
@@ -56,8 +58,7 @@ module RakeBase
   end
   
   task :anchor_root do
-    require 'fileutils'
-    FileUtils.touch anchor_file_name
+    FileUtils.touch anchor_file_name if not File.exist? anchor_file_name
   end
   
   task :gen do

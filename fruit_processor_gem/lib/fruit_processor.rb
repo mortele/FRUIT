@@ -37,8 +37,7 @@ class FruitProcessor
     
     File.open(fruit_basket_file, 'a') do |f| 
       @files.each do |file|
-        test_module_name=file.gsub(".f90", "")
-        test_module_name = test_module_name[test_module_name.rindex("/")+1 ..  -1]
+        test_module_name = test_module_name_from_file_path file
         
         subroutine_name="#{test_module_name}_all_tests"
         test_subroutine_names << subroutine_name
@@ -200,7 +199,7 @@ class FruitProcessor
     @spec_hash.keys.sort.each do |file|
       method_hash=@spec_hash[file]
       #@spec_hash[file]['methods']['spec']
-      puts "  #{file.gsub('_test.f90', '')}"
+      puts "  #{(test_module_name_from_file_path file).gsub('_test', '')}"
       puts "  --"
       
       method_hash.each_pair do |method, method_values|
@@ -257,10 +256,14 @@ class FruitProcessor
     return module_with_path
   end
   
-  def lib_base_files(lib_bases, build_dir)
+  def lib_base_files(lib_bases, build_dir=nil)
+    if build_dir != nil
+      puts "build_dir on lib_base_files is obsolete" 
+      build_dir = nil
+    end
     return if lib_bases == nil 
     lib_base_files =[]
-    lib_bases.each_pair { |key, value| lib_base_files << "#{build_dir}/lib#{key}.a" }
+    lib_bases.each_pair { |key, value| lib_base_files << "#{value}/lib#{key}.a" }
     return lib_base_files
   end
   
@@ -281,5 +284,14 @@ class FruitProcessor
     end
     _libs.uniq.each { |value|  lib_dir_flag += "-L#{value} " }
     return lib_dir_flag
+  end
+  
+  def inc_flag inc_dirs
+    inc_dirs.collect {|item| "-I#{item}"}.join(" ")
+  end
+  
+  def test_module_name_from_file_path file_name
+    test_module_name=file_name.gsub(".f90", "")
+    test_module_name[test_module_name.rindex("/")+1 ..  -1]
   end
 end
