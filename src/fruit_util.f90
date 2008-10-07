@@ -1,4 +1,8 @@
 module fruit_util
+  private
+  
+  public :: equals, to_s, strip
+  
   interface equals
      module procedure equalEpsilon
      module procedure floatEqual
@@ -17,14 +21,6 @@ module fruit_util
      module procedure to_s_double_complex_
      module procedure to_s_string_
   end interface
-
-  interface strip
-     module procedure strip_
-  end interface
-
-  private:: &
-       to_s_int_, to_s_real_, to_s_logical_, to_s_double_, to_s_complex_, to_s_double_complex_, to_s_string_, &
-       strip_
 
 contains
 
@@ -89,12 +85,12 @@ contains
     to_s_string_ = value
   end function to_s_string_
 
-  function strip_(value)
+  function strip(value)
     implicit none
-    character(len=500):: strip_
+    character(len=500):: strip
     character(len=*), intent(in) :: value
-    strip_ = trim(adjustl(value))
-  end function strip_
+    strip = trim(adjustl(value))
+  end function strip
 
   !------------------------
   ! test if 2 values are close
