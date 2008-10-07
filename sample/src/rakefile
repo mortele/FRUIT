@@ -4,11 +4,10 @@ require 'fruit_processor'
 $goal='libcalculator.a'
 
 # if $build is specified, then use that dir, instead of FruitProcessor.new.build_dir below
-$lib_bases = {'fruit' => FruitProcessor.new.build_dir}
+$lib_bases = [['fruit', FruitProcessor.new.build_dir]]
 
 # if there are other -I modules to include
 #$inc_dirs = ['/opt/lib']
 
 load "#{FruitProcessor.new.base_dir}/rake_base.rb"
 include RakeBase
-

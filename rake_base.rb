@@ -12,9 +12,9 @@ module RakeBase
   $base_dir = FruitProcessor.new.base_dir if ! $base_dir
   $build_dir = FruitProcessor.new.build_dir if ! $build_dir
   
-  $lib_bases = {} if !$lib_bases
+  $lib_bases = [] if !$lib_bases
   $inc_dirs = [] if !$inc_dirs
-
+  
   SRC = FileList['*.f90'].sort
   OBJ = SRC.ext('o')
   
@@ -32,7 +32,12 @@ module RakeBase
   end
   
   # final goal link is depending on the libraries
-  file $goal => FruitProcessor.new.lib_base_files($lib_bases)
+  # file $goal => FruitProcessor.new.lib_base_files($lib_bases)
+  # This is to resolve the .so files in LD_LIBRARY_PATH, 
+  # so if the .a file is not in the path, assume it is in one of the LD_LIBRARY_PATH
+  FruitProcessor.new.lib_base_files($lib_bases).each do |lib|
+    file $goal => lib if File.exist? lib
+  end
   
   rule '.o' => ['.f90'] do |t|
     Rake::Task[:dirs].invoke if Rake::Task.task_defined?('dirs')

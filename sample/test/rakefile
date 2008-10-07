@@ -8,8 +8,11 @@ $goal='calculator_fruit_driver'
 
 # the link of the executable depends on libfruit.a, and libcalculator.a
 # spefify where the files are here:
-$lib_bases = {'fruit' => FruitProcessor.new.build_dir, 
-  'calculator' => FruitProcessor.new.build_dir}
+# It is in array, because order matters
+$lib_bases = [
+['fruit', FruitProcessor.new.build_dir],
+['calculator', FruitProcessor.new.build_dir]
+]
 
 # if $build_dir is defined, then use build_dir
 

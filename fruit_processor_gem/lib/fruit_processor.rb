@@ -13,7 +13,7 @@ class FruitProcessor
   
   def load_files dir="."
     return if @spec_hash.size != 0
-    @files = FileList["#{dir}/*_test.f90"]
+    @files = FileList["#{dir}/*_test.f90"] - FileList["#{dir}/~*_test.f90"] 
     @files.each do |file|
       parse_method_names file
       gather_specs file
@@ -263,14 +263,16 @@ class FruitProcessor
     end
     return if lib_bases == nil 
     lib_base_files =[]
-    lib_bases.each_pair { |key, value| lib_base_files << "#{value}/lib#{key}.a" }
+    lib_bases.each do |pair|
+      lib_base_files << "#{pair[1]}/lib#{pair[0]}.a"
+    end
     return lib_base_files
   end
   
   def lib_name_flag (lib_bases, build_dir)
     return if lib_bases == nil 
     lib_name_flag = ''
-    lib_bases.keys.each { |key| lib_name_flag += "-l#{key} " }
+    lib_bases.each { |pair| lib_name_flag += "-l#{pair[0]} " }
     return lib_name_flag
   end
   
@@ -278,9 +280,9 @@ class FruitProcessor
     return if lib_bases == nil 
     lib_dir_flag = ''
     _libs=[]
-    lib_bases.each_pair do |key, value|
-      value = build_dir if value == nil
-      _libs << value
+    lib_bases.each do |pair|
+      pair[1] = build_dir if pair[1] == nil
+      _libs << pair[1]
     end
     _libs.uniq.each { |value|  lib_dir_flag += "-L#{value} " }
     return lib_dir_flag

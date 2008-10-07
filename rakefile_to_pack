@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'net/ftp'
 
-version='2.4.2'
+version='2.4.4'
 pkg_name="fruit_#{version}"
 
 task :default => [:pack, :publish]
