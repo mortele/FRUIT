@@ -22,8 +22,8 @@ module fruit
   integer, parameter :: MSG_LENGTH = 256
   integer, parameter :: MAX_MSG_STACK_SIZE = 2000
   integer, parameter :: MSG_ARRAY_INCREMENT = 50
+  
   integer, private, save :: current_max = 50
-
   integer, private, save :: successful_assert_count = 0
   integer, private, save :: failed_assert_count = 0
   character (len = MSG_LENGTH), private, allocatable :: message_array(:)

@@ -41,7 +41,7 @@ module RakeBase
   
   rule '.o' => ['.f90'] do |t|
     Rake::Task[:dirs].invoke if Rake::Task.task_defined?('dirs')
-    sh "#{$compiler} -c -o #{t.name} #{t.source} -module #{$build_dir} #{FruitProcessor.new.inc_flag($inc_dirs)}"
+    sh "#{$compiler} -g -debug inline_debug_info -c -o #{t.name} #{t.source} -module #{$build_dir} #{FruitProcessor.new.inc_flag($inc_dirs)}"
   end
   
   file $goal => OBJ do
