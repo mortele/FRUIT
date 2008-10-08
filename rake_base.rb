@@ -1,5 +1,4 @@
 require 'misc'
-require 'ftools'
 
 module RakeBase
   require 'rubygems'
@@ -44,7 +43,10 @@ module RakeBase
   
   rule '.o' => ['.f90'] do |t|
     Rake::Task[:dirs].invoke if Rake::Task.task_defined?('dirs')
-    sh "#{$compiler} -c -o #{t.name} #{t.source} -module #{$build_dir} #{FruitProcessor.new.inc_flag($inc_dirs)}"
+    sh "#{$compiler} -c -o #{t.name} #{t.source} -I#{$build_dir} #{FruitProcessor.new.inc_flag($inc_dirs)}"
+    FileList["*.mod"].each do |module_file|
+      os_install File.expand_path(module_file), $build_dir
+    end
   end
   
   file $goal => OBJ do
@@ -52,7 +54,7 @@ module RakeBase
     elsif $goal =~ /.a$/
       sh "ar cr #{$goal} #{OBJ}"
     else
-      sh "#{$compiler} -o #{$goal} #{OBJ} #{FruitProcessor.new.lib_name_flag($lib_bases, $build_dir)} #{FruitProcessor.new.lib_dir_flag($lib_bases, $build_dir)}"
+      sh "#{$compiler} -I#{$build_dir} -o #{$goal} #{OBJ} #{FruitProcessor.new.lib_name_flag($lib_bases, $build_dir)} #{FruitProcessor.new.lib_dir_flag($lib_bases, $build_dir)}"
     end
   end
   
@@ -62,11 +64,7 @@ module RakeBase
   end  
   
   task :deploy => $goal do
-    if is_windows?
-      install("#{Dir.pwd}/#{$goal}", "#{$build_dir}/#{$goal}")
-    else
-      ln_sf("#{Dir.pwd}/#{$goal}", "#{$build_dir}/#{$goal}")
-    end
+    os_install "#{Dir.pwd}/#{$goal}", "#{$build_dir}/#{$goal}"
   end
   
   task :anchor_root do
