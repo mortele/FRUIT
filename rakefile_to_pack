@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'net/ftp'
 
-version='2.5.1'
+version='2.6'
 pkg_name="fruit_#{version}"
 #dir_name="sourceforge_fruit"
 dir_name="fruit"

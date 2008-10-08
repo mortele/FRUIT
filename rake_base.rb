@@ -7,7 +7,12 @@ module RakeBase
   require 'fileutils'
   
   anchor_file_name='ROOT_ANCHOR'
+  
+  # Intel FORTRAN compiler tested on Linux
   $compiler = 'ifort'
+  
+  # GCC FORTRAN compiler tested on MacOs (10.3, Tiger)
+  #$compiler = "gfortran"
   
   $goal = '' if !$goal
   
