@@ -1,16 +1,18 @@
 require 'rubygems'
 require 'net/ftp'
 
-version='2.4.4'
+version='2.5.1'
 pkg_name="fruit_#{version}"
+#dir_name="sourceforge_fruit"
+dir_name="fruit"
 
 task :default => [:pack, :publish]
 
 task :clean_up do
-  sh 'cd sourceforge_fruit;rake clobber'
-  sh 'cd sourceforge_fruit/fruit_processor_gem;rake'
+  sh "cd #{dir_name};rake clobber"
+  sh "cd #{dir_name}/fruit_processor_gem;rake"
   sh "rm -rf #{pkg_name}"
-  sh "cp -R sourceforge_fruit #{pkg_name}"
+  sh "cp -R #{dir_name} #{pkg_name}"
   sh "find #{pkg_name} | grep -i cvs | perl -nle 'system \"rm -rf $_\"'"
   sh "rm -rf #{pkg_name}/.loadpath"
   sh "rm -rf #{pkg_name}/.project"
@@ -27,7 +29,8 @@ desc "Publish package"
 task :publish => :pack do
   Net::FTP.open("upload.sourceforge.net", 
      "ftp", 
-     ENV['USER']+"@"+ENV['HOSTNAME']) {
+     #ENV['USER']+"@"+ENV['HOSTNAME']) {
+     "fruit@test.com") {
      |ftpclient|
      ftpclient.passive = true
      ftpclient.chdir "incoming"

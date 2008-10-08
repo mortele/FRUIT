@@ -1,3 +1,6 @@
+require 'misc'
+require 'ftools'
+
 module RakeBase
   require 'rubygems'
   require 'fruit_processor'
@@ -12,7 +15,7 @@ module RakeBase
   $base_dir = FruitProcessor.new.base_dir if ! $base_dir
   $build_dir = FruitProcessor.new.build_dir if ! $build_dir
   
-  $lib_bases = [] if !$lib_bases
+  $lib_bases = {} if !$lib_bases
   $inc_dirs = [] if !$inc_dirs
   
   SRC = FileList['*.f90'].sort
@@ -41,7 +44,7 @@ module RakeBase
   
   rule '.o' => ['.f90'] do |t|
     Rake::Task[:dirs].invoke if Rake::Task.task_defined?('dirs')
-    sh "#{$compiler} -g -debug inline_debug_info -c -o #{t.name} #{t.source} -module #{$build_dir} #{FruitProcessor.new.inc_flag($inc_dirs)}"
+    sh "#{$compiler} -c -o #{t.name} #{t.source} -module #{$build_dir} #{FruitProcessor.new.inc_flag($inc_dirs)}"
   end
   
   file $goal => OBJ do
@@ -59,7 +62,11 @@ module RakeBase
   end  
   
   task :deploy => $goal do
-    ln_sf("#{Dir.pwd}/#{$goal}", "#{$build_dir}/#{$goal}" )
+    if is_windows?
+      install("#{Dir.pwd}/#{$goal}", "#{$build_dir}/#{$goal}")
+    else
+      ln_sf("#{Dir.pwd}/#{$goal}", "#{$build_dir}/#{$goal}")
+    end
   end
   
   task :anchor_root do
