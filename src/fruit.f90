@@ -252,14 +252,13 @@ contains
     character(len=MSG_LENGTH) :: msg_swap_holder(current_max)
 
     if (messageIndex > MAX_MSG_STACK_SIZE) then
-       write (*, *) "Stop because there are too many error messages to put into stack.  Try to increase MAX_MSG_STACK_SIZE if you really need so."
+       write(*,*) "Stop because there are too many error messages to put into stack."
+       write (*,*) "Try to increase MAX_MSG_STACK_SIZE if you really need so."
        call getTestSummary ()
        stop 1
     end if
 
     if (messageIndex > current_max) then
-write(*,*) "in to reallocate"
-    
       msg_swap_holder(1:current_max) = message_array(1:current_max)
       deallocate(message_array)
       current_max = current_max + MSG_ARRAY_INCREMENT
@@ -267,12 +266,11 @@ write(*,*) "in to reallocate"
       message_array(1:current_max - MSG_ARRAY_INCREMENT) = msg_swap_holder(1: current_max - MSG_ARRAY_INCREMENT)
     end if
     
-write(*,*) "end to reallocate"
     message_array (messageIndex) = msg
     messageIndex = messageIndex + 1
   end subroutine increase_message_stack_
 
-  function get_last_message
+  function get_last_message()
     character(len=MSG_LENGTH) :: get_last_message
     if (messageIndex > 1) then
        get_last_message = strip(message_array(messageIndex-1))
@@ -357,7 +355,7 @@ write(*,*) "end to reallocate"
     endif
   end subroutine make_error_msg_
 
-  function is_last_passed
+  function is_last_passed()
     logical:: is_last_passed
     is_last_passed = last_passed 
   end function is_last_passed
