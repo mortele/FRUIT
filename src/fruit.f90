@@ -42,7 +42,8 @@ module fruit
     assert_not_equals, assertNotEquals, add_success, addSuccess, &
     addFail, add_fail, set_unit_name, get_unit_name, &
     failed_assert_action, get_total_count, getTotalCount, &
-    get_failed_count, getFailedCount, is_all_successful, isAllSuccessful 
+    get_failed_count, getFailedCount, is_all_successful, isAllSuccessful, &
+    run_test_case, runTestCase
 
   interface initializeFruit
      module procedure obsolete_subroutine_delete_later_initializeFruit_
@@ -141,6 +142,11 @@ module fruit
   interface isAllSuccessful
      module procedure obsolete_subroutine_delete_later_isAllSuccessful_
   end interface
+
+  interface runTestCase
+     module procedure run_test_case
+  end interface
+
 contains
 
   subroutine init_fruit
@@ -166,6 +172,26 @@ contains
     call obsolete_ ( "getTestSummary is OBSOLETE.  replaced by fruit_summary")
     call fruit_summary
   end subroutine obsolete_subroutine_delete_later_getTestSummary_
+
+  subroutine run_test_case( tc )
+    interface
+       subroutine tc()
+       end subroutine
+    end interface
+
+    last_passed = .true.
+
+    call tc()
+
+    if ( last_passed .eq. .true. ) then
+       successful_case_count = successful_case_count+1
+    else
+       failed_case_count = failed_case_count+1
+    end if
+
+    testCaseIndex = testCaseIndex+1
+    
+  end subroutine run_test_case
 
   subroutine fruit_summary
     integer :: i
