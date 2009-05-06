@@ -23,12 +23,14 @@ module fruit
   integer, parameter :: MAX_MSG_STACK_SIZE = 2000
   integer, parameter :: MSG_ARRAY_INCREMENT = 50
   
+  character(*), parameter :: DEFAULT_UNIT_NAME = '_not_set_'
+
   integer, private, save :: current_max = 50
   integer, private, save :: successful_assert_count = 0
   integer, private, save :: failed_assert_count = 0
   character (len = MSG_LENGTH), private, allocatable :: message_array(:)
   character (len = MSG_LENGTH), private, save :: msg = '[unit name not set from set_name]: '
-  character (len = MSG_LENGTH), private, save :: unit_name  = '_not_set_'
+  character (len = MSG_LENGTH), private, save :: unit_name  = DEFAULT_UNIT_NAME
   integer, private, save :: messageIndex = 1
 
   integer, private, save :: successful_case_count = 0
@@ -143,8 +145,14 @@ module fruit
      module procedure obsolete_subroutine_delete_later_isAllSuccessful_
   end interface
 
+  interface run_test_case
+     module procedure run_test_case_
+     module procedure run_test_case_named_
+  end interface
+
   interface runTestCase
-     module procedure run_test_case
+     module procedure run_test_case_
+     module procedure run_test_case_named_
   end interface
 
 contains
@@ -173,11 +181,16 @@ contains
     call fruit_summary
   end subroutine obsolete_subroutine_delete_later_getTestSummary_
 
-  subroutine run_test_case( tc )
+  ! Run a named test case
+  subroutine run_test_case_named_( tc, tc_name )
     interface
        subroutine tc()
        end subroutine
     end interface
+    character(*), intent(in) :: tc_name
+
+    ! Set the name of the unit test
+    call set_unit_name( tc_name )
 
     last_passed = .true.
 
@@ -191,7 +204,21 @@ contains
 
     testCaseIndex = testCaseIndex+1
     
-  end subroutine run_test_case
+    ! Reset the name of the unit test back to the default
+    call set_unit_name( DEFAULT_UNIT_NAME )
+
+  end subroutine run_test_case_named_
+
+  ! Run an 'unnamed' test case
+  subroutine run_test_case_( tc )
+    interface
+       subroutine tc()
+       end subroutine
+    end interface
+
+    call run_test_case_named_( tc, '_unnamed_' )
+
+  end subroutine run_test_case_
 
   subroutine fruit_summary
     integer :: i
@@ -212,7 +239,7 @@ contains
        write (*,*) '  -- Failed assertion messages:'
 
        do i = 1, messageIndex - 1
-          write (*,"(A)") trim(strip(message_array(i)))
+          write (*,"(A)") '   '//trim(strip(message_array(i)))
        end do
 
        write (*,*) '  -- end of failed assertion messages.'
