@@ -189,6 +189,8 @@ contains
     end interface
     character(*), intent(in) :: tc_name
 
+    integer :: initial_failed_assert_count = failed_assert_count
+
     ! Set the name of the unit test
     call set_unit_name( tc_name )
 
@@ -196,7 +198,9 @@ contains
 
     call tc()
 
-    if ( last_passed .eq. .true. ) then
+    if ( initial_failed_assert_count .eq. failed_assert_count ) then
+       ! If no additional assertions failed during the run of this test case
+       ! then the test case was successful
        successful_case_count = successful_case_count+1
     else
        failed_case_count = failed_case_count+1
