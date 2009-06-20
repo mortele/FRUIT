@@ -499,8 +499,8 @@ contains
   end subroutine assert_eq_double_
 
   subroutine assert_eq_complex_ (var1, var2, message)
-    complex,       intent(IN) :: var1, var2
-    character (*), intent(IN), optional :: message
+    complex(kind=kind(1.0D0)), intent(IN) :: var1, var2
+    character (*),             intent(IN), optional :: message
     integer count
 
     if ( var1 .ne. var2) then
@@ -740,9 +740,9 @@ contains
   end subroutine assert_eq_2d_double_
 
   subroutine assert_eq_1d_complex_ (var1, var2, n, message)
-    integer,       intent(IN) :: n
-    complex,       intent(IN) :: var1(n), var2(n)
-    character (*), intent(IN), optional :: message
+    integer,                   intent(IN) :: n
+    complex(kind=kind(1.0D0)), intent(IN) :: var1(n), var2(n)
+    character (*),             intent(IN), optional :: message
     integer count
 
     loop_dim1: do count = 1, n
@@ -756,9 +756,9 @@ contains
   end subroutine assert_eq_1d_complex_
 
   subroutine assert_eq_2d_complex_ (var1, var2, n, m, message)
-    integer,       intent(IN) :: n, m
-    complex,       intent(IN) :: var1(n,m), var2(n,m)
-    character (*), intent(IN), optional :: message
+    integer,                   intent(IN) :: n, m
+    complex(kind=kind(1.0D0)), intent(IN) :: var1(n,m), var2(n,m)
+    character (*),             intent(IN), optional :: message
     integer count1, count2
 
     loop_dim2: do count2 = 1, m

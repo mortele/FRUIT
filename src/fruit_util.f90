@@ -63,7 +63,7 @@ contains
   function to_s_double_complex_ (value)
     implicit none
     character(len=500):: to_s_double_complex_
-    double complex, intent(in) :: value
+    complex(kind=kind(1.0D0)), intent(in) :: value
     character(len=500) :: result
     write (result, *) value
     to_s_double_complex_ = adjustl(trim(result))
