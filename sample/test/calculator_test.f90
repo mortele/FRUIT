@@ -9,4 +9,16 @@ contains
     call add (2,2,result)
     call assertEquals (4, result)
   end subroutine test_calculator_should_produce_4_when_2_and_2_are_inputs
+
+  subroutine test_fruit_multiple_cases
+    use calculator, only: add
+    integer:: result
+
+    call add (0,0,result)
+    call assertEquals (0, result)
+    call assertEquals (0, result)
+    call assertEquals (0, result)
+  end subroutine test_fruit_multiple_cases
+
+
 end module calculator_test

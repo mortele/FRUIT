@@ -9,13 +9,13 @@ module RakeBase
   anchor_file_name='ROOT_ANCHOR'
   
   # Intel FORTRAN compiler tested on Linux
-  #$compiler = 'ifort'
+  $compiler = 'ifort'
   
   # GCC FORTRAN compiler tested on MacOs (10.3, Tiger)
   #$compiler = "gfortran"
   
   # G95 FORTRAN compiler tested on Linux
-  $compiler = "g95"
+  #$compiler = "g95"
   
   $goal = '' if !$goal
   

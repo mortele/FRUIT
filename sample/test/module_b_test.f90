@@ -3,6 +3,7 @@ contains
   subroutine test_another_module_module_can_be_in_other_directories
     use fruit
     use calculator, only: add
+
     integer:: result, a, b
     a=2
     b=2

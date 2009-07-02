@@ -62,7 +62,7 @@ class FruitProcessor
           end
           f.write "    write (*, *) \"  ..running test: #{method_name}\"\n"
           f.write "    call set_unit_name ('#{method_name}')\n"
-          f.write "    call #{method_name}\n"
+          f.write "    call run_test_case(#{method_name})\n"
           f.write "    if (.not. is_last_passed()) then\n"
           f.write "      write(*,*) \n"
           f.write "      write(*,*) '  Un-satisfied spec:'\n"

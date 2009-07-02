@@ -35,6 +35,9 @@ contains
     call test_obsolete_message
     call fruit_summary
 
+    call demonstrate_case_summary
+    call fruit_summary
+
   end subroutine fruit_test_package
   
   subroutine test_should_add_success_or_failed_actions
@@ -274,5 +277,19 @@ contains
   subroutine test_obsolete_message
     call assertTrue(.true.)
   end subroutine test_obsolete_message
+
+  subroutine test_multiple_cases_1
+     call assertTrue (.true.)
+     call assertTrue (.false.)
+  end subroutine test_multiple_cases_1
+
+  subroutine test_multiple_cases_2
+     call assertTrue (.true.)
+  end subroutine test_multiple_cases_2
+
+  subroutine demonstrate_case_summary
+     call run_test_case(test_multiple_cases_1)
+     call run_test_case(test_multiple_cases_2)
+  end subroutine demonstrate_case_summary
 
 end module fruit_test
