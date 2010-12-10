@@ -308,9 +308,9 @@ contains
 
     linechar_count = linechar_count + 1
     if ( linechar_count .lt. MAX_MARKS_PER_LINE ) then
-       write(*,"(A1)",ADVANCE='NO') '.'
+       write(*,"(A1)",ADVANCE='NO') chr
     else
-       write(*,"(A1)",ADVANCE='YES') '.'
+       write(*,"(A1)",ADVANCE='YES') chr
        linechar_count = 0
     endif
 
