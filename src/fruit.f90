@@ -23,6 +23,7 @@ module fruit
   integer, parameter :: MSG_LENGTH = 256
   integer, parameter :: MAX_MSG_STACK_SIZE = 2000
   integer, parameter :: MSG_ARRAY_INCREMENT = 50
+  integer, parameter :: MAX_MARKS_PER_LINE = 78
   
   character(*), parameter :: DEFAULT_UNIT_NAME = '_not_set_'
 
@@ -300,12 +301,27 @@ contains
     result= (failed_assert_count .eq. 0 )
   end subroutine is_all_successful
 
+  ! Private, helper routine to wrap lines of success/failed marks
+  subroutine output_mark_( chr )
+    character(1) :: chr
+    integer(1),save :: linechar_count = 0
+
+    linechar_count = linechar_count + 1
+    if ( linechar_count .lt. MAX_MARKS_PER_LINE ) then
+       write(*,"(A1)",ADVANCE='NO') '.'
+    else
+       write(*,"(A1)",ADVANCE='YES') '.'
+       linechar_count = 0
+    endif
+
+  end subroutine output_mark_
+
   subroutine success_mark_
-    write(*,"(A1)",ADVANCE='NO') '.'
+    call output_mark_( '.' )
   end subroutine success_mark_
 
   subroutine failed_mark_
-    write(*,"(A1)",ADVANCE='NO') 'F'
+    call output_mark_( 'F' )
   end subroutine failed_mark_
 
   subroutine increase_message_stack_
