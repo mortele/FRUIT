@@ -428,7 +428,7 @@ contains
     msg = '[' // trim(strip(unit_name)) // ']: Expected [' // trim(strip(var1)) &
           // '], Got [' // trim(strip(var2)) // ']'
     if (present(message)) then
-       msg = msg // '; User message: [' // message // ']'
+       msg = trim(msg) // '; User message: [' // message // ']'
     endif
   end subroutine make_error_msg_
 
