@@ -20,6 +20,14 @@ module fruit
   implicit none
   private
 
+  integer, parameter :: XML_OPEN = 20
+  integer, parameter :: XML_WORK = 21
+  integer, parameter :: NUMBER_LENGTH = 10
+  integer, private, save :: message_index_from
+
+  character (len = *), parameter :: xml_filename     = "result.xml"
+  character (len = *), parameter :: xml_filename_work = "result_tmp.xml"
+
   integer, parameter :: MSG_LENGTH = 256
   integer, parameter :: MAX_MSG_STACK_SIZE = 2000
   integer, parameter :: MSG_ARRAY_INCREMENT = 50
@@ -39,10 +47,16 @@ module fruit
   integer, private, save :: failed_case_count = 0
   integer, private, save :: testCaseIndex = 1
   logical, private, save :: last_passed = .false.
+  logical, private, save :: case_passed = .false.
 
   public :: &
     init_fruit, initializeFruit, fruit_summary, getTestSummary, get_last_message, &
     is_last_passed, assert_true, assertTrue, assert_equals, assertEquals, &
+    is_case_passed, &
+    init_fruit_xml, &
+    fruit_summary_xml, &
+    case_passed_xml, &
+    case_failed_xml, &
     assert_not_equals, assertNotEquals, add_success, addSuccess, &
     addFail, add_fail, set_unit_name, get_unit_name, &
     failed_assert_action, get_total_count, getTotalCount, &
@@ -157,6 +171,21 @@ module fruit
      module procedure run_test_case_named_
   end interface
 
+  interface init_fruit_xml
+    module procedure init_fruit_xml_
+  end interface
+
+  interface fruit_summary_xml
+    module procedure fruit_summary_xml_
+  end interface
+
+  interface case_passed_xml
+    module procedure case_passed_xml_
+  end interface
+
+  interface case_failed_xml
+    module procedure case_failed_xml_
+  end interface
 contains
 
   subroutine init_fruit
@@ -172,6 +201,82 @@ contains
       allocate(message_array(MSG_ARRAY_INCREMENT)) 
     end if
   end subroutine init_fruit
+
+  subroutine init_fruit_xml_
+    open (XML_OPEN, file = xml_filename)
+    write(XML_OPEN, '("<?xml version=""1.0"" encoding=""UTF-8""?>")') 
+    write(XML_OPEN, '("<testsuites>")')
+    close(XML_OPEN)
+    open (XML_WORK, FILE = xml_filename_work, status='replace')
+    close (XML_WORK)
+  end subroutine init_fruit_xml_
+
+  subroutine case_passed_xml_(tc_name, classname)
+    character(*), intent(in) :: tc_name
+    character(*), intent(in) :: classname
+
+    open (XML_WORK, FILE = xml_filename_work, position='append')
+    write(XML_WORK, &
+   &  '("    <testcase name=""", a, """ classname=""", a, """ time=""0""/>")') &
+   &  trim(tc_name), trim(classname)
+    close (XML_WORK)
+  end subroutine case_passed_xml_
+
+  subroutine case_failed_xml_(tc_name, classname, message)
+    character(*), intent(in) :: tc_name
+    character(*), intent(in) :: classname
+    character(*), intent(in) :: message
+    integer :: i
+
+    open (XML_WORK, FILE = xml_filename_work, position='append')
+    write(XML_WORK, &
+   &  '("    <testcase name=""", a, """ classname=""", a, """ time=""0"">")') &
+   &  trim(tc_name), trim(classname)
+
+    write(XML_WORK, '("      <failure type=""failure"" message=""")', advance = "no")
+    do i = message_index_from, messageIndex - 1
+      write(XML_WORK, '(a, " ")') trim(strip(message_array(i)))
+    enddo
+    write(XML_WORK, '("""/>")')
+
+    write(XML_WORK, &
+   &  '("    </testcase>")')
+    close(XML_WORK)
+  end subroutine case_failed_xml_
+
+  subroutine fruit_summary_xml_
+    character(len = 1000) :: whole_line
+
+    open (XML_OPEN, FILE = xml_filename, position='append')
+    write(XML_OPEN, '("  <testsuite errors=""0"" ")', advance = "no")
+    write(XML_OPEN, '("tests=""", a, """ ")', advance = "no") &
+   &  trim(int_to_str(successful_case_count + failed_case_count))
+    write(XML_OPEN, '("failures=""", a, """ ")', advance = "no") &
+   &  trim(int_to_str(failed_case_count))
+    write(XML_OPEN, '("name=""", a, """ ")', advance = "no") &
+   &  "name of test suite"
+    write(XML_OPEN, '("id=""1"">")')
+
+    open (XML_WORK, FILE = xml_filename_work)
+    do
+      read(XML_WORK, '(a)', end = 999) whole_line
+      write(XML_OPEN, '(a)') trim(whole_line)
+    enddo
+999 continue
+    close(XML_WORK)
+
+    write(XML_OPEN, '("  </testsuite>")')
+    write(XML_OPEN, '("</testsuites>")')
+    close(XML_OPEN)
+  end subroutine fruit_summary_xml_
+
+  function int_to_str(i)
+    integer, intent(in) :: i
+    character(LEN = NUMBER_LENGTH) :: int_to_str
+
+    write(int_to_str, '(i10)') i
+    int_to_str = adjustl(int_to_str)
+  end function int_to_str
 
   subroutine obsolete_initializeFruit_
     call obsolete_ ("initializeFruit is OBSOLETE.  replaced by init_fruit")
@@ -199,6 +304,8 @@ contains
     call set_unit_name( tc_name )
 
     last_passed = .true.
+    case_passed = .true.
+    message_index_from = messageIndex
 
     call tc()
 
@@ -208,6 +315,7 @@ contains
        successful_case_count = successful_case_count+1
     else
        failed_case_count = failed_case_count+1
+       case_passed = .false.
     end if
 
     testCaseIndex = testCaseIndex+1
@@ -304,7 +412,7 @@ contains
   ! Private, helper routine to wrap lines of success/failed marks
   subroutine output_mark_( chr )
     character(1) :: chr
-    integer(1),save :: linechar_count = 0
+    integer, save :: linechar_count = 0
 
     linechar_count = linechar_count + 1
     if ( linechar_count .lt. MAX_MARKS_PER_LINE ) then
@@ -398,6 +506,7 @@ contains
   subroutine add_success
     successful_assert_count = successful_assert_count + 1
     last_passed = .true.
+    case_passed = .true.
     call success_mark_  
   end subroutine add_success
 
@@ -409,6 +518,7 @@ contains
     call increase_message_stack_
     failed_assert_count = failed_assert_count + 1
     last_passed = .false.
+    case_passed = .false.
     call failed_mark_
   end subroutine failed_assert_action
 
@@ -436,6 +546,12 @@ contains
     logical:: is_last_passed
     is_last_passed = last_passed 
   end function is_last_passed
+
+  function is_case_passed()
+    logical:: is_case_passed
+    is_case_passed = case_passed 
+  end function is_case_passed
+
 
   !--------------------------------------------------------------------------------
   ! all assertions
@@ -499,7 +615,7 @@ contains
     if ( var1 .eq. var2) then
        call add_success
     else
-7      call failed_assert_action(to_s(var1), to_s(var2), message)
+       call failed_assert_action(to_s(var1), to_s(var2), message)
     end if
   end subroutine assert_eq_real_
 
@@ -517,7 +633,6 @@ contains
   subroutine assert_eq_complex_ (var1, var2, message)
     complex(kind=kind(1.0D0)), intent(IN) :: var1, var2
     character (*),             intent(IN), optional :: message
-    integer count
 
     if ( var1 .ne. var2) then
        call failed_assert_action(to_s(var1), to_s(var2), message)

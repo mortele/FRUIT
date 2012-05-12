@@ -17,7 +17,8 @@ contains
     call add (0,0,result)
     call assertEquals (0, result)
     call assertEquals (0, result)
-    call assertEquals (0, result)
+    call add (1,0,result)
+    call assertEquals (1, result)
   end subroutine test_fruit_multiple_cases
 
 

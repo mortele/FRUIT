@@ -62,12 +62,20 @@ class FruitProcessor
           end
           f.write "    write (*, *) \"  ..running test: #{method_name}\"\n"
           f.write "    call set_unit_name ('#{method_name}')\n"
-          f.write "    call run_test_case(#{method_name})\n"
-          f.write "    if (.not. is_last_passed()) then\n"
+          f.write "    call run_test_case(#{method_name}, &\n"
+          f.write "                    &\"#{method_name}\")\n"
+          f.write "    if (.not. is_case_passed()) then\n"
           f.write "      write(*,*) \n"
           f.write "      write(*,*) '  Un-satisfied spec:'\n"
           f.write "      write(*,*) '#{format_spec(@spec_hash[file]['methods']['spec'][spec_counter], '  -- ', '&')}'\n"
           f.write "      write(*,*) \n"
+
+          f.write "      call case_failed_xml(\"#{method_name}\", &\n"
+          f.write "     &  \"#{test_module_name}\", &\n"
+          f.write "     &  '#{@spec_hash[file]['methods']['spec'][spec_counter]}')\n"
+          f.write "    else\n"
+          f.write "      call case_passed_xml(\"#{method_name}\", &\n"
+          f.write "     &  \"#{test_module_name}\")\n"
           f.write "    end if\n"
           
           if @spec_hash[file]['setup'] != nil
@@ -140,8 +148,10 @@ class FruitProcessor
       f.write "  use fruit\n"
       f.write "  use #{@fruit_basket_module_name}\n"
       f.write "  call init_fruit\n"
+      f.write "  call init_fruit_xml\n"
       f.write "  call fruit_basket\n"
       f.write "  call fruit_summary\n"
+      f.write "  call fruit_summary_xml\n"
       f.write "end program #{@driver_program_name}\n"
     end
   end
@@ -157,10 +167,11 @@ class FruitProcessor
           
           while (inside_subroutine = infile.gets)
             break if inside_subroutine =~ /end\s+subroutine/i
-            next if inside_subroutine !~ /^\s*character.*::.*spec.*=(.*)$/i
-            spec_var = $1.strip!
-            
-            spec_var = spec_var[1, spec_var.length-1]
+
+            next if inside_subroutine !~ /^\s*character.*::\s*spec\s*=(.*)$/i
+            spec_var = $1
+            spec_var =~ /\s*(["'])(.*)\1\s*(!.*)?$/
+            spec_var = $2
             
             if end_match(spec_var, '&')
               spec_var.chop!

@@ -13,6 +13,8 @@ contains
     integer, intent (in) :: a, b
     integer, intent (inout) :: output
     output=a+b
+
+    if (output == 0) output = output + 777  !error to be detected
   end subroutine add_integer
 
   subroutine add_real (a, b, output)
