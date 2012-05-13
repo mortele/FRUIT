@@ -1,6 +1,8 @@
 require 'rubygems'
 require 'fruit_processor'
 
+include Rake::DSL if defined?(Rake::DSL)
+
 # Add this line at the beginning if there are generated code involved
 FruitProcessor.new.pre_process
 

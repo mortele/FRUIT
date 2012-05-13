@@ -5,17 +5,22 @@ module RakeBase
   require 'fruit_processor'
   require 'rake/clean'
   require 'fileutils'
-  
+
+  include Rake::DSL if defined?(Rake::DSL)
+
   anchor_file_name='ROOT_ANCHOR'
   
   # Intel FORTRAN compiler tested on Linux
   $compiler = 'ifort'
+  $option = "-check all -warn all"
   
   # GCC FORTRAN compiler tested on MacOs (10.3, Tiger)
   #$compiler = "gfortran"
+  #$option = "-Wall -pedantic -fbounds-check -Wuninitialized"
   
   # G95 FORTRAN compiler tested on Linux
   #$compiler = "g95"
+  #$option = "-Wall -pedantic -fbounds-check -Wuninitialized"
   
   $goal = '' if !$goal
   
@@ -51,7 +56,7 @@ module RakeBase
   
   rule '.o' => ['.f90'] do |t|
     Rake::Task[:dirs].invoke if Rake::Task.task_defined?('dirs')
-    sh "#{$compiler} -c -o #{t.name} #{t.source} -I#{$build_dir} #{FruitProcessor.new.inc_flag($inc_dirs)}"
+    sh "#{$compiler} #{$option} -c -o #{t.name} #{t.source} -I#{$build_dir} #{FruitProcessor.new.inc_flag($inc_dirs)}"
     FileList["*.mod"].each do |module_file|
       os_install File.expand_path(module_file), $build_dir
     end
@@ -62,7 +67,7 @@ module RakeBase
     elsif $goal =~ /.a$/
       sh "ar cr #{$goal} #{OBJ}"
     else
-      sh "#{$compiler} -I#{$build_dir} -o #{$goal} #{OBJ} #{FruitProcessor.new.lib_name_flag($lib_bases, $build_dir)} #{FruitProcessor.new.lib_dir_flag($lib_bases, $build_dir)}"
+      sh "#{$compiler} #{$option}  -I#{$build_dir} -o #{$goal} #{OBJ} #{FruitProcessor.new.lib_name_flag($lib_bases, $build_dir)} #{FruitProcessor.new.lib_dir_flag($lib_bases, $build_dir)}"
     end
   end
   
@@ -72,7 +77,9 @@ module RakeBase
   end  
   
   task :deploy => $goal do
-    os_install "#{Dir.pwd}/#{$goal}", "#{$build_dir}/#{$goal}"
+    if $goal.length > 0
+      os_install "#{Dir.pwd}/#{$goal}", "#{$build_dir}/#{$goal}"
+    end
   end
   
   task :anchor_root do

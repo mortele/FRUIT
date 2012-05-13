@@ -22,6 +22,10 @@ module fruit_util
      module procedure to_s_string_
   end interface
 
+  interface strip
+    module procedure strip_
+    module procedure strip_length_
+  end interface
 contains
 
   function to_s_int_ (value)
@@ -85,12 +89,20 @@ contains
     to_s_string_ = value
   end function to_s_string_
 
-  function strip(value)
+  function strip_(value)
     implicit none
-    character(len=500):: strip
+    character(len=500):: strip_
     character(len=*), intent(in) :: value
-    strip = trim(adjustl(value))
-  end function strip
+    strip_ = trim(adjustl(value))
+  end function strip_
+
+  function strip_length_(value, length)
+    implicit none
+    character(len=*), intent(in) :: value
+    integer, intent(in) :: length
+    character(len= length):: strip_length_
+    strip_length_ = trim(adjustl(value))
+  end function strip_length_
 
   !------------------------
   ! test if 2 values are close

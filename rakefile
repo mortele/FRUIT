@@ -2,6 +2,8 @@ require 'rake/clean'
 require 'rubygems'
 require 'fruit_processor'
 
+include Rake::DSL if defined?(Rake::DSL)
+
 $base_dir=Dir.pwd
 $build_dir = "#{$base_dir}/build"
 

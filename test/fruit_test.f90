@@ -66,7 +66,7 @@ contains
     write (*,*) 'Should see 1 successful case'
     call assertTrue (.true.)
 
-    write (*,*) 'Shoule see 1 failed case'
+    write (*,*) 'Should see 1 failed case'
     call assertTrue (.FALSE.)
     
     call fruit_summary
@@ -224,10 +224,7 @@ contains
   
   subroutine test_show_output 
     implicit none
-    logical :: trueValue = .TRUE.
-    logical :: falseValue = .FALSE.
     integer :: i
-    integer :: count
 
     call init_fruit
     DO i=1,5
@@ -249,7 +246,7 @@ contains
     logical :: falseValue = .FALSE.
     integer :: i
     integer :: count
-    character (100), DIMENSION (3)  :: msgs; 
+    !character (100), DIMENSION (3)  :: msgs; 
     
     call init_fruit
     DO i=1,2

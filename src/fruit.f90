@@ -458,7 +458,7 @@ contains
   function get_last_message()
     character(len=MSG_LENGTH) :: get_last_message
     if (messageIndex > 1) then
-       get_last_message = strip(message_array(messageIndex-1))
+       get_last_message = strip(message_array(messageIndex-1), MSG_LENGTH)
     else
        get_last_message = ''
     end if
@@ -524,7 +524,7 @@ contains
 
   subroutine set_unit_name(value)
     character(*), intent(in) :: value
-    unit_name = strip(value)
+    unit_name = strip(value, MSG_LENGTH)
   end subroutine set_unit_name
 
   subroutine get_unit_name(value)

@@ -1,6 +1,8 @@
 require 'rubygems'
 require 'fruit_processor'
 
+include Rake::DSL if defined?(Rake::DSL)
+
 $goal='libcalculator.a'
 
 # if $build is specified, then use that dir, instead of FruitProcessor.new.build_dir below

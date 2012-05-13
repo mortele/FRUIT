@@ -1,6 +1,8 @@
 require 'rubygems'
 require 'fruit_processor'
 
+include Rake::DSL if defined?(Rake::DSL)
+
 
 task :compile do
   sh 'cd src;rake'

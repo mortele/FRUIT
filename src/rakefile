@@ -2,6 +2,8 @@ require 'rubygems'
 require 'fruit_processor'
 require 'rake/clean'
 
+include Rake::DSL if defined?(Rake::DSL)
+
 $goal = 'libfruit.a'
 
 SRC = FileList['*.f90']
