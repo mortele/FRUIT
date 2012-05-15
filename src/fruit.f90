@@ -222,10 +222,9 @@ contains
     close (XML_WORK)
   end subroutine case_passed_xml_
 
-  subroutine case_failed_xml_(tc_name, classname, message)
+  subroutine case_failed_xml_(tc_name, classname)
     character(*), intent(in) :: tc_name
     character(*), intent(in) :: classname
-    character(*), intent(in) :: message
     integer :: i
 
     open (XML_WORK, FILE = xml_filename_work, position='append')

@@ -14,7 +14,7 @@ module RakeBase
   $compiler = 'ifort'
   $option = "-check all -warn all"
   
-  # GCC FORTRAN compiler tested on MacOs (10.3, Tiger)
+  # GCC FORTRAN compiler tested on MacOs (10.6.8 Snow Leopard) and Windows Vista
   #$compiler = "gfortran"
   #$option = "-Wall -pedantic -fbounds-check -Wuninitialized"
   

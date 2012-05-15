@@ -71,8 +71,7 @@ class FruitProcessor
           f.write "      write(*,*) \n"
 
           f.write "      call case_failed_xml(\"#{method_name}\", &\n"
-          f.write "     &  \"#{test_module_name}\", &\n"
-          f.write "     &  '#{@spec_hash[file]['methods']['spec'][spec_counter]}')\n"
+          f.write "     &  \"#{test_module_name}\")\n"
           f.write "    else\n"
           f.write "      call case_passed_xml(\"#{method_name}\", &\n"
           f.write "     &  \"#{test_module_name}\")\n"
