@@ -295,7 +295,7 @@ class FruitProcessor
       _libs << pair[1]
     end
     _libs.uniq.each { |value|  lib_dir_flag += "-L#{value} " }
-    return lib_dir_flag
+    return lib_dir_flag.strip
   end
   
   def inc_flag inc_dirs

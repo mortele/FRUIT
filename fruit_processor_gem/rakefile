@@ -14,10 +14,12 @@ spec = Gem::Specification.new do |s|
   s.summary   =   "A package for fortranxunit (fruit)."
   s.files     =   FileList['lib/*.rb', 'test/*'].to_a
   s.require_path  =   "lib"
-  s.autorequire   =   "fruit_processor"
+###  s.autorequire   =   "fruit_processor"
   s.test_files = Dir.glob('tests/*.rb')
   s.has_rdoc  =   true
   s.extra_rdoc_files  =   ["README"]
+  s.homepage  = "http://sourceforge.net/projects/fortranxunit/"
+  s.description = "The fruit_processor gem works with fortranxunit (fruit) on sourceforge."
 end
 
 Rake::GemPackageTask.new(spec) do |pkg|

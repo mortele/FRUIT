@@ -20,13 +20,13 @@ task :test => :compile do
   sh 'cd test;rake;'
   driver_programs = FileList["#{$build_dir}/fruit_driver"]
   driver_programs.each do |driver|
-    sh driver
+    sh "\"#{driver}\""
   end
 end
 
 task :sample => :compile do
   sh 'cd sample;rake;'
-  sh "cd #{$build_dir};./fruit_driver"
+  sh "cd \"#{$build_dir}\";./fruit_driver"
 end
 
 load 'rake_base.rb'

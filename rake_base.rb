@@ -56,7 +56,7 @@ module RakeBase
   
   rule '.o' => ['.f90'] do |t|
     Rake::Task[:dirs].invoke if Rake::Task.task_defined?('dirs')
-    sh "#{$compiler} #{$option} -c -o #{t.name} #{t.source} -I#{$build_dir} #{FruitProcessor.new.inc_flag($inc_dirs)}"
+    sh "#{$compiler} #{$option} -c -o #{t.name} #{t.source} \"-I#{$build_dir}\" #{FruitProcessor.new.inc_flag($inc_dirs)}"
     FileList["*.mod"].each do |module_file|
       os_install File.expand_path(module_file), $build_dir
     end
@@ -67,7 +67,7 @@ module RakeBase
     elsif $goal =~ /.a$/
       sh "ar cr #{$goal} #{OBJ}"
     else
-      sh "#{$compiler} #{$option}  -I#{$build_dir} -o #{$goal} #{OBJ} #{FruitProcessor.new.lib_name_flag($lib_bases, $build_dir)} #{FruitProcessor.new.lib_dir_flag($lib_bases, $build_dir)}"
+      sh "#{$compiler} #{$option} \"-I#{$build_dir}\" -o #{$goal} #{OBJ} #{FruitProcessor.new.lib_name_flag($lib_bases, $build_dir)} \"#{FruitProcessor.new.lib_dir_flag($lib_bases, $build_dir)}\""
     end
   end
   
