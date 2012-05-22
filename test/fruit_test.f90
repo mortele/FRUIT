@@ -64,28 +64,28 @@ contains
 
     call init_fruit
     write (*,*) 'Should see 1 successful case'
-    call assertTrue (.true.)
+    call assert_true (.true.)
 
     write (*,*) 'Should see 1 failed case'
-    call assertTrue (.FALSE.)
+    call assert_true (.FALSE.)
     
     call fruit_summary
   end subroutine test_assert_true
   
-  ! Test assertTrue with message
+  ! Test assert_true with message
   ! ----------------------------
-  subroutine assertTrueMessageTest 
+  subroutine assert_true_message_test 
     implicit none
     
     call init_fruit
-    call assertTrue (.true., 'message in assertTrueTest_message true test')
+    call assert_true (.true., 'message in assert_true_message_test true test')
 
-    call assertTrue (.FALSE., 'message in assertTrueTest_message false test')
+    call assert_true (.FALSE., 'message in assert_true_message_test false test')
     
     call fruit_summary
-  end subroutine assertTrueMessageTest
+  end subroutine assert_true_message_test
   
-  ! Test addSuccess and is_all_successful
+  ! Test add_success and is_all_successful
   ! -----------------------------------
   subroutine test_add_success
     implicit none
@@ -94,12 +94,12 @@ contains
 
     call init_fruit
 
-    call addSuccess
+    call add_success
     call is_all_successful (result)
 
     IF (result .neqv. .true.) then
       write (*, *)
-      write (*, *) 'FAILED addSuccess!!!'
+      write (*, *) 'FAILED add_success!!!'
       write (*, *)
     end IF
 
@@ -107,7 +107,7 @@ contains
     
   end subroutine test_add_success
   
-  ! Test addSuccess and is_all_successful
+  ! Test add_success and is_all_successful
   ! -----------------------------------
   subroutine test_add_fail
     implicit none
@@ -115,21 +115,21 @@ contains
     logical :: result = .FALSE.
 
     call init_fruit
-    call addFail
+    call add_fail
     call is_all_successful (result)
 
     IF (result .neqv. .FALSE.) then
       write (*, *)
-      write (*, *) 'FAILED addFail !!!'
+      write (*, *) 'FAILED add_fail !!!'
       write (*, *)
     end IF
     
-    call addFail('test_add_fail', 'testing addFail')
+    call add_fail('test_add_fail', 'testing add_fail')
     call fruit_summary
 
   end subroutine test_add_fail
   
-  ! Test addSuccess and is_all_successful
+  ! Test add_success and is_all_successful
   ! -----------------------------------
   subroutine test_add_fail_message
     implicit none
@@ -137,8 +137,8 @@ contains
     logical :: result = .FALSE.
 
     call init_fruit
-    call addFail ('Add a failed case')
-    call addFail ('test_add_fail_message', 'Add a failed case')
+    call add_fail ('Add a failed case')
+    call add_fail ('test_add_fail_message', 'Add a failed case')
     call is_all_successful (result)
 
     IF (result .neqv. .FALSE.) then
@@ -157,22 +157,22 @@ contains
     write (*,*) 'Summary for successful cases without message: '
     write (*,*) 'Should see 1 successful case'
     call init_fruit
-    call addSuccess
+    call add_success
     call fruit_summary
     
     write (*,*) 'Summary for successful cases and 2 messages: '
     write (*,*) 'Should see 3 successful cases'
     call init_fruit
-    call addSuccess
-    call addSuccess
-    call addSuccess
+    call add_success
+    call add_success
+    call add_success
     call fruit_summary
     
     write (*,*) 'Summary for failed cases: '
     write (*,*) 'Should see 2 failed case amd 1 message'
     call init_fruit
-    call addFail
-    call addFail('Fail message from test case.')
+    call add_fail
+    call add_fail('Fail message from test case.')
     call fruit_summary
     
   end subroutine fruit_summary_test
@@ -186,28 +186,28 @@ contains
     logical :: result = .true.
     
     call init_fruit
-    call addSuccess
-    call addFail
-    call addSuccess
+    call add_success
+    call add_fail
+    call add_success
     call is_all_successful (result)
     
     IF (result .neqv. .FALSE.) then
       write (*, *)
-      write (*, *) 'FAILED test_is_all_successful!!! (addFail)'
+      write (*, *) 'FAILED test_is_all_successful!!! (add_fail)'
       write (*, *)
     end IF
 
     call fruit_summary
 
     call init_fruit
-    call addSuccess
-    call addSuccess
-    call addSuccess
+    call add_success
+    call add_success
+    call add_success
     call is_all_successful (result)
     
     IF (result .neqv. .true.) then
       write (*, *)
-      write (*, *) 'FAILED test_is_all_successful!!! (addSuccess)'
+      write (*, *) 'FAILED test_is_all_successful!!! (add_success)'
       write (*, *)
     end IF
     call fruit_summary
@@ -215,7 +215,7 @@ contains
     call init_fruit
     IF (result .neqv. .true.) then
       write (*, *)
-      write (*, *) 'FAILED test_is_all_successful!!! (addSuccess)'
+      write (*, *) 'FAILED test_is_all_successful!!! (add_success)'
       write (*, *)
     end IF
     call fruit_summary
@@ -228,14 +228,14 @@ contains
 
     call init_fruit
     DO i=1,5
-       call assertTrue (.true.)
+       call assert_true (.true.)
     END DO
-    call assertEquals (trim(get_last_message()), '')
+    call assert_equals (trim(get_last_message()), '')
 
     DO i=1,5
-       call assertTrue (.false.)
+       call assert_true (.false.)
     END DO
-    call assertEquals (trim(get_last_message()), 'Expected T got F')
+    call assert_equals (trim(get_last_message()), 'Expected T got F')
     call fruit_summary
 
   end subroutine test_show_output
@@ -250,11 +250,11 @@ contains
     
     call init_fruit
     DO i=1,2
-      call assertTrue (trueValue, 'msg')
+      call assert_true (trueValue, 'msg')
     END DO
     
     DO i=1,2
-      call assertTrue (falseValue, 'msg')
+      call assert_true (falseValue, 'msg')
     END DO
     
     call get_total_count (count)
@@ -272,16 +272,17 @@ contains
   end subroutine showOutputForReport
 
   subroutine test_obsolete_message
+    print *, "Warning on obsolete subroutine name should appear below:"
     call assertTrue(.true.)
   end subroutine test_obsolete_message
 
   subroutine test_multiple_cases_1
-     call assertTrue (.true.)
-     call assertTrue (.false.)
+     call assert_true (.true.)
+     call assert_true (.false.)
   end subroutine test_multiple_cases_1
 
   subroutine test_multiple_cases_2
-     call assertTrue (.true.)
+     call assert_true (.true.)
   end subroutine test_multiple_cases_2
 
   subroutine demonstrate_case_summary
