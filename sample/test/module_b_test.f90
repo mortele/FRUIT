@@ -9,6 +9,16 @@ contains
     b=2
 
     call add (a,b,result)
-    call assertEquals (4, result)
+    call assert_equals (4, result)
   end subroutine test_another_module_module_can_be_in_other_directories
+
+  subroutine test_including_one_failure
+    use fruit
+    use calculator, only: add
+    
+    integer:: result
+
+    call add (0, 0, result)
+    call assert_equals(0, result, "0+0 should be 0")
+  end subroutine test_including_one_failure
 end module module_b_test

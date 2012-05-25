@@ -14,6 +14,7 @@ Installation guide:
 	5. You may need to change your compiler from Intel FORTRAN to other
 	   modify this line in rake_base.rb :
 	     $compiler = 'ifort'
+             $option = "-check all -warn all"
 	   
 	6. Build and run all the test
 	  cd fruit

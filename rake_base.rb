@@ -14,13 +14,13 @@ module RakeBase
   $compiler = 'ifort'
   $option = "-check all -warn all"
   
-  # GCC FORTRAN compiler tested on MacOs (10.6.8 Snow Leopard) and Windows Vista
+  # GCC FORTRAN compiler tested on MacOs (10.6.8 Snow Leopard) and Windows Vista + cygwin
   #$compiler = "gfortran"
-  #$option = "-Wall -pedantic -fbounds-check -Wuninitialized"
+  #$option = "-Wall -Wextra -pedantic -fbounds-check -Wuninitialized -O"
   
-  # G95 FORTRAN compiler tested on Linux
+  # G95 FORTRAN compiler tested on Linux and Windows Vista + cygwin
   #$compiler = "g95"
-  #$option = "-Wall -pedantic -fbounds-check -Wuninitialized"
+  #$option = "-Wall -Wobsolescent -Wunused-module-vars -Wunused-internal-procs -Wunused-parameter -Wunused-types -Wmissing-intent -Wimplicit-interface -pedantic -fbounds-check -Wuninitialized"
   
   $goal = '' if !$goal
   
@@ -33,7 +33,7 @@ module RakeBase
   SRC = FileList['*.f90'].sort
   OBJ = SRC.ext('o')
   
-  CLEAN.include(['*.o', '*.a', '*.mod', '*_gen.f90', '*fruit_driver', 
+  CLEAN.include(['*.o', '*.a', '*.mod', '*_gen.f90', '*fruit_driver', 'result*.xml', 
     '*_gen.f90', FruitProcessor.new.module_files(SRC, $build_dir)])
   CLOBBER.include("#{$build_dir}/#{$goal}")
   

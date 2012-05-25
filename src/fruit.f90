@@ -234,7 +234,12 @@ contains
 
     write(XML_WORK, '("      <failure type=""failure"" message=""")', advance = "no")
     do i = message_index_from, messageIndex - 1
-      write(XML_WORK, '(a, " ")') trim(strip(message_array(i)))
+      write(XML_WORK, '(a)', advance = "no") trim(strip(message_array(i)))
+      if (i == messageIndex - 1) then
+        continue
+      else
+        write(XML_WORK, '("&#xA;")', advance="no")
+      endif
     enddo
     write(XML_WORK, '("""/>")')
 
@@ -410,7 +415,7 @@ contains
 
   ! Private, helper routine to wrap lines of success/failed marks
   subroutine output_mark_( chr )
-    character(1) :: chr
+    character(1), intent(in) :: chr
     integer, save :: linechar_count = 0
 
     linechar_count = linechar_count + 1
@@ -722,23 +727,23 @@ contains
     end if
   end subroutine assert_eq_1d_double_in_range_
 
-  subroutine assert_eq_1d_double (var1, var2, n, message)
-    integer, intent (in) :: n
-    double precision, intent (in) :: var1(n), var2(n)
-    character(*), intent(in), optional :: message
-
-    integer count
-
-    loop_dim1: do count = 1, n
-       if ( var1(count) .ne. var2(count)) then
-          call failed_assert_action(to_s(var1(count)), to_s(var2(count)), &
-               'Array different at count: ' // to_s(count) // ' ' // message)
-          return
-       end if
-    end do loop_dim1
-
-    call add_success
-  end subroutine assert_eq_1d_double
+!  subroutine assert_eq_1d_double (var1, var2, n, message)
+!    integer, intent (in) :: n
+!    double precision, intent (in) :: var1(n), var2(n)
+!    character(*), intent(in), optional :: message
+!
+!    integer count
+!
+!    loop_dim1: do count = 1, n
+!       if ( var1(count) .ne. var2(count)) then
+!          call failed_assert_action(to_s(var1(count)), to_s(var2(count)), &
+!               'Array different at count: ' // to_s(count) // ' ' // message)
+!          return
+!       end if
+!    end do loop_dim1
+!
+!    call add_success
+!  end subroutine assert_eq_1d_double
 
   subroutine assert_eq_2d_real (var1, var2, n, m)
     integer, intent (in) :: n, m
@@ -759,24 +764,24 @@ contains
     call add_success
   end subroutine assert_eq_2d_real
 
-  subroutine assert_eq_2d_double (var1, var2, n, m)
-    integer, intent (in) :: n, m
-    double precision, intent (in) :: var1(n,m), var2(n,m)
-
-    integer count1, count2
-
-    loop_dim2: do count2 = 1, m
-       loop_dim1: do count1 = 1, n
-          if ( var1(count1,count2) .ne. var2(count1,count2)) then
-             call failed_assert_action(to_s(var1(count1, count2)), to_s(var2(count1, count2)), &
-                  'Array difference at (' // to_s(count1) // ',' // to_s(count2) // ')')
-             return
-          end if
-       end do loop_dim1
-    end do loop_dim2
-
-    call add_success
-  end subroutine assert_eq_2d_double
+!  subroutine assert_eq_2d_double (var1, var2, n, m)
+!    integer, intent (in) :: n, m
+!    double precision, intent (in) :: var1(n,m), var2(n,m)
+!
+!    integer count1, count2
+!
+!    loop_dim2: do count2 = 1, m
+!       loop_dim1: do count1 = 1, n
+!          if ( var1(count1,count2) .ne. var2(count1,count2)) then
+!             call failed_assert_action(to_s(var1(count1, count2)), to_s(var2(count1, count2)), &
+!                  'Array difference at (' // to_s(count1) // ',' // to_s(count2) // ')')
+!             return
+!          end if
+!       end do loop_dim1
+!    end do loop_dim2
+!
+!    call add_success
+!  end subroutine assert_eq_2d_double
 
   subroutine assert_eq_2d_int_ (var1, var2, n, m, message)
     integer, intent (in) :: n, m
