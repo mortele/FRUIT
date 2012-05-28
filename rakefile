@@ -7,9 +7,10 @@ include Rake::DSL if defined?(Rake::DSL)
 $base_dir=Dir.pwd
 $build_dir = "#{$base_dir}/build"
 
-task :default => [:anchor_root, :dirs, :compile, :test, :sample]
+task :default => [:in_3_minutes, :anchor_root, :dirs, :compile, :test, :sample]
 
-CLEAN.include(FileList['**/*.o', '**/*.mod', '**/*.a', '**/*_gen.f90', '**/*fruit_driver', '**/result*.xml' ])
+CLEAN.include(FileList['**/*.o', '**/*.mod', '**/*.a', '**/*_gen.f90', '**/*fruit_driver', 
+  '**/result*.xml', 'in_3_minutes/fruit.f90', 'in_3_minutes/fruit_util.f90' ])
 CLOBBER.include($build_dir)
 
 task :compile do
@@ -27,6 +28,10 @@ end
 task :sample => :compile do
   sh 'cd sample;rake;'
   sh "cd \"#{$build_dir}\";./fruit_driver"
+end
+
+task :in_3_minutes do
+  sh 'cd in_3_minutes;rake'
 end
 
 load 'rake_base.rb'

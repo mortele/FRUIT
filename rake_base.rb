@@ -78,7 +78,9 @@ module RakeBase
   
   task :deploy => $goal do
     if $goal.length > 0
-      os_install "#{Dir.pwd}/#{$goal}", "#{$build_dir}/#{$goal}"
+      if $build_dir != "."
+        os_install "#{Dir.pwd}/#{$goal}", "#{$build_dir}/#{$goal}"
+      end
     end
   end
   
