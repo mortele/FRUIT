@@ -1,0 +1,25 @@
+
+
+---------
+FRUIT 2.8
+---------
+
+1. FRUIT outputs test report in XML. 
+   It can be read by Jenkins( http://jenkins-ci.org/ ).
+   A sample report appears as sample/test/result.xml
+   in FRUIT 2.8 release.
+
+2. Case names are shown in failed assertion messages
+   even when fruit_processor is used.
+   Previously __unnamed__ was shown in place of case names.
+
+3. Sample without rake nor rake was in "sample/taste" directry of FRUIT 2.7.
+  It is moved to "in_3_minutes" directry.
+
+4. Works both with rake 0.9.2.2 and rake 0.8.7.
+
+5. Debug option of fortran compiler is turned on by default.
+
+For example of 1. and 2. above, see fruit2.8_with_jenkins.png 
+
+
