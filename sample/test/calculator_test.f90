@@ -23,6 +23,7 @@ contains
   subroutine test_fruit_multiple_cases
     use calculator, only: add
     integer:: result
+    !FRUIT_SPEC   Spec string may given as Fortran's "comment" line.
 
     call add (0,0,result)
     call assert_equals (0, result, "message shown when assertion fails")
@@ -41,7 +42,10 @@ contains
     !The following variable "spec" is not used within fortran.
     !It's parsed by fruit_processor.
     !Fortran compiler will complain that this variable is unused.
-    character :: spec = 'calculation should produce 4.0 when 2.0 and 2.0 are inputs'
+    character(len=*), parameter :: spec = 'calculation should produce 4.0&
+    & when 2.0 &
+      and 2.0 &
+      are inputs'
 
     real:: result, a, b
     a=2.0

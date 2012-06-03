@@ -12,7 +12,7 @@ module RakeBase
   
   # Intel FORTRAN compiler tested on Linux
   $compiler = 'ifort'
-  $option = "-check all -warn all"
+  $option = "-check all -warn all -g -debug -inline-debug-info"
   
   # GCC FORTRAN compiler tested on MacOs (10.6.8 Snow Leopard) and Windows Vista + cygwin
   #$compiler = "gfortran"

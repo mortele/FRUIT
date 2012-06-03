@@ -49,6 +49,8 @@ module fruit
   logical, private, save :: last_passed = .false.
   logical, private, save :: case_passed = .false.
 
+  integer, private, save :: case_time_from = 0
+
   public :: &
     init_fruit, initializeFruit, fruit_summary, getTestSummary, get_last_message, &
     is_last_passed, assert_true, assertTrue, assert_equals, assertEquals, &
@@ -211,14 +213,34 @@ contains
     close (XML_WORK)
   end subroutine init_fruit_xml_
 
+  function  case_delta_t()
+    integer, parameter :: STRLEN_T = 12
+    character(len = STRLEN_T) :: case_delta_t
+    real :: delta_t
+    integer :: case_time_to, time_rate, time_max
+
+    call system_clock(case_time_to, time_rate, time_max)
+    if (time_rate > 0) then
+      delta_t = real(case_time_to - case_time_from) / real(time_rate)
+      if (delta_t < 0) then
+        delta_t = delta_t + real(time_max) / real(time_rate)
+      endif
+    else
+      delta_t = 0
+    endif
+
+    write(case_delta_t, '(g12.4)') delta_t
+    case_delta_t = adjustl(case_delta_t)
+  end function case_delta_t
+
   subroutine case_passed_xml_(tc_name, classname)
     character(*), intent(in) :: tc_name
     character(*), intent(in) :: classname
 
     open (XML_WORK, FILE = xml_filename_work, position='append')
     write(XML_WORK, &
-   &  '("    <testcase name=""", a, """ classname=""", a, """ time=""0""/>")') &
-   &  trim(tc_name), trim(classname)
+   &  '("    <testcase name=""", a, """ classname=""", a, """ time=""", a, """/>")') &
+   &  trim(tc_name), trim(classname), trim(case_delta_t())
     close (XML_WORK)
   end subroutine case_passed_xml_
 
@@ -229,8 +251,8 @@ contains
 
     open (XML_WORK, FILE = xml_filename_work, position='append')
     write(XML_WORK, &
-   &  '("    <testcase name=""", a, """ classname=""", a, """ time=""0"">")') &
-   &  trim(tc_name), trim(classname)
+   &  '("    <testcase name=""", a, """ classname=""", a, """ time=""", a, """>")') &
+   &  trim(tc_name), trim(classname), trim(case_delta_t())
 
     write(XML_WORK, '("      <failure type=""failure"" message=""")', advance = "no")
     do i = message_index_from, messageIndex - 1
@@ -310,6 +332,7 @@ contains
     last_passed = .true.
     case_passed = .true.
     message_index_from = messageIndex
+    call system_clock(case_time_from)
 
     call tc()
 

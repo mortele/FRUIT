@@ -3,7 +3,7 @@ require 'rubygems'
 require 'rake/gempackagetask'
 require 'rake/clean'
 
-CLEAN.include(FileList['pkg/*.gem'])
+CLEAN.include(FileList['pkg/*.gem', 'test/*_gen.f90'])
 
 spec = Gem::Specification.new do |s|
   s.platform  =   Gem::Platform::RUBY
@@ -12,7 +12,10 @@ spec = Gem::Specification.new do |s|
   s.author    =   "Andrew Chen"
   s.email     =   "meihome meihome.com"
   s.summary   =   "A package for fortranxunit (fruit)."
-  s.files     =   FileList['lib/*.rb', 'test/*'].to_a
+
+  s.files     =   FileList['lib/*.rb', 'test/*.rb', 'test/*_test.f90'].to_a
+###  s.files     =   FileList['lib/*.rb', 'test/*'].to_a
+
   s.require_path  =   "lib"
 ###  s.autorequire   =   "fruit_processor"
   s.test_files = Dir.glob('tests/*.rb')
@@ -26,10 +29,15 @@ Rake::GemPackageTask.new(spec) do |pkg|
   pkg.need_tar = true
 end
 
-task :default => [:clean, "pkg/#{spec.name}-#{spec.version}.gem"] do
+task :default => [:clean, :test, "pkg/#{spec.name}-#{spec.version}.gem"] do
   puts "generated latest version"
 end
 
 task :install => :default do
   sh "gem install pkg/#{spec.name}-#{spec.version}.gem"
 end
+
+task :test do
+  sh "cd test; ruby fruit_processor_test.rb"
+end
+

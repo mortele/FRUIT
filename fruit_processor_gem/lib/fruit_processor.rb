@@ -167,15 +167,25 @@ class FruitProcessor
           while (inside_subroutine = infile.gets)
             break if inside_subroutine =~ /end\s+subroutine/i
 
+            if inside_subroutine =~ /^\s*\!FRUIT_SPEC\s*(.*)$/i 
+              spec_var = $1.sub("'", "''")
+              next
+            end
+
             next if inside_subroutine !~ /^\s*character.*::\s*spec\s*=(.*)$/i
             spec_var = $1
-            spec_var =~ /\s*(["'])(.*)\1\s*(!.*)?$/
+            spec_var =~ /\s*(["'])(.*)(\1|\&)\s*(!.*)?$/
             spec_var = $2
+            last_character = $3
             
-            if end_match(spec_var, '&')
-              spec_var.chop!
+            #if end_match(spec_var, '&')
+            #  spec_var.chop!
+            if last_character == '&'
               while (next_line = infile.gets)
                 next_line.strip!
+                if next_line !~ /^\&/
+                  next_line = "&" + next_line
+                end
                 spec_var += "\n#{next_line.chop}"
                 break if ! end_match(next_line, '&')
               end
