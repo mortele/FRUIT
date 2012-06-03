@@ -4,3 +4,5 @@ calculator_fruit_driver
 .f90
 *.swp
 a
+*.mod
+result*.xml
