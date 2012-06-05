@@ -7,7 +7,9 @@ include Rake::DSL if defined?(Rake::DSL)
 $base_dir=Dir.pwd
 $build_dir = "#{$base_dir}/build"
 
-task :default => [:in_3_minutes, :anchor_root, :dirs, :compile, :test, :sample]
+task :default => [
+  :ruby_test, :in_3_minutes, 
+  :anchor_root, :dirs, :compile, :test, :sample]
 
 CLEAN.include(FileList['**/*.o', '**/*.mod', '**/*.a', '**/*_gen.f90', '**/*fruit_driver', 
   '**/result*.xml', 'in_3_minutes/fruit.f90', 'in_3_minutes/fruit_util.f90' ])
@@ -32,6 +34,10 @@ end
 
 task :in_3_minutes do
   sh 'cd in_3_minutes;rake'
+end
+
+task :ruby_test do
+  sh 'cd fruit_processor_gem; rake'
 end
 
 load 'rake_base.rb'

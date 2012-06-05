@@ -8,12 +8,39 @@ class FruitProcessor
   def initialize
     @driver_program_name='fruit_driver_gen'
     @fruit_basket_module_name = 'fruit_basket_gen'
+
+    @extensions=["f90", "f95", "f03"]
     @spec_hash={}
+  end
+
+  def get_spec_hash_filename file_name
+    return @spec_hash[file_name]
+  end
+
+  def get_methods_of_filename file_name
+    return @spec_hash[file_name]["methods"]["name"]
+  end
+
+  def get_files
+    return @files
   end
   
   def load_files dir="."
     return if @spec_hash.size != 0
-    @files = FileList["#{dir}/*_test.f90"] - FileList["#{dir}/~*_test.f90"] 
+
+#---
+#   @files = FileList["#{dir}/*_test.f90"] - FileList["#{dir}/~*_test.f90"] 
+#---
+    files = []
+    @extensions.each{|f| 
+      files.concat(
+        FileList["#{dir}/*_test." + f] - FileList["#{dir}/~*_test." + f] 
+      )
+    }
+    @files = files
+#---
+
+
     @files.each do |file|
       parse_method_names file
       gather_specs file
@@ -313,7 +340,19 @@ class FruitProcessor
   end
   
   def test_module_name_from_file_path file_name
-    test_module_name=file_name.gsub(".f90", "")
+
+#---
+#    test_module_name=file_name.gsub(".f90", "")
+#---
+    test_module_name=""
+    @extensions.each{|fxx| 
+      if file_name =~ /(.+)\.#{fxx}/
+        test_module_name=$1
+      end
+    }
+#---
+
+
     test_module_name[test_module_name.rindex("/")+1 ..  -1]
   end
 end
