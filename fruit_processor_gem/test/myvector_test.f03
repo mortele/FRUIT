@@ -8,6 +8,7 @@ module mod_myvector_test
 contains
   subroutine test_init
       type(ty_myvector) :: vec
+    character :: spec = "double quoted spec contains 'single quoted'"
 
     call vec%init()
     call vec%push(1.23)

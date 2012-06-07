@@ -15,8 +15,8 @@ module RakeBase
   $option = "-check all -warn all -g -debug -inline-debug-info"
   
   # GCC FORTRAN compiler tested on MacOs (10.6.8 Snow Leopard) and Windows Vista + cygwin
-  #$compiler = "gfortran"
-  #$option = "-Wall -Wextra -pedantic -fbounds-check -Wuninitialized -O"
+  $compiler = "gfortran"
+  $option = "-Wall -Wextra -pedantic -fbounds-check -Wuninitialized -O"
   
   # G95 FORTRAN compiler tested on Linux and Windows Vista + cygwin
   #$compiler = "g95"

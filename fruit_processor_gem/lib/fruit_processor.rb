@@ -21,6 +21,10 @@ class FruitProcessor
     return @spec_hash[file_name]["methods"]["name"]
   end
 
+  def get_specs_of_filename file_name
+    return @spec_hash[file_name]["methods"]["spec"]
+  end
+
   def get_files
     return @files
   end
@@ -39,7 +43,6 @@ class FruitProcessor
     }
     @files = files
 #---
-
 
     @files.each do |file|
       parse_method_names file
@@ -94,7 +97,7 @@ class FruitProcessor
           f.write "    if (.not. is_case_passed()) then\n"
           f.write "      write(*,*) \n"
           f.write "      write(*,*) '  Un-satisfied spec:'\n"
-          f.write "      write(*,*) '#{format_spec(@spec_hash[file]['methods']['spec'][spec_counter], '  -- ', '&')}'\n"
+          f.write "      write(*,*) '#{format_spec_fortran(@spec_hash[file]['methods']['spec'][spec_counter], '  -- ')}'\n"
           f.write "      write(*,*) \n"
 
           f.write "      call case_failed_xml(\"#{method_name}\", &\n"
@@ -195,7 +198,7 @@ class FruitProcessor
             break if inside_subroutine =~ /end\s+subroutine/i
 
             if inside_subroutine =~ /^\s*\!FRUIT_SPEC\s*(.*)$/i 
-              spec_var = $1.sub("'", "''")
+              spec_var = $1.chomp
               next
             end
 
@@ -205,19 +208,13 @@ class FruitProcessor
             spec_var = $2
             last_character = $3
             
-            #if end_match(spec_var, '&')
-            #  spec_var.chop!
             if last_character == '&'
               while (next_line = infile.gets)
                 next_line.strip!
-                if next_line !~ /^\&/
-                  next_line = "&" + next_line
-                end
+                next_line.sub!(/^\&/, '')
                 spec_var += "\n#{next_line.chop}"
                 break if ! end_match(next_line, '&')
               end
-            elsif end_match(spec_var, '\'')
-              spec_var.chop!
             end 
           end # end of inside subroutine lines
           
@@ -264,6 +261,12 @@ class FruitProcessor
   def format_spec (spec, spaces, ending='')
     indent = "  " + spaces.gsub("-", " ")
     line = spec.gsub("\n", "#{ending}\n#{indent}")
+    "#{spaces}#{line}"
+  end
+
+  def format_spec_fortran(spec, spaces)
+    indent = "  " + spaces.gsub("-", " ")
+    line = spec.gsub("\n", "&\n#{indent}&").gsub("'", "''")
     "#{spaces}#{line}"
   end
   

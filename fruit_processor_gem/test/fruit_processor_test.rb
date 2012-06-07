@@ -24,8 +24,8 @@ class FruitProcessorTest < Test::Unit::TestCase
     @fixture.load_files "."
 
     files = @fixture.get_files
-    assert_equal(1, files.grep(/calculator_test\.f90$/).length, "detect .f90 files") 
-    assert_equal(1, files.grep(/myvector_test\.f03$/).length, "detect .f03 files") 
+    assert_equal(1, files.grep(/calculator_test\.f90$/).length, "detect .f90 files")
+    assert_equal(1, files.grep(/myvector_test\.f03$/).length, "detect .f03 files")
   end
 
   def test_test_module_name_from_file_path
@@ -35,7 +35,64 @@ class FruitProcessorTest < Test::Unit::TestCase
     result = @fixture.test_module_name_from_file_path("mmm/nnn/ppp_qqq.f03")
     assert_equal("ppp_qqq", result)
   end
-  
+
+  def test_gather_specs_2
+    fp = FruitProcessor.new
+
+    filename = "./for_test_gather_specs.txt"
+    fp.parse_method_names(filename)
+    fp.gather_specs(filename)
+
+    spec_names = fp.get_specs_of_filename(filename)
+
+    assert_equal(0, /^abc [\n\r]+ DEF ghi [\n\r]+jkl$/ =~ spec_names[0])
+    assert_equal("spec for 'test_aaaaa'", spec_names[1])
+    assert_equal(
+      0, /^calculation should produce 4\.0 when 2\.0 and 2\.0 [\n\r]+are [\n\r]+inputs/ =~ spec_names[2]
+    )
+
+    expected = "Spec string may given as Fortran's \"comment\" line."
+    assert_equal(expected, spec_names[3])
+
+    expected = "spec for \"test_abbaa\""
+    assert_equal(expected, spec_names[4])
+  end
+
+  def test_format_spec_fortran
+    fp = FruitProcessor.new
+
+    filename = "./for_test_gather_specs.txt"
+    fp.parse_method_names(filename)
+    fp.gather_specs(filename)
+
+    spec_names = fp.get_specs_of_filename(filename)
+
+    assert_equal(
+             "  --- " + "abc &\n" +
+      "  " + "      " + "& DEF ghi &\n" +
+      "  " + "      " + "&jkl",
+      fp.format_spec_fortran(spec_names[0], '  --- ')
+    )
+    assert_equal(
+             "  --- " + "spec for ''test_aaaaa''",
+      fp.format_spec_fortran(spec_names[1], '  --- ')
+    )
+    assert_equal(
+             "  --- " + "calculation should produce 4.0 when 2.0 and 2.0 &\n" +
+      "  " + "      " + "&are &\n" +
+      "  " + "      " + "&inputs",
+      fp.format_spec_fortran(spec_names[2], '  --- ')
+    )
+    assert_equal(
+             "  --- " + "Spec string may given as Fortran''s \"comment\" line.",
+      fp.format_spec_fortran(spec_names[3], '  --- ')
+    )
+    assert_equal(
+             "  --- " + "spec for \"test_abbaa\"",
+      fp.format_spec_fortran(spec_names[4], '  --- ')
+    )
+  end
+
   def test_create_driver
     if File.exists?(@@driver)
       File.delete(@@driver)

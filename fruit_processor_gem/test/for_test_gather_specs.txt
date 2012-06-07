@@ -1,0 +1,31 @@
+
+
+
+   subroutine  test_abc
+
+character :: spec = "spec except last in surbourine will be ignored."
+
+ CharacTer  :: spec = "abc &
+& DEF ghi &
+&jkl"
+
+
+    EnD   SuBroutInE
+subroutine test_aaaaa
+  character ( len = *), parameter, foo, bar :: spec = "spec for 'test_aaaaa'"
+end subroutine
+
+
+subroutine test_bbb
+    character :: spec = 'calculation should produce 4.0 when 2.0 and 2.0 &
+         are &
+         inputs'
+end subroutine test_bbb
+
+subroutine test_dummy_name
+    !FRUIT_SPEC   Spec string may given as Fortran's "comment" line.
+end SubRoutine
+
+subroutine test_abbaa
+  character ( len = *), parameter, foo, bar :: spec = 'spec for "test_abbaa"'
+end subroutine
