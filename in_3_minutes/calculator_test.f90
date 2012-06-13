@@ -1,7 +1,8 @@
 module calculator_test
   use fruit
+  implicit none
 
-contains
+contains                          !fortran 95 limits subroutine name to 31 char.
   subroutine test_calculator_should_produce_4_when_2_and_2_are_inputs
     use calculator, only: add
     integer:: result

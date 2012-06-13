@@ -8,8 +8,8 @@ program fruit_driver
   call init_fruit
 
   call fruit_test_package
-  call fruit_util_test_package
-  call fruit_data_test_package
+!moved to self_test!  call fruit_util_test_package
+!moved to self_test!  call fruit_data_test_package
 
   call fruit_summary
 

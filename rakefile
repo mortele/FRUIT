@@ -9,10 +9,14 @@ $build_dir = "#{$base_dir}/build"
 
 task :default => [
   :ruby_test, :in_3_minutes, 
-  :anchor_root, :dirs, :compile, :test, :sample]
+  :anchor_root, :dirs, :compile, :sample, :self_test]
+# :test is not included.
+# :self_test covers tests done in :test
 
 CLEAN.include(FileList['**/*.o', '**/*.mod', '**/*.a', '**/*_gen.f90', '**/*fruit_driver', 
-  '**/result*.xml', 'in_3_minutes/fruit.f90', 'in_3_minutes/fruit_util.f90' ])
+  '**/result*.xml', 'in_3_minutes/fruit.f90', 'in_3_minutes/fruit_util.f90', 
+  'self_test/fruit_self_test_driver', 'self_test/override_stdout.txt'
+ ])
 CLOBBER.include($build_dir)
 
 task :compile do
@@ -27,9 +31,14 @@ task :test => :compile do
   end
 end
 
+task :self_test => :compile do
+  sh 'cd self_test; rake;'
+#  sh "cd \"#{$build_dir}\";./fruit_self_test_driver"
+end
+
 task :sample => :compile do
   sh 'cd sample;rake;'
-  sh "cd \"#{$build_dir}\";./fruit_driver"
+#  sh "cd \"#{$build_dir}\";./calculator_fruit_driver"
 end
 
 task :in_3_minutes do

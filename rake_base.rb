@@ -11,16 +11,26 @@ module RakeBase
   anchor_file_name='ROOT_ANCHOR'
   
   # Intel FORTRAN compiler tested on Linux
-  $compiler = 'ifort'
-  $option = "-check all -warn all -g -debug -inline-debug-info"
+   $compiler = 'ifort'
+   $option = "-check all -warn all"
   
   # GCC FORTRAN compiler tested on MacOs (10.6.8 Snow Leopard) and Windows Vista + cygwin
   #$compiler = "gfortran"
   #$option = "-Wall -Wextra -pedantic -fbounds-check -Wuninitialized -O"
+  # With " -std=f95", 
+  # subroutines whose name is longer than 31 characters cause error.
   
   # G95 FORTRAN compiler tested on Linux and Windows Vista + cygwin
   #$compiler = "g95"
   #$option = "-Wall -Wobsolescent -Wunused-module-vars -Wunused-internal-procs -Wunused-parameter -Wunused-types -Wmissing-intent -Wimplicit-interface -pedantic -fbounds-check -Wuninitialized"
+
+  if open("| which #{$compiler} 2>/dev/null"){|f| f.gets}
+    puts "Fortran compiler " + $compiler + " exists."
+  else
+    puts "***** Fortran compiler " + $compiler + " not exists. *****"
+    $compiler = "gfortran"
+    $option = "-Wall -Wextra -pedantic -fbounds-check -Wuninitialized -O"
+  end
   
   $goal = '' if !$goal
   

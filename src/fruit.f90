@@ -20,6 +20,9 @@ module fruit
   implicit none
   private
 
+  integer, parameter ::  STDOUT_DEFAULT = 6
+  integer :: stdout = STDOUT_DEFAULT
+
   integer, parameter :: XML_OPEN = 20
   integer, parameter :: XML_WORK = 21
   integer, parameter :: NUMBER_LENGTH = 10
@@ -51,6 +54,26 @@ module fruit
 
   integer, private, save :: case_time_from = 0
 
+  type ty_stack  
+    integer :: successful_assert_count
+    integer :: failed_assert_count
+
+    integer :: messageIndex
+    integer :: current_max
+    character (len = MSG_LENGTH), pointer :: message_array(:)
+
+    integer :: successful_case_count
+    integer :: failed_case_count
+    integer :: testCaseIndex
+
+    character (len = MSG_LENGTH) :: unit_name !  = DEFAULT_UNIT_NAME
+    integer :: message_index_from
+    logical :: last_passed 
+    logical :: case_passed
+    integer :: case_time_from
+  end type ty_stack  
+  type(ty_stack), save :: stashed_suite
+
   public :: &
     init_fruit, initializeFruit, fruit_summary, getTestSummary, get_last_message, &
     is_last_passed, assert_true, assertTrue, assert_equals, assertEquals, &
@@ -64,6 +87,9 @@ module fruit
     failed_assert_action, get_total_count, getTotalCount, &
     get_failed_count, getFailedCount, is_all_successful, isAllSuccessful, &
     run_test_case, runTestCase
+  public :: override_stdout, end_override_stdout
+  public :: stash_test_suite, restore_test_suite
+  public :: get_messages
 
   interface initializeFruit
      module procedure obsolete_initializeFruit_
@@ -126,6 +152,7 @@ module fruit
   end interface
 
   interface assert_not_equals
+     module procedure assert_not_equals_int_
      module procedure assert_not_equals_real_
      module procedure assert_not_equals_1d_real_
      module procedure assert_not_equals_double_
@@ -188,17 +215,30 @@ module fruit
   interface case_failed_xml
     module procedure case_failed_xml_
   end interface
+
+  interface override_stdout
+    module procedure override_stdout_
+  end interface
+
+  interface end_override_stdout
+    module procedure end_override_stdout_
+  end interface
+
+
+  interface get_messages
+    module procedure get_messages_
+  end interface
 contains
 
   subroutine init_fruit
     successful_assert_count = 0
     failed_assert_count = 0
     messageIndex = 1
-    write (*,*)
-    write (*,*) "Test module initialized"
-    write (*,*)
-    write (*,*) "   . : successful assert,   F : failed assert "
-    write (*,*)
+    write (stdout,*)
+    write (stdout,*) "Test module initialized"
+    write (stdout,*)
+    write (stdout,*) "   . : successful assert,   F : failed assert "
+    write (stdout,*)
     if ( .not. allocated(message_array) ) then
       allocate(message_array(MSG_ARRAY_INCREMENT)) 
     end if
@@ -366,44 +406,44 @@ contains
   subroutine fruit_summary
     integer :: i
 
-    write (*,*)
-    write (*,*)
-    write (*,*) '    Start of FRUIT summary: '
-    write (*,*)
+    write (stdout,*)
+    write (stdout,*)
+    write (stdout,*) '    Start of FRUIT summary: '
+    write (stdout,*)
 
     if (failed_assert_count > 0) then
-       write (*,*) 'Some tests failed!'
+       write (stdout,*) 'Some tests failed!'
     else
-       write (*,*) 'SUCCESSFUL!'
+       write (stdout,*) 'SUCCESSFUL!'
     end if
 
-    write (*,*)
+    write (stdout,*)
     if ( messageIndex > 1) then
-       write (*,*) '  -- Failed assertion messages:'
+       write (stdout,*) '  -- Failed assertion messages:'
 
        do i = 1, messageIndex - 1
-          write (*,"(A)") '   '//trim(strip(message_array(i)))
+          write (stdout,"(A)") '   '//trim(strip(message_array(i)))
        end do
 
-       write (*,*) '  -- end of failed assertion messages.'
-       write (*,*)
+       write (stdout,*) '  -- end of failed assertion messages.'
+       write (stdout,*)
     else
-       write (*,*) '  No messages '
+       write (stdout,*) '  No messages '
     end if
 
     if (successful_assert_count + failed_assert_count /= 0) then
 
-       write (*,*) 'Total asserts :   ', successful_assert_count + failed_assert_count
-       write (*,*) 'Successful    :   ', successful_assert_count
-       write (*,*) 'Failed        :   ', failed_assert_count
-       write (*,'("Successful rate:   ",f6.2,"%")')  real(successful_assert_count) * 100.0 / &
+       write (stdout,*) 'Total asserts :   ', successful_assert_count + failed_assert_count
+       write (stdout,*) 'Successful    :   ', successful_assert_count
+       write (stdout,*) 'Failed        :   ', failed_assert_count
+       write (stdout,'("Successful rate:   ",f6.2,"%")')  real(successful_assert_count) * 100.0 / &
             real (successful_assert_count + failed_assert_count)
-       write (*, *)
-       write (*,*) 'Successful asserts / total asserts : [ ',&
+       write (stdout, *)
+       write (stdout,*) 'Successful asserts / total asserts : [ ',&
             successful_assert_count, '/', successful_assert_count + failed_assert_count, ' ]'
-       write (*,*) 'Successful cases   / total cases   : [ ', successful_case_count, '/', &
+       write (stdout,*) 'Successful cases   / total cases   : [ ', successful_case_count, '/', &
             successful_case_count + failed_case_count, ' ]'
-       write (*, *) '  -- end of FRUIT summary'
+       write (stdout, *) '  -- end of FRUIT summary'
 
     end if
   end subroutine fruit_summary
@@ -443,9 +483,9 @@ contains
 
     linechar_count = linechar_count + 1
     if ( linechar_count .lt. MAX_MARKS_PER_LINE ) then
-       write(*,"(A1)",ADVANCE='NO') chr
+       write(stdout,"(A1)",ADVANCE='NO') chr
     else
-       write(*,"(A1)",ADVANCE='YES') chr
+       write(stdout,"(A1)",ADVANCE='YES') chr
        linechar_count = 0
     endif
 
@@ -463,8 +503,8 @@ contains
     character(len=MSG_LENGTH) :: msg_swap_holder(current_max)
 
     if (messageIndex > MAX_MSG_STACK_SIZE) then
-       write(*,*) "Stop because there are too many error messages to put into stack."
-       write (*,*) "Try to increase MAX_MSG_STACK_SIZE if you really need so."
+       write(stdout,*) "Stop because there are too many error messages to put into stack."
+       write(stdout,*) "Try to increase MAX_MSG_STACK_SIZE if you really need so."
        call getTestSummary ()
        stop 1
     end if
@@ -490,6 +530,18 @@ contains
        get_last_message = ''
     end if
   end function get_last_message
+
+  subroutine get_messages_(msgs)
+    character(len = *), intent(out) :: msgs(:)
+    integer :: i, j
+
+    msgs(:) = ""
+    do i = message_index_from, messageIndex - 1
+      j = i - message_index_from + 1
+      if (i > ubound(msgs, 1)) exit
+      msgs(j) = trim(strip(message_array(i)))
+    enddo
+  end subroutine get_messages_
 
   subroutine obsolete_getTotalCount_ (count)
     integer, intent (out) :: count
@@ -518,16 +570,16 @@ contains
 
   subroutine obsolete_ (message)
     character (*), intent (in), optional :: message
-    write (*,*) 
-    write (*,*) "<<<<<<<<<<<<<<<<<<<<<<<<<< WARNING from FRUIT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-    write (*,*) message
-    write (*,*) 
-    write (*,*) " old calls will be replaced in the next release in Jan 2009"
-    write (*,*) " Naming convention for all the method calls are changed to: first_name from"
-    write (*,*) " firstName.  Subroutines that will be deleted: assertEquals, assertNotEquals,"
-    write (*,*) " assertTrue, addSuccessful, addFail, etc."
-    write (*,*) "<<<<<<<<<<<<<<<<<<<<<<<<<< WARNING from FRUIT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-    write (*,*) 
+    write (stdout,*) 
+    write (stdout,*) "<<<<<<<<<<<<<<<<<<<<<<<<<< WARNING from FRUIT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+    write (stdout,*) message
+    write (stdout,*) 
+    write (stdout,*) " old calls will be replaced in the next release in Jan 2009"
+    write (stdout,*) " Naming convention for all the method calls are changed to: first_name from"
+    write (stdout,*) " firstName.  Subroutines that will be deleted: assertEquals, assertNotEquals,"
+    write (stdout,*) " assertTrue, addSuccessful, addFail, etc."
+    write (stdout,*) "<<<<<<<<<<<<<<<<<<<<<<<<<< WARNING from FRUIT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+    write (stdout,*) 
   end subroutine obsolete_
 
   subroutine add_success
@@ -579,6 +631,74 @@ contains
     is_case_passed = case_passed 
   end function is_case_passed
 
+  subroutine override_stdout_(write_unit, filename)
+    integer, intent(in) ::    write_unit
+    character(len = *), intent(in) :: filename
+
+    stdout = write_unit
+    open(stdout, file = filename)
+  end subroutine override_stdout_
+
+  subroutine stash_test_suite
+    stashed_suite%successful_assert_count = successful_assert_count
+                  successful_assert_count = 0
+
+    stashed_suite%failed_assert_count     = failed_assert_count
+                  failed_assert_count = 0
+
+    allocate(stashed_suite%message_array(current_max))
+             stashed_suite%message_array(1:messageIndex) = &
+                         & message_array(1:messageIndex)
+    deallocate(message_array)
+      allocate(message_array(MSG_ARRAY_INCREMENT)) 
+
+    stashed_suite%messageIndex = messageIndex
+                  messageIndex = 1
+    stashed_suite%current_max = current_max
+                  current_max = 50
+    stashed_suite%successful_case_count = successful_case_count
+                  successful_case_count = 0
+    stashed_suite%failed_case_count     = failed_case_count
+                  failed_case_count = 0
+    stashed_suite%testCaseIndex         = testCaseIndex
+                  testCaseIndex = 1
+    stashed_suite%unit_name = unit_name
+                  unit_name = DEFAULT_UNIT_NAME
+    stashed_suite%message_index_from = message_index_from
+
+    stashed_suite%last_passed = last_passed
+                  last_passed = .false.
+    stashed_suite%case_passed = case_passed
+                  case_passed = .false.
+    stashed_suite%case_time_from = case_time_from
+                  case_time_from = 0
+  end subroutine stash_test_suite
+
+  subroutine restore_test_suite
+    successful_assert_count = stashed_suite%successful_assert_count 
+    failed_assert_count     = stashed_suite%failed_assert_count
+
+    deallocate(message_array)
+    messageIndex = stashed_suite%messageIndex
+    current_max  = stashed_suite%current_max
+    allocate(message_array(current_max))
+    message_array(1:messageIndex) = stashed_suite%message_array(1:messageIndex)
+
+    successful_case_count = stashed_suite%successful_case_count
+    failed_case_count     = stashed_suite%failed_case_count
+    testCaseIndex         = stashed_suite%testCaseIndex
+
+    unit_name          = stashed_suite%unit_name 
+    message_index_from = stashed_suite%message_index_from 
+    last_passed        = stashed_suite%last_passed 
+    case_passed        = stashed_suite%case_passed 
+    case_time_from     = stashed_suite%case_time_from 
+  end subroutine restore_test_suite
+
+  subroutine end_override_stdout_
+    close(stdout)
+    stdout = STDOUT_DEFAULT
+  end subroutine end_override_stdout_
 
   !--------------------------------------------------------------------------------
   ! all assertions
@@ -931,6 +1051,17 @@ contains
 
     call add_success
   end subroutine assert_eq_2d_complex_
+
+  subroutine assert_not_equals_int_(var1, var2, message)
+    integer, intent (in) :: var1, var2
+    character (*), intent (in), optional :: message
+
+    if ( var1 .ne. var2) then
+       call add_success
+    else
+       call failed_assert_action(to_s(var1), to_s(var2), message)
+    end if
+  end subroutine assert_not_equals_int_
 
   subroutine assert_not_equals_real_ (var1, var2, message)
     real, intent (in) :: var1, var2

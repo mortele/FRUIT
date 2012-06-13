@@ -164,6 +164,11 @@ class FruitProcessor
           @spec_hash[file_name]['teardown']='all'
           next
         end
+
+        #The same condition must be used for storing
+        #both subroutine name and spec string.
+        #Otherwise number of subroutine names and specs mismatch.
+        next if subroutine_name !~ /^test_/
         @spec_hash[file_name]['methods']['name'] << subroutine_name
       end
     end
@@ -191,6 +196,10 @@ class FruitProcessor
       while (line = infile.gets)
         if line =~ /^\s*subroutine\s+(\w+)\s*$/i
           subroutine_name=$1
+
+          #The same condition must be used for storing
+          #both subroutine name and spec string.
+          #Otherwise number of subroutine names and specs mismatch.
           next if subroutine_name !~ /^test_/
           spec_var=nil
           
