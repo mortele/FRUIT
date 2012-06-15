@@ -109,11 +109,8 @@ contains
     open (20, file = STDOUTNAME)
       call read_until_string(20, 'User message:', line_read)
 
-      call assert_not_equals(0, &
-      & index(line_read, &
-      &   "message in assert_true_message_test false test"), &
-      & "String 'message in assert_true_message_test false test'&
-      & should appear")
+      call assert_string_has_string(line_read, &
+      &  "message in assert_true_message_test false test")
     close (20)
   end subroutine test_assert_true_message
 
@@ -204,18 +201,12 @@ contains
       call assert_equals("FF", line_read)
 
       call read_until_string(20, 'User message:', line_read)
-      call assert_not_equals(0, &
-      & index(line_read, "[Add a failed case]"), &
-      &          "String '[Add a failed case]' should appear")
+      call assert_string_has_string(line_read, "[Add a failed case]")
 
       read(20, '(a)') line_read
 
-      call assert_not_equals(0, &
-      & index(line_read, "test_add_fail_message"), &
-      & "String 'test_add_fail_message' should appear")
-      call assert_not_equals(0, &
-      & index(line_read, "Add a failed case"), &
-      &          "String 'Add a failed case' should appear")
+      call assert_string_has_string(line_read, "test_add_fail_message")
+      call assert_string_has_string(line_read, "Add a failed case")
     close (20)
   end subroutine test_add_fail_message
 
@@ -241,8 +232,7 @@ contains
 
     open (20, file = STDOUTNAME)
       call read_until_string(20, 'Successful', line_read)
-      call assert_not_equals(0, &
-      & index(line_read, " 1"), "String ' 1' should appear")
+      call assert_string_has_string(line_read, " 1")
     close (20)
 
     call assert_equals(0, failed_count, "Number of failed assertions")
@@ -273,8 +263,7 @@ contains
 
     open (20, file = STDOUTNAME)
       call read_until_string(20, 'Successful', line_read)
-      call assert_not_equals(0, &
-      & index(line_read, " 3"), "String ' 3' should appear")
+      call assert_string_has_string(line_read, " 3")
     close (20)
   end subroutine test_fruit_summary_2
 
@@ -301,19 +290,15 @@ contains
       call assert_equals("FF", line_read)
 
       call read_until_string(20, 'Failed assertion messages:', line_read)
-
       read (20, '(a)') line_read
       call assert_equals(0, &
       & index(line_read, "User message:"), &
       &          "String 'User message:' should not appear")
 
       read(20, '(a)') line_read
-      call assert_not_equals(0, &
-      & index(line_read, "Fail message from test case."), &
-               & "String 'Fail message from test case.' should appear")
+      call assert_string_has_string(line_read, "Fail message from test case.")
     close (20)
     !call cat_file(STDOUTNAME)
-
   end subroutine test_fruit_summary_3
 
   subroutine test_show_output
@@ -341,10 +326,7 @@ contains
     call assert_equals (last_message_got1, '')
 
     expected = "Expected [T], Got [F]"
-    call assert_not_equals(0, &
-    &  index(last_message_got2, trim(expected)), &
-    &  "String '" // trim(expected) // "' should appear in " &
-    &   // trim(last_message_got2))
+    call assert_string_has_string(last_message_got2, expected)
   end subroutine test_show_output
 
   subroutine test_showOutputForReport
@@ -366,12 +348,10 @@ contains
          DO i=1,2
            call assert_true (falseValue, 'msg falseValue')
          END DO
-
          call get_total_count (count_total)
          call get_failed_count (count_failed)
          call get_messages(msgs)
-
-         call fruit_summary
+       call fruit_summary
       call restore_test_suite
     call end_override_stdout
 
@@ -379,23 +359,32 @@ contains
     call assert_equals(2, count_failed)
 
     expected = "msg falseValue"
-    call assert_not_equals(0, &
-    &  index(trim(msgs(1)), trim(expected)), &
-    &  "String '" // trim(expected) // "' should appear in " // trim(msgs(1)))
+    call assert_string_has_string(msgs(1), expected)
 
     expected = "msg falseValue"
-    call assert_not_equals(0, &
-    &  index(trim(msgs(2)), trim(expected)), &
-    &  "String '" // trim(expected) // "' should appear in " // trim(msgs(2)))
+    call assert_string_has_string(msgs(2), expected)
 
     call assert_equals("", msgs(3))
   end subroutine test_showOutputForReport
+
+  subroutine assert_string_has_string(str1, str2)
+    character (len = *), intent(in) :: str1, str2
+    logical :: has_string
+
+    if (index(trim(str1), trim(str2)) /= 0) then
+      has_string = .true.
+    else
+      has_string = .false.
+    endif
+    call assert_true(has_string, &
+   &  "String '" // trim(str1) // "' should contain " // trim(str2) &
+   &)
+  end subroutine assert_string_has_string
 
   subroutine test_obsolete_message
     character (len = 500) :: expected
     character (len = 500) :: line_read
 
-    print *, "Warning on obsolete subroutine name should appear below:"
     call override_stdout(20, STDOUTNAME)
       call stash_test_suite
         call assertTrue(.true.)
@@ -406,9 +395,7 @@ contains
       call read_until_string(20, 'assertTrue subroutine', line_read)
 
       expected = "replaced by function assert_true"
-      call assert_not_equals(0, &
-      &  index(trim(line_read), trim(expected)), &
-      &  "String '" // trim(expected) // "' should appear in " // trim(line_read))
+      call assert_string_has_string(line_read, expected)
     close(20)
 
   end subroutine test_obsolete_message

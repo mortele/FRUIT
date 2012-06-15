@@ -9,8 +9,8 @@
 ! This package is to perform unit test for FORTRAN subroutines
 !
 ! The method used most are: assert_true, assert_equals
-! 
-! Coding convention:  
+!
+! Coding convention:
 !   1) All methods must be exposed by interface.  i.e. interface init_fruit
 !   2) Variable and methods are lower case connected with underscores.  i.e. init_fruit, and
 !      failed_assert_count
@@ -26,7 +26,10 @@ module fruit
   integer, parameter :: XML_OPEN = 20
   integer, parameter :: XML_WORK = 21
   integer, parameter :: NUMBER_LENGTH = 10
-  integer, private, save :: message_index_from
+
+  integer, private, save :: message_index = 1
+  integer, private, save :: message_index_from = 1
+  integer, private, save :: current_max = 50
 
   character (len = *), parameter :: xml_filename     = "result.xml"
   character (len = *), parameter :: xml_filename_work = "result_tmp.xml"
@@ -35,16 +38,14 @@ module fruit
   integer, parameter :: MAX_MSG_STACK_SIZE = 2000
   integer, parameter :: MSG_ARRAY_INCREMENT = 50
   integer, parameter :: MAX_MARKS_PER_LINE = 78
-  
-  character(*), parameter :: DEFAULT_UNIT_NAME = '_not_set_'
 
-  integer, private, save :: current_max = 50
+  character(*), parameter :: DEFAULT_CASE_NAME = '_not_set_'
+
   integer, private, save :: successful_assert_count = 0
   integer, private, save :: failed_assert_count = 0
   character (len = MSG_LENGTH), private, allocatable :: message_array(:)
   character (len = MSG_LENGTH), private, save :: msg = '[unit name not set from set_name]: '
-  character (len = MSG_LENGTH), private, save :: unit_name  = DEFAULT_UNIT_NAME
-  integer, private, save :: messageIndex = 1
+  character (len = MSG_LENGTH), private, save :: case_name  = DEFAULT_CASE_NAME
 
   integer, private, save :: successful_case_count = 0
   integer, private, save :: failed_case_count = 0
@@ -54,11 +55,12 @@ module fruit
 
   integer, private, save :: case_time_from = 0
 
-  type ty_stack  
+  type ty_stack
     integer :: successful_assert_count
     integer :: failed_assert_count
 
-    integer :: messageIndex
+    integer :: message_index
+    integer :: message_index_from
     integer :: current_max
     character (len = MSG_LENGTH), pointer :: message_array(:)
 
@@ -66,12 +68,11 @@ module fruit
     integer :: failed_case_count
     integer :: testCaseIndex
 
-    character (len = MSG_LENGTH) :: unit_name !  = DEFAULT_UNIT_NAME
-    integer :: message_index_from
-    logical :: last_passed 
+    character (len = MSG_LENGTH) :: case_name !  = DEFAULT_CASE_NAME
+    logical :: last_passed
     logical :: case_passed
     integer :: case_time_from
-  end type ty_stack  
+  end type ty_stack
   type(ty_stack), save :: stashed_suite
 
   public :: &
@@ -83,7 +84,9 @@ module fruit
     case_passed_xml, &
     case_failed_xml, &
     assert_not_equals, assertNotEquals, add_success, addSuccess, &
-    addFail, add_fail, set_unit_name, get_unit_name, &
+    addFail, add_fail, &
+    set_unit_name, get_unit_name, &
+    set_case_name, get_case_name, &
     failed_assert_action, get_total_count, getTotalCount, &
     get_failed_count, getFailedCount, is_all_successful, isAllSuccessful, &
     run_test_case, runTestCase
@@ -96,7 +99,7 @@ module fruit
   end interface
 
   interface getTestSummary
-     module procedure obsolete_getTestSummary_  
+     module procedure obsolete_getTestSummary_
   end interface
 
   interface assertTrue
@@ -228,25 +231,40 @@ module fruit
   interface get_messages
     module procedure get_messages_
   end interface
+
+  interface set_unit_name
+    module procedure set_case_name_
+  end interface
+  interface set_case_name
+    module procedure set_case_name_
+  end interface
+
+  interface get_unit_name
+    module procedure get_case_name_
+  end interface
+  interface get_case_name
+    module procedure get_case_name_
+  end interface
 contains
 
   subroutine init_fruit
     successful_assert_count = 0
     failed_assert_count = 0
-    messageIndex = 1
+    message_index = 1
+    message_index_from = 1
     write (stdout,*)
     write (stdout,*) "Test module initialized"
     write (stdout,*)
     write (stdout,*) "   . : successful assert,   F : failed assert "
     write (stdout,*)
     if ( .not. allocated(message_array) ) then
-      allocate(message_array(MSG_ARRAY_INCREMENT)) 
+      allocate(message_array(MSG_ARRAY_INCREMENT))
     end if
   end subroutine init_fruit
 
   subroutine init_fruit_xml_
     open (XML_OPEN, file = xml_filename)
-    write(XML_OPEN, '("<?xml version=""1.0"" encoding=""UTF-8""?>")') 
+    write(XML_OPEN, '("<?xml version=""1.0"" encoding=""UTF-8""?>")')
     write(XML_OPEN, '("<testsuites>")')
     close(XML_OPEN)
     open (XML_WORK, FILE = xml_filename_work, status='replace')
@@ -295,9 +313,9 @@ contains
    &  trim(tc_name), trim(classname), trim(case_delta_t())
 
     write(XML_WORK, '("      <failure type=""failure"" message=""")', advance = "no")
-    do i = message_index_from, messageIndex - 1
+    do i = message_index_from, message_index - 1
       write(XML_WORK, '(a)', advance = "no") trim(strip(message_array(i)))
-      if (i == messageIndex - 1) then
+      if (i == message_index - 1) then
         continue
       else
         write(XML_WORK, '("&#xA;")', advance="no")
@@ -367,11 +385,11 @@ contains
     initial_failed_assert_count = failed_assert_count
 
     ! Set the name of the unit test
-    call set_unit_name( tc_name )
+    call set_case_name( tc_name )
 
     last_passed = .true.
     case_passed = .true.
-    message_index_from = messageIndex
+    message_index_from = message_index
     call system_clock(case_time_from)
 
     call tc()
@@ -386,9 +404,9 @@ contains
     end if
 
     testCaseIndex = testCaseIndex+1
-    
+
     ! Reset the name of the unit test back to the default
-    call set_unit_name( DEFAULT_UNIT_NAME )
+    call set_case_name( DEFAULT_CASE_NAME )
 
   end subroutine run_test_case_named_
 
@@ -418,10 +436,10 @@ contains
     end if
 
     write (stdout,*)
-    if ( messageIndex > 1) then
+    if ( message_index > 1) then
        write (stdout,*) '  -- Failed assertion messages:'
 
-       do i = 1, messageIndex - 1
+       do i = 1, message_index - 1
           write (stdout,"(A)") '   '//trim(strip(message_array(i)))
        end do
 
@@ -502,14 +520,14 @@ contains
   subroutine increase_message_stack_
     character(len=MSG_LENGTH) :: msg_swap_holder(current_max)
 
-    if (messageIndex > MAX_MSG_STACK_SIZE) then
+    if (message_index > MAX_MSG_STACK_SIZE) then
        write(stdout,*) "Stop because there are too many error messages to put into stack."
        write(stdout,*) "Try to increase MAX_MSG_STACK_SIZE if you really need so."
        call getTestSummary ()
        stop 1
     end if
 
-    if (messageIndex > current_max) then
+    if (message_index > current_max) then
       msg_swap_holder(1:current_max) = message_array(1:current_max)
       deallocate(message_array)
       current_max = current_max + MSG_ARRAY_INCREMENT
@@ -517,15 +535,15 @@ contains
       message_array(1:current_max - MSG_ARRAY_INCREMENT) &
                    = msg_swap_holder(1: current_max - MSG_ARRAY_INCREMENT)
     end if
-    
-    message_array (messageIndex) = msg
-    messageIndex = messageIndex + 1
+
+    message_array (message_index) = msg
+    message_index = message_index + 1
   end subroutine increase_message_stack_
 
   function get_last_message()
     character(len=MSG_LENGTH) :: get_last_message
-    if (messageIndex > 1) then
-       get_last_message = strip(message_array(messageIndex-1), MSG_LENGTH)
+    if (message_index > 1) then
+       get_last_message = strip(message_array(message_index-1), MSG_LENGTH)
     else
        get_last_message = ''
     end if
@@ -536,9 +554,9 @@ contains
     integer :: i, j
 
     msgs(:) = ""
-    do i = message_index_from, messageIndex - 1
+    do i = message_index_from, message_index - 1
       j = i - message_index_from + 1
-      if (i > ubound(msgs, 1)) exit
+      if (j > ubound(msgs, 1)) exit
       msgs(j) = trim(strip(message_array(i)))
     enddo
   end subroutine get_messages_
@@ -549,7 +567,7 @@ contains
     call get_total_count(count)
   end subroutine obsolete_getTotalCount_
 
-  subroutine get_total_count(count) 
+  subroutine get_total_count(count)
     integer, intent(out) :: count
 
     count = successful_assert_count + failed_assert_count
@@ -570,23 +588,23 @@ contains
 
   subroutine obsolete_ (message)
     character (*), intent (in), optional :: message
-    write (stdout,*) 
+    write (stdout,*)
     write (stdout,*) "<<<<<<<<<<<<<<<<<<<<<<<<<< WARNING from FRUIT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
     write (stdout,*) message
-    write (stdout,*) 
+    write (stdout,*)
     write (stdout,*) " old calls will be replaced in the next release in Jan 2009"
     write (stdout,*) " Naming convention for all the method calls are changed to: first_name from"
     write (stdout,*) " firstName.  Subroutines that will be deleted: assertEquals, assertNotEquals,"
     write (stdout,*) " assertTrue, addSuccessful, addFail, etc."
     write (stdout,*) "<<<<<<<<<<<<<<<<<<<<<<<<<< WARNING from FRUIT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-    write (stdout,*) 
+    write (stdout,*)
   end subroutine obsolete_
 
   subroutine add_success
     successful_assert_count = successful_assert_count + 1
     last_passed = .true.
     case_passed = .true.
-    call success_mark_  
+    call success_mark_
   end subroutine add_success
 
   subroutine failed_assert_action (expected, got, message)
@@ -601,20 +619,20 @@ contains
     call failed_mark_
   end subroutine failed_assert_action
 
-  subroutine set_unit_name(value)
+  subroutine set_case_name_(value)
     character(*), intent(in) :: value
-    unit_name = strip(value, MSG_LENGTH)
-  end subroutine set_unit_name
+    case_name = strip(value, MSG_LENGTH)
+  end subroutine set_case_name_
 
-  subroutine get_unit_name(value)
+  subroutine get_case_name_(value)
     character(*), intent(out) :: value
-    value = strip(unit_name)
-  end subroutine get_unit_name
+    value = strip(case_name)
+  end subroutine get_case_name_
 
   subroutine make_error_msg_ (var1, var2, message)
     character(*), intent(in) :: var1, var2
     character(*), intent(in), optional :: message
-    msg = '[' // trim(strip(unit_name)) // ']: Expected [' // trim(strip(var1)) &
+    msg = '[' // trim(strip(case_name)) // ']: Expected [' // trim(strip(var1)) &
           // '], Got [' // trim(strip(var2)) // ']'
     if (present(message)) then
        msg = trim(msg) // '; User message: [' // message // ']'
@@ -623,12 +641,12 @@ contains
 
   function is_last_passed()
     logical:: is_last_passed
-    is_last_passed = last_passed 
+    is_last_passed = last_passed
   end function is_last_passed
 
   function is_case_passed()
     logical:: is_case_passed
-    is_case_passed = case_passed 
+    is_case_passed = case_passed
   end function is_case_passed
 
   subroutine override_stdout_(write_unit, filename)
@@ -647,13 +665,16 @@ contains
                   failed_assert_count = 0
 
     allocate(stashed_suite%message_array(current_max))
-             stashed_suite%message_array(1:messageIndex) = &
-                         & message_array(1:messageIndex)
+             stashed_suite%message_array(1:message_index) = &
+                         & message_array(1:message_index)
     deallocate(message_array)
-      allocate(message_array(MSG_ARRAY_INCREMENT)) 
+      allocate(message_array(MSG_ARRAY_INCREMENT))
 
-    stashed_suite%messageIndex = messageIndex
-                  messageIndex = 1
+    stashed_suite%message_index = message_index
+                  message_index = 1
+    stashed_suite%message_index_from = message_index_from
+                  message_index_from = 1
+
     stashed_suite%current_max = current_max
                   current_max = 50
     stashed_suite%successful_case_count = successful_case_count
@@ -662,9 +683,8 @@ contains
                   failed_case_count = 0
     stashed_suite%testCaseIndex         = testCaseIndex
                   testCaseIndex = 1
-    stashed_suite%unit_name = unit_name
-                  unit_name = DEFAULT_UNIT_NAME
-    stashed_suite%message_index_from = message_index_from
+    stashed_suite%case_name = case_name
+                  case_name = DEFAULT_CASE_NAME
 
     stashed_suite%last_passed = last_passed
                   last_passed = .false.
@@ -675,24 +695,24 @@ contains
   end subroutine stash_test_suite
 
   subroutine restore_test_suite
-    successful_assert_count = stashed_suite%successful_assert_count 
+    successful_assert_count = stashed_suite%successful_assert_count
     failed_assert_count     = stashed_suite%failed_assert_count
 
     deallocate(message_array)
-    messageIndex = stashed_suite%messageIndex
+    message_index = stashed_suite%message_index
+    message_index_from = stashed_suite%message_index_from
     current_max  = stashed_suite%current_max
     allocate(message_array(current_max))
-    message_array(1:messageIndex) = stashed_suite%message_array(1:messageIndex)
+    message_array(1:message_index) = stashed_suite%message_array(1:message_index)
 
     successful_case_count = stashed_suite%successful_case_count
     failed_case_count     = stashed_suite%failed_case_count
     testCaseIndex         = stashed_suite%testCaseIndex
 
-    unit_name          = stashed_suite%unit_name 
-    message_index_from = stashed_suite%message_index_from 
-    last_passed        = stashed_suite%last_passed 
-    case_passed        = stashed_suite%case_passed 
-    case_time_from     = stashed_suite%case_time_from 
+    case_name          = stashed_suite%case_name
+    last_passed        = stashed_suite%last_passed
+    case_passed        = stashed_suite%case_passed
+    case_time_from     = stashed_suite%case_time_from
   end subroutine restore_test_suite
 
   subroutine end_override_stdout_
