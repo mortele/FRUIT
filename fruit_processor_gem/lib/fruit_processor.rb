@@ -348,7 +348,9 @@ class FruitProcessor
   end
   
   def inc_flag inc_dirs
-    inc_dirs.collect {|item| "-I#{item}"}.join(" ")
+    inc_dirs.collect {|item| 
+      "-I#{item}" if item.size > 0
+    }.join(" ")
   end
   
   def test_module_name_from_file_path file_name

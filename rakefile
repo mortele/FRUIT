@@ -8,13 +8,15 @@ $base_dir=Dir.pwd
 $build_dir = "#{$base_dir}/build"
 
 task :default => [
-  :ruby_test, :in_3_minutes, 
+  :ruby_test, :in_3_minutes, :sample_single_dir,
   :anchor_root, :dirs, :compile, :sample, :self_test]
 # :test is not included.
 # :self_test covers tests done in :test
 
-CLEAN.include(FileList['**/*.o', '**/*.mod', '**/*.a', '**/*_gen.f90', '**/*fruit_driver', 
-  '**/result*.xml', 'in_3_minutes/fruit.f90', 'in_3_minutes/fruit_util.f90', 
+CLEAN.include(FileList['**/*.o', '**/*.mod', '**/*.a', '**/*_gen.f90', '**/*fruit_driver',
+  '**/result*.xml', 'in_3_minutes/fruit.f90', 'in_3_minutes/fruit_util.f90',
+  'sample_single_dir/fruit.f90', 'sample_single_dir/fruit_util.f90',
+  'sample_single_dir/rake_base.rb', '**/fruit_driver_fxx.exe',
   'self_test/fruit_self_test_driver', 'self_test/override_stdout.txt'
  ])
 CLOBBER.include($build_dir)
@@ -43,6 +45,12 @@ end
 
 task :in_3_minutes do
   sh 'cd in_3_minutes;rake'
+end
+
+task :sample_single_dir do
+  dir = "sample_single_dir"
+  sh "cp src/fruit.f90 src/fruit_util.f90 rake_base.rb #{dir}"
+  sh "cd #{dir}; rake"
 end
 
 task :ruby_test do

@@ -1,0 +1,30 @@
+require 'rubygems'
+require 'fruit_processor'
+require 'rake/clean'
+
+include Rake::DSL if defined?(Rake::DSL)
+
+# Add this line at the beginning if there are generated code involved
+FruitProcessor.new.pre_process
+
+$build_dir = ""  #If not set, build will be done in ../build/
+$goal = "fruit_driver_fxx.exe"
+
+task :default => [:test]
+
+task :test => $goal do
+  sh "./#{$goal}"
+end
+
+CLEAN.include($goal)
+
+#load "#{FruitProcessor.new.base_dir}/rake_base.rb"
+load "rake_base.rb"
+include RakeBase
+
+#File dependencies
+file 'fruit.o' => ['fruit.f90', 'fruit_util.o']
+
+#dependencies of your file
+file 'mystack.o' => ['Z_constants.o']
+
