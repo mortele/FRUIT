@@ -1,23 +1,22 @@
 require 'rubygems'
-### Gem::manage_gems
 require 'rake/gempackagetask'
 require 'rake/clean'
 
-CLEAN.include(FileList['pkg/*.gem', 'test/*_gen.f90'])
+CLEAN.include(FileList['test/*_gen.f90'])
+CLOBBER.include(FileList['pkg/*.gem'])
 
 spec = Gem::Specification.new do |s|
   s.platform  =   Gem::Platform::RUBY
   s.name      =   "fruit_processor"
-  s.version   =   "2.8"
+  s.version   =   "2.9"
   s.author    =   "Andrew Chen"
   s.email     =   "meihome meihome.com"
   s.summary   =   "A package for fortranxunit (fruit)."
 
-  s.files     =   FileList['lib/*.rb', 'test/*.rb', 'test/*_test.f90'].to_a
-###  s.files     =   FileList['lib/*.rb', 'test/*'].to_a
+  s.files     =   FileList['lib/*.rb', 'test/*.rb',
+    'test/*_test.f90', 'test/*_test.f03', 'test/for_test_gather_specs.txt'].to_a
 
   s.require_path  =   "lib"
-###  s.autorequire   =   "fruit_processor"
   s.test_files = Dir.glob('tests/*.rb')
   s.has_rdoc  =   true
   s.extra_rdoc_files  =   ["README"]

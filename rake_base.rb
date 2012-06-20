@@ -10,7 +10,7 @@ module RakeBase
 
   anchor_file_name='ROOT_ANCHOR'
 
-  extensions = ["f90", "f95", "f03"]
+  extensions = ["f90", "f95", "f03", "f08"]
 
   # Intel FORTRAN compiler tested on Linux
    $compiler = 'ifort'

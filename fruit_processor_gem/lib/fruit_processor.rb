@@ -9,7 +9,7 @@ class FruitProcessor
     @driver_program_name='fruit_driver_gen'
     @fruit_basket_module_name = 'fruit_basket_gen'
 
-    @extensions=["f90", "f95", "f03"]
+    @extensions = ["f90", "f95", "f03", "f08"]
     @spec_hash={}
   end
 

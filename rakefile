@@ -8,10 +8,11 @@ $base_dir=Dir.pwd
 $build_dir = "#{$base_dir}/build"
 
 task :default => [
-  :ruby_test, :in_3_minutes, :sample_single_dir,
+  :ruby_test, :in_3_minutes,
   :anchor_root, :dirs, :compile, :sample, :self_test]
-# :test is not included.
-# :self_test covers tests done in :test
+# :test is not included as :self_test covers tests done in :test.
+# :sample_single_dir is not included
+#    because fortran compiler must recognize .f95 extension.
 
 CLEAN.include(FileList['**/*.o', '**/*.mod', '**/*.a', '**/*_gen.f90', '**/*fruit_driver',
   '**/result*.xml', 'in_3_minutes/fruit.f90', 'in_3_minutes/fruit_util.f90',

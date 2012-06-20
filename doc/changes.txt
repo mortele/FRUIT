@@ -1,3 +1,61 @@
+---------
+FRUIT 2.9
+---------
+
++ Extensions .f95
+
+fruit_processor was processing only files with extension .f90.
+Now extension .f95 is also recognized.
+These extensions are hard-coded in
+  "fruit_processor_gem/lib/fruit_processor.rb" (around line 12)
+and
+  "rake_base.rb" (around line 13).
+
+
++ Additional sample
+
+New sample is added to "sample_single_dir/".
+It is single directory project. Before compiling,
+  fruit.f90,
+  fruit_util.f90, and
+  rake_base.rb
+must be copied to this directory. Fruit_processor generates
+fruit_driver and fruit_basket and builds driver executable.
+File extension .f95 is used for testing code and tested code.
+If your fortran compiler does not recognize .f95 extension, 
+rename the files to have .f90 extension.
+
+ 
++ Self-testing
+
+Test of "fruit_processor.rb" is done by
+"fruit_processor_gem/test/fruit_processor_test.rb".
+This test is included to default rake target of
+"(tarball base dir)/rakefile" and
+"(tarball base dir)/fruit_processor_gem/rakefile".
+
+Self tests of "src/fruit.f90" and "src/fruit_util.f90" are in
+"self_test" directry.
+These test are originally in "test/" directry and rewritten
+as automated tests.
+
+
++ Spec string
+
+There was regression in FRUIT 2.8.
+Spec string written using Fortran's continuous line did not processed.
+
+Now spec string specification such as
+    character(len=*), parameter :: spec = 'calculation should produce 4.0&
+  & when 2.0 &
+     and 2.0 &
+     are inputs'
+is processed. Also, spec specification as Fortran's comment line
+
+    !FRUIT_SPEC   Spec string may given as Fortran's "comment" line.
+
+is available.
+
 
 
 ---------

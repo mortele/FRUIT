@@ -1,0 +1,34 @@
+It's a sample of Single directory project.
+Before compile, fruit.f90, fruit_util.f90, and rake_base.rb must
+be copied to this directory.
+Fruit_processor generates fruit_driver and fruit_basket and builds driver executable. 
+
+1. Make an empty directory somewhere.
+   To the directry, copy
+     rake_base.rb
+     src/fruit.f90
+     src/fruit_util.f90
+     sample_single_dir/rakefile
+ from FRUIT tarball or zipball.
+
+
+2. Let's assume you have written a test code
+     mystack_test.f95
+  and skelton codes
+     Z_constants.f95
+     mystack.f95  (without detailed implementation).
+
+  As mystack.f95 depends on Z_constants.f95,
+  you'll write this dependency at the end of rakefile.
+
+
+3. On shell, do
+
+  rake
+
+  It will generate fruit_basket_gen.f90 and fruit_driver_gen.f90, and
+  builds fruit_driver_fxx.exe.
+  This test driver will be run there.
+
+Then we can start modifying the codes (in this sample mystack.f95 and Z_constants.f95) and run test again.
+
