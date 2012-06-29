@@ -15,17 +15,21 @@ task :default => [
 #    because fortran compiler must recognize .f95 extension.
 
 CLEAN.include(FileList['**/*.o', '**/*.mod', '**/*.a', '**/*_gen.f90', '**/*fruit_driver',
-  '**/result*.xml', 'in_3_minutes/fruit.f90', 'in_3_minutes/fruit_util.f90',
+  '**/result*.xml', 
+  'in_3_minutes/fruit.f90', 'in_3_minutes/fruit_util.f90',
   'sample_single_dir/fruit.f90', 'sample_single_dir/fruit_util.f90',
   'sample_single_dir/rake_base.rb', '**/fruit_driver_fxx.exe',
   'self_test/fruit_self_test_driver', 'self_test/override_stdout.txt'
  ])
+CLOBBER.include(FileList['src/fruit.f90']) 
 CLOBBER.include($build_dir)
 
+desc "Complie src/fruit*.f90 and build build/libfruit.a"
 task :compile do
   sh 'cd src;rake'
 end
 
+desc "(Obsolete) Test of fruit.f90 and fruit_util.f90."
 task :test => :compile do
   sh 'cd test;rake;'
   driver_programs = FileList["#{$build_dir}/fruit_driver"]
@@ -34,28 +38,38 @@ task :test => :compile do
   end
 end
 
+desc "Update fruit.f90"
+task :fruit_f90 do
+  sh 'cd src; rake fruit.f90'
+end
+
+desc "Self test of fruit.f90 and fruit_util.f90."
 task :self_test => :compile do
   sh 'cd self_test; rake;'
 #  sh "cd \"#{$build_dir}\";./fruit_self_test_driver"
 end
 
+desc "Test of fruit_processor.rb."
+task :ruby_test do
+  sh 'cd fruit_processor_gem; rake'
+end
+
+desc "Compile a sample of multi-directry test."
 task :sample => :compile do
   sh 'cd sample;rake;'
 #  sh "cd \"#{$build_dir}\";./calculator_fruit_driver"
 end
 
-task :in_3_minutes do
+desc "Compile a sample of manually written test."
+task :in_3_minutes => :fruit_f90 do
   sh 'cd in_3_minutes;rake'
 end
 
-task :sample_single_dir do
+desc "Compile a sample of single-directry test."
+task :sample_single_dir => :fruit_f90 do
   dir = "sample_single_dir"
   sh "cp src/fruit.f90 src/fruit_util.f90 rake_base.rb #{dir}"
   sh "cd #{dir}; rake"
-end
-
-task :ruby_test do
-  sh 'cd fruit_processor_gem; rake'
 end
 
 load 'rake_base.rb'

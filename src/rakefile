@@ -9,10 +9,20 @@ $goal = 'libfruit.a'
 SRC = FileList['*.f90']
 OBJ = SRC.ext('o')
 
+CLOBBER.include(FileList['fruit.f90'])
+
 load "#{FruitProcessor.new.base_dir}/rake_base.rb"
 include RakeBase
 
 # File dependencies go here ...
 #file 'libfruit.a' => ['fruit.o', 'fruit_utility.o']
 file 'fruit.o' => ['fruit.f90', 'fruit_util.o']
+
+desc "build #{$goal}"
+file $goal => 'fruit.f90'
+
+desc "update fruit.f90"
+file 'fruit.f90' => ["fruit_f90_generator.rb", "fruit_f90_source.txt"] do
+  sh 'ruby fruit_f90_generator.rb'
+end
 
