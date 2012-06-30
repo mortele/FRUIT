@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
-require 'ftools'
+#require 'ftools'  #ftools is unavailable in ruby 1.9
+require 'fileutils'
 
 module Misc
   def get_os
