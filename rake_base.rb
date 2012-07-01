@@ -54,6 +54,23 @@ module RakeBase
   OBJ = SRC.ext('o')
   #---------^
 
+  #-------------v
+  # assume a_test.fxx depends on a.fxx if a.fxx exists
+  OBJ.each{|a_obj|
+    a = a_obj.to_s
+    b = a.sub(/_test\.o$/, "\.o")
+    if a != b then
+      extensions.each{|fxx|
+        b_src = b.sub(/\.o$/, "\.#{fxx}")
+        if File.exist?(b_src)
+          puts "rake_base.rb: Assuming \"" + a + "\" depends on \"" + b + "\""
+          file a => b
+        end
+      }
+    end
+  }
+  #-------------^
+
   CLEAN.include(['*.o', '*.a', '*.mod', '*_gen.f90', '*fruit_driver', 'result*.xml',
     '*_gen.f90', FruitProcessor.new.module_files(SRC, $build_dir)])
   CLOBBER.include("#{$build_dir}/#{$goal}")

@@ -15,13 +15,14 @@ task :default => [
 #    because fortran compiler must recognize .f95 extension.
 
 CLEAN.include(FileList['**/*.o', '**/*.mod', '**/*.a', '**/*_gen.f90', '**/*fruit_driver',
-  '**/result*.xml', 
+  '**/result*.xml',
   'in_3_minutes/fruit.f90', 'in_3_minutes/fruit_util.f90',
   'sample_single_dir/fruit.f90', 'sample_single_dir/fruit_util.f90',
   'sample_single_dir/rake_base.rb', '**/fruit_driver_fxx.exe',
-  'self_test/fruit_self_test_driver', 'self_test/override_stdout.txt'
+  'self_test/fruit_self_test_driver', 'self_test/override_stdout.txt',
+  'fruit_processor_gem/pkg/fruit_processor-*/',
  ])
-CLOBBER.include(FileList['src/fruit.f90']) 
+CLOBBER.include(FileList['src/fruit.f90'])
 CLOBBER.include($build_dir)
 
 desc "Complie src/fruit*.f90 and build build/libfruit.a"
