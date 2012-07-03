@@ -9,6 +9,7 @@ Fruit_processor generates fruit_driver and fruit_basket and builds driver execut
      src/fruit.f90
      src/fruit_util.f90
      sample_single_dir/rakefile
+     rake_estimate.rb (experimental)
  from FRUIT tarball or zipball.
 
 
