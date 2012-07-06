@@ -43,15 +43,16 @@ module RakeBase
   $inc_dirs = [] if !$inc_dirs
 
   #---------v
-  # SRC = FileList['*.f90'].sort
-  # OBJ = SRC.ext('o')
-  #--
-  SRC = FileList[]
-  extensions.each{|fxx|
-    SRC.concat(FileList['*.' + fxx])
-  }
-  SRC.sort!
-  OBJ = SRC.ext('o')
+  if defined?(OBJ)
+    p OBJ
+  else
+    SRC = FileList[]
+    extensions.each{|fxx|
+      SRC.concat(FileList['*.' + fxx])
+    }
+    SRC.sort!
+    OBJ = SRC.ext('o')
+  end
   #---------^
 
   #-------------v

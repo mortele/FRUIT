@@ -32,4 +32,11 @@ Fruit_processor generates fruit_driver and fruit_basket and builds driver execut
   This test driver will be run there.
 
 Then we can start modifying the codes (in this sample mystack.f95 and Z_constants.f95) and run test again.
+In rakefile, you have to either load "rake_estimate.rb" or
+give dependencies between mystack.o and Z_constants.o.
+In the former way, directry may contain extra main program, 
+for example "dummy_main.f90". It will be ignored when building fruit_driver.
+
+
+
 

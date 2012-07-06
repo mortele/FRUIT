@@ -2,28 +2,31 @@
 
 extensions = ["f90", "f95", "f03", "f08"]
 
-file_gives_mod = {}
-mod_usedby_file = {}
+main = $main
+
+all_f = []
 extensions.each{|fxx|
   Dir::glob("*.#{fxx}").each{|filename|
-    open(filename, 'r'){|f|
-      f.each_line{|line|
-        if line =~ /^\s*use +(\w+)\b?/
-          mod = $1
-          if mod_usedby_file[ filename ]
-            mod_usedby_file[ filename ] << mod
-          else
-            mod_usedby_file[ filename ] = [mod]
-          end
-        end
-        if line =~ /^\s*module +(\w+)\b/
-          mod = $1
-          if mod =~ /procedure/ 
-            next
-          end
-          file_gives_mod[ mod ] = filename
-        end
-      }
+    all_f << filename
+  }
+}
+#puts "fortran files:"
+#puts all_f.join(" ")
+
+mod_in_f = {}
+f_uses_mod = {}
+
+all_f.each{|filename|
+  f_uses_mod[ filename ] = []
+  open(filename, 'r'){|f|
+    f.each_line{|line|
+      if line =~ /^\s*use +(\w+)\b?/
+        f_uses_mod[ filename ] << $1
+      end
+      if line =~ /^\s*module +(\w+)\b/
+        mod = $1
+        mod_in_f[ mod ] = filename unless mod =~ /procedure/ 
+      end
     }
   }
 }
@@ -37,18 +40,72 @@ def f_to_o(name, extensions)
   return nil
 end
 
-puts "Dependencies Estimated:"
-mod_usedby_file.each{|a|
-  needs = f_to_o(a[0], extensions)
-  a[1].uniq.each{|mod|
-    needed = f_to_o(file_gives_mod[ mod ], extensions)
-    if needed
-      print "  file '#{needs}' => '#{needed}'\n"
-      file needs => needed if defined?(Rake)
-    end
+forward = {}
+all_f.each{|f|
+  forward[ f ] = []
+  f_uses_mod[f].uniq.each{|a_mod|
+    forward[ f ] << mod_in_f[ a_mod ]
   }
 }
 
+puts "=========="
+puts "Dependencies Estimated:"
+all_f.each{|f|
+  next if forward[f].size == 0
 
+  needs = f_to_o(f, extensions)
+  needed = []
+  forward[f].each{|f_needed|
+    needed << f_to_o(f_needed, extensions)
+  }
+  needed_str = "['" + needed.join("', '") + "']"
+  print "  file '#{needs}' => #{needed_str}\n"
+  file needs => needed if defined?(Rake)
+}
 
+def get_needed(fortrans, forward)
+  f_add = []
+  fortrans.each{|f|
+    forward[f].each{|f_plus|
+      f_add << f_plus if !fortrans.index(f_plus)
+    }
+  }
+  if f_add.size == 0
+    return fortrans.uniq
+  end
+  get_needed(fortrans + f_add, forward)
+end
+
+needed = get_needed( [main], forward )
+
+def get_ordered(needed, forward, ordered = [])
+  f_add = []
+  needed.each{|f|
+    next if ordered.index(f)
+    if forward[f].size == 0
+      f_add << f
+    elsif ordered & forward[f] == forward[f]
+      f_add << f
+    end
+  }
+  if f_add.size == 0
+    return ordered.uniq
+  end 
+  get_ordered(needed, forward, ordered + f_add)
+end
+
+ordered_f = get_ordered(needed, forward)
+
+#replacing OBJ with ordered_o
+SRC = FileList[]
+ordered_f.each{|f|
+  SRC.concat(FileList[f])
+}
+OBJ = SRC.ext('o')
+
+puts "=========="
+puts "Files to be compiled:"
+puts " " + OBJ.join(" ")
+puts "=========="
+      
 #eof
