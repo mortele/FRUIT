@@ -43,9 +43,7 @@ module RakeBase
   $inc_dirs = [] if !$inc_dirs
 
   #---------v
-  if defined?(OBJ)
-    p OBJ
-  else
+  if not defined?(OBJ)
     SRC = FileList[]
     extensions.each{|fxx|
       SRC.concat(FileList['*.' + fxx])
@@ -54,6 +52,14 @@ module RakeBase
     OBJ = SRC.ext('o')
   end
   #---------^
+
+  SRC.each{|f|
+    f_obj = f.ext('o')
+    next if (f.to_s =~ /fruit_basket_gen\.f90$/)
+    next if (f.to_s =~ /fruit_driver_gen\.f90$/)
+    puts "rake_base.rb: Assuming " + f_obj.to_s + " => " + f.to_s
+    file f_obj.to_s => f.to_s
+  }
 
   #-------------v
   # assume a_test.fxx depends on a.fxx if a.fxx exists

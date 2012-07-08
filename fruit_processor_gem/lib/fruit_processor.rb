@@ -4,6 +4,7 @@ require 'rubygems'
 require 'rake'
 
 class FruitProcessor
+  attr_accessor :process_only
   
   def initialize
     @driver_program_name='fruit_driver_gen'
@@ -32,17 +33,18 @@ class FruitProcessor
   def load_files dir="."
     return if @spec_hash.size != 0
 
-#---
-#   @files = FileList["#{dir}/*_test.f90"] - FileList["#{dir}/~*_test.f90"] 
-#---
-    files = []
-    @extensions.each{|f| 
-      files.concat(
-        FileList["#{dir}/*_test." + f] - FileList["#{dir}/~*_test." + f] 
-      )
-    }
-    @files = files
-#---
+    @files = []
+    if @process_only
+      @process_only.each{|f|
+        @files.concat( FileList["#{dir}/#{f}"])
+      }
+    else
+      @extensions.each{|f| 
+        @files.concat(
+          FileList["#{dir}/*_test." + f] - FileList["#{dir}/~*_test." + f] 
+        )
+      }
+    end
 
     @files.each do |file|
       parse_method_names file

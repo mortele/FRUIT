@@ -4,7 +4,8 @@ require 'fruit_processor'
 include Rake::DSL if defined?(Rake::DSL)
 
 # Add this line at the beginning if there are generated code involved
-FruitProcessor.new.pre_process
+fp = FruitProcessor.new
+fp.pre_process
 
 $goal='calculator_fruit_driver'
 
@@ -12,16 +13,23 @@ $goal='calculator_fruit_driver'
 # spefify where the files are here:
 # It is in array, because order matters
 $lib_bases = [
-['fruit', FruitProcessor.new.build_dir],
-['calculator', FruitProcessor.new.build_dir]
+['fruit', fp.build_dir],
+['calculator', fp.build_dir]
 ]
 
 # if $build_dir is defined, then use build_dir
 
 task :default => [:spec]
 
+#-------- dependencies
+# Load rake_estimate.rb to estimate dependency.
+$main = "fruit_driver_gen.f90"
+load "#{fp.base_dir}/rake_estimate.rb"
+#-------
+# Otherwise
 # if one module has to be compiled after another module, specify like this:
 #file ['module_b_test.o']  => 'calculator_test.o'
+#-------
 
-load "#{FruitProcessor.new.base_dir}/rake_base.rb"
+load "#{fp.base_dir}/rake_base.rb"
 include RakeBase

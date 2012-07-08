@@ -28,6 +28,23 @@ class FruitProcessorTest < Test::Unit::TestCase
     assert_equal(1, files.grep(/myvector_test\.f03$/).length, "detect .f03 files")
   end
 
+  def test_process_only
+    fp = FruitProcessor.new
+    fp.process_only = ["a_test.f90"]
+    fp.process_only << "b_test.f90"
+ 
+    assert_equal(["a_test.f90", "b_test.f90"], fp.process_only)
+
+    fp.load_files "."
+    assert_equal(["./a_test.f90", "./b_test.f90"], fp.get_files)
+
+    spec_hash = fp.get_spec_hash_filename("./a_test.f90")
+    assert_equal(
+      ["test_aaa", "test_aaa2nd"], 
+      spec_hash["methods"]["name"],
+      "test subroutine test_aaaa")
+  end
+
   def test_test_module_name_from_file_path
     result = @fixture.test_module_name_from_file_path("./abc/def/ghi_jk.f90")
     assert_equal("ghi_jk", result)

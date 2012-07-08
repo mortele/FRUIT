@@ -20,12 +20,15 @@ all_f.each{|filename|
   f_uses_mod[ filename ] = []
   open(filename, 'r'){|f|
     f.each_line{|line|
-      if line =~ /^\s*use +(\w+)\b?/
+      if line =~ /^\s*use +(\w+)\b?/i
         f_uses_mod[ filename ] << $1
       end
-      if line =~ /^\s*module +(\w+)\b/
+      if line =~ /^\s*module +(\w+)\b/i
         mod = $1
-        mod_in_f[ mod ] = filename unless mod =~ /procedure/ 
+        mod_in_f[ mod ] = filename unless mod =~ /procedure/i
+      end
+      if line =~ /^\s*#if(n?)def +(\w+)\b/i
+        puts "macro not supported."
       end
     }
   }
@@ -44,7 +47,9 @@ forward = {}
 all_f.each{|f|
   forward[ f ] = []
   f_uses_mod[f].uniq.each{|a_mod|
-    forward[ f ] << mod_in_f[ a_mod ]
+    if mod_in_f[a_mod]
+      forward[ f ] << mod_in_f[ a_mod ]
+    end
   }
 }
 
@@ -66,6 +71,7 @@ all_f.each{|f|
 def get_needed(fortrans, forward)
   f_add = []
   fortrans.each{|f|
+    next if not forward[f]
     forward[f].each{|f_plus|
       f_add << f_plus if !fortrans.index(f_plus)
     }
@@ -80,12 +86,13 @@ needed = get_needed( [main], forward )
 
 def get_ordered(needed, forward, ordered = [])
   f_add = []
-  needed.each{|f|
+  (needed - ordered).each{|f|
     next if ordered.index(f)
     if forward[f].size == 0
       f_add << f
-    elsif ordered & forward[f] == forward[f]
+    elsif (ordered & forward[f]).sort == (forward[f]).sort
       f_add << f
+    else
     end
   }
   if f_add.size == 0
@@ -97,15 +104,17 @@ end
 ordered_f = get_ordered(needed, forward)
 
 #replacing OBJ with ordered_o
-SRC = FileList[]
-ordered_f.each{|f|
-  SRC.concat(FileList[f])
-}
-OBJ = SRC.ext('o')
-
-puts "=========="
-puts "Files to be compiled:"
-puts " " + OBJ.join(" ")
-puts "=========="
-      
+if defined?(FileList)
+  if ordered_f.size > 0
+    SRC = FileList[]
+    ordered_f.each{|f|
+      SRC.concat(FileList[f])
+    }
+    OBJ = SRC.ext('o')
+    puts "=========="
+    puts "Files to be compiled:"
+    puts " " + OBJ.join(" ")
+    puts "=========="
+  end
+end
 #eof

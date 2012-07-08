@@ -5,7 +5,8 @@ require 'rake/clean'
 include Rake::DSL if defined?(Rake::DSL)
 
 # Add this line at the beginning if there are generated code involved
-FruitProcessor.new.pre_process
+fp = FruitProcessor.new
+fp.pre_process
 
 $build_dir = ""  #If not set, build will be done in ../build/
 $goal = "fruit_driver_fxx.exe"
