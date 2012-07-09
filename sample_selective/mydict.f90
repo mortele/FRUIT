@@ -17,17 +17,17 @@ contains
     new_dict%num_keys = 0
   end subroutine new_mydict
 
-  subroutine mydict_add(a_dict, key, value)
+  subroutine mydict_add(a_dict, key, val)
     type(ty_mydict), pointer :: a_dict
     character(len = *), intent(in) :: key
-    character(len = *), intent(in) :: value
+    character(len = *), intent(in) :: val
     integer :: i
     logical :: if_set
  
     if_set = .false.
     do i = 1, a_dict%num_keys
       if (a_dict%keys(i) == key) then
-        a_dict%values(i) = value
+        a_dict%values(i) = val
         if_set = .true.
       endif
     enddo
@@ -37,14 +37,30 @@ contains
       endif
       a_dict%num_keys = a_dict%num_keys + 1
       a_dict%keys(  a_dict%num_keys) = key
-      a_dict%values(a_dict%num_keys) = value
+      a_dict%values(a_dict%num_keys) = val
     endif
   end subroutine mydict_add
+
+  subroutine value_of_key(a_dict, key, got)
+    type(ty_mydict), pointer :: a_dict
+    character(len = *), intent(in) :: key
+    character(len = *), intent(out) :: got
+
+    integer :: i
+
+    do i = 1, a_dict%num_keys
+      if (a_dict%keys(i) == key) then
+        got = a_dict%values(i)
+        return 
+      endif
+    enddo
+    got = "null"
+  end subroutine value_of_key
 
   subroutine extend(a_dict)
     type(ty_mydict), pointer :: a_dict
     character(len = KEYLEN), allocatable :: tmp_keys(:)
-    character(len = KEYLEN), allocatable :: tmp_values(:)
+    character(len = VALLEN), allocatable :: tmp_values(:)
     integer :: i
 
     i = a_dict%num_keys
@@ -61,8 +77,8 @@ contains
 
     allocate(a_dict%keys(  i * 2))
     allocate(a_dict%values(i * 2))
-    tmp_keys(1:i)   = a_dict%keys(1:i)
-    tmp_values(1:i) = a_dict%values(1:i)
+    a_dict%keys(1:i)   = tmp_keys(1:i)
+    a_dict%values(1:i) = tmp_values(1:i) 
   end subroutine extend
 end module mydict
 

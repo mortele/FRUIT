@@ -24,4 +24,18 @@ contains
     call assert_equals("some_key", a_dict%keys(1))
     call assert_equals("some_value", a_dict%values(1))
   end subroutine test_mydict_add
+
+  subroutine test_value_of_key
+    type(ty_mydict), pointer :: a_dict
+    character(len = VALLEN) :: val
+
+    nullify(a_dict)
+    call new_mydict(a_dict)
+    call mydict_add(a_dict, "some_key", "some_value")
+    call mydict_add(a_dict, "2nd_key", "2nd_value")
+    call mydict_add(a_dict, "3rd_key", "3rd_value")
+
+    call value_of_key(a_dict, "2nd_key", val)
+    call assert_equals("2nd_value", val)
+  end subroutine test_value_of_key
 end module mydict_test

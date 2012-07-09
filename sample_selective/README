@@ -1,0 +1,24 @@
+
+This sample demonstrates that
+fruit_basket_gen.f90 calls only specifiled testers (*_test.f90).
+
+While there are two tester files
+  constant_test.f90 and 
+  mydict_test.f90,
+only the latter is specified in rakefile as
+
+  fp.process_only = FileList["mydict_test.f90"]
+
+Then fruit_processor scans only the specified file and
+resulting fruit_basket_gen.f90 and fruit_driver_selective
+calls only testers in mydict_test.f90.
+
+By the way, dummy_main.f90 is here just to show
+it does not conflict with fruit_driver_gen.f90 while compiling.
+If you want to compile dummy_main.f90,
+
+  gfortran constants.f90 mydict.f90 dummy_main.f90
+
+will work.
+
+

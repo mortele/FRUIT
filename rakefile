@@ -9,7 +9,9 @@ $build_dir = "#{$base_dir}/build"
 
 task :default => [
   :ruby_test, :in_3_minutes,
-  :anchor_root, :dirs, :compile, :sample, :self_test]
+  :sample_selective, 
+  :anchor_root, :dirs, :compile, :sample, 
+  :self_test]
 # :test is not included as :self_test covers tests done in :test.
 # :sample_single_dir is not included
 #    because fortran compiler must recognize .f95 extension.
@@ -57,7 +59,7 @@ end
 
 desc "Test of fruit_processor.rb."
 task :ruby_test do
-  sh 'cd fruit_processor_gem; rake'
+  sh 'cd fruit_processor_gem; rake test'
 end
 
 desc "Compile a sample of multi-directry test."
@@ -75,6 +77,13 @@ desc "Compile a sample of single-directry test."
 task :sample_single_dir => :fruit_f90 do
   dir = "sample_single_dir"
   sh "cp src/fruit.f90 src/fruit_util.f90 rake_base.rb rake_estimate.rb #{dir}"
+  sh "cd #{dir}; rake"
+end
+
+desc "Compile a sample which complies only specifiled testerss."
+task :sample_selective => :fruit_f90 do
+  dir = "sample_selective"
+  sh "cp src/fruit.f90 src/fruit_util.f90 #{dir}"
   sh "cd #{dir}; rake"
 end
 

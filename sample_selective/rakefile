@@ -6,6 +6,7 @@ include Rake::DSL if defined?(Rake::DSL)
 
 # Add this line at the beginning if there are generated code involved
 fp = FruitProcessor.new
+fp.process_only = FileList["mydict_test.f90"] #only files here are processed.
 fp.pre_process
 
 $build_dir = ""  #If not set, build will be done in ../build/
@@ -20,10 +21,8 @@ end
 CLEAN.include($goal)
 
 $main = "fruit_driver_gen.f90"
-#load "rake_estimate.rb"
-load "#{fp.base_dir}/rake_estimate.rb"
+load "../rake_estimate.rb"
 
-#load "rake_base.rb"
-load "#{fp.base_dir}/rake_base.rb"
+load "../rake_base.rb"
 include RakeBase
 
