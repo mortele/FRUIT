@@ -825,12 +825,8 @@ contains
     logical, intent (in) :: var1, var2
     
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
 
         if (var1 .neqv. var2) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1), &
           & to_s(var2), message)
@@ -847,12 +843,8 @@ contains
     logical, intent (in) :: var1(n), var2(n)
     
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
     do i = 1, n
         if (var1(i) .neqv. var2(i)) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1(i)), &
           & to_s(var2(i)), '1d array has difference ' // message)
@@ -869,13 +861,9 @@ contains
     logical, intent (in) :: var1(n, m), var2(n, m)
     
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
     do j = 1, m
       do i = 1, n
         if (var1(i, j) .neqv. var2(i, j)) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1(i, j)), &
           & to_s(var2(i, j)), '2d array has difference ' // message)
@@ -892,12 +880,8 @@ contains
     character (len = *), intent (in) :: var1, var2
     
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
 
         if (trim(strip(var1)) /= trim(strip(var2))) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1), &
           & to_s(var2), message)
@@ -914,12 +898,8 @@ contains
     character (len = *), intent (in) :: var1(n), var2(n)
     
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
     do i = 1, n
         if (trim(strip(var1(i))) /= trim(strip(var2(i)))) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1(i)), &
           & to_s(var2(i)), '1d array has difference ' // message)
@@ -936,13 +916,9 @@ contains
     character (len = *), intent (in) :: var1(n, m), var2(n, m)
     
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
     do j = 1, m
       do i = 1, n
         if (trim(strip(var1(i, j))) /= trim(strip(var2(i, j)))) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1(i, j)), &
           & to_s(var2(i, j)), '2d array has difference ' // message)
@@ -959,12 +935,8 @@ contains
     integer, intent (in) :: var1, var2
     
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
 
         if (var1 /= var2) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1), &
           & to_s(var2), message)
@@ -981,12 +953,8 @@ contains
     integer, intent (in) :: var1(n), var2(n)
     
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
     do i = 1, n
         if (var1(i) /= var2(i)) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1(i)), &
           & to_s(var2(i)), '1d array has difference ' // message)
@@ -1003,13 +971,9 @@ contains
     integer, intent (in) :: var1(n, m), var2(n, m)
     
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
     do j = 1, m
       do i = 1, n
         if (var1(i, j) /= var2(i, j)) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1(i, j)), &
           & to_s(var2(i, j)), '2d array has difference ' // message)
@@ -1026,12 +990,8 @@ contains
     real, intent (in) :: var1, var2
     
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
 
         if (var1 /= var2) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1), &
           & to_s(var2), message)
@@ -1047,12 +1007,8 @@ contains
     real, intent (in) :: var1, var2
     real, intent (in) :: delta
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
 
         if (abs(var1 - var2) > delta) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1), &
           & to_s(var2), message)
@@ -1069,12 +1025,8 @@ contains
     real, intent (in) :: var1(n), var2(n)
     
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
     do i = 1, n
         if (var1(i) /= var2(i)) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1(i)), &
           & to_s(var2(i)), '1d array has difference ' // message)
@@ -1091,12 +1043,8 @@ contains
     real, intent (in) :: var1(n), var2(n)
     real, intent (in) :: delta
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
     do i = 1, n
         if (abs(var1(i) - var2(i)) > delta) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1(i)), &
           & to_s(var2(i)), '1d array has difference ' // message)
@@ -1113,13 +1061,9 @@ contains
     real, intent (in) :: var1(n, m), var2(n, m)
     
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
     do j = 1, m
       do i = 1, n
         if (var1(i, j) /= var2(i, j)) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1(i, j)), &
           & to_s(var2(i, j)), '2d array has difference ' // message)
@@ -1137,13 +1081,9 @@ contains
     real, intent (in) :: var1(n, m), var2(n, m)
     real, intent (in) :: delta
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
     do j = 1, m
       do i = 1, n
         if (abs(var1(i, j) - var2(i, j)) > delta) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1(i, j)), &
           & to_s(var2(i, j)), '2d array has difference ' // message)
@@ -1160,12 +1100,8 @@ contains
     double precision, intent (in) :: var1, var2
     
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
 
         if (var1 /= var2) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1), &
           & to_s(var2), message)
@@ -1181,12 +1117,8 @@ contains
     double precision, intent (in) :: var1, var2
     double precision, intent (in) :: delta
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
 
         if (abs(var1 - var2) > delta) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1), &
           & to_s(var2), message)
@@ -1203,12 +1135,8 @@ contains
     double precision, intent (in) :: var1(n), var2(n)
     
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
     do i = 1, n
         if (var1(i) /= var2(i)) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1(i)), &
           & to_s(var2(i)), '1d array has difference ' // message)
@@ -1225,12 +1153,8 @@ contains
     double precision, intent (in) :: var1(n), var2(n)
     double precision, intent (in) :: delta
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
     do i = 1, n
         if (abs(var1(i) - var2(i)) > delta) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1(i)), &
           & to_s(var2(i)), '1d array has difference ' // message)
@@ -1247,13 +1171,9 @@ contains
     double precision, intent (in) :: var1(n, m), var2(n, m)
     
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
     do j = 1, m
       do i = 1, n
         if (var1(i, j) /= var2(i, j)) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1(i, j)), &
           & to_s(var2(i, j)), '2d array has difference ' // message)
@@ -1271,13 +1191,9 @@ contains
     double precision, intent (in) :: var1(n, m), var2(n, m)
     double precision, intent (in) :: delta
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
     do j = 1, m
       do i = 1, n
         if (abs(var1(i, j) - var2(i, j)) > delta) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1(i, j)), &
           & to_s(var2(i, j)), '2d array has difference ' // message)
@@ -1294,12 +1210,8 @@ contains
     complex(kind=kind(1.0D0)), intent (in) :: var1, var2
     
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
 
         if (var1 /= var2) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1), &
           & to_s(var2), message)
@@ -1315,12 +1227,8 @@ contains
     complex(kind=kind(1.0D0)), intent (in) :: var1, var2
     double precision, intent (in) :: delta
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
 
         if (abs(var1 - var2) > delta) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1), &
           & to_s(var2), message)
@@ -1337,12 +1245,8 @@ contains
     complex(kind=kind(1.0D0)), intent (in) :: var1(n), var2(n)
     
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
     do i = 1, n
         if (var1(i) /= var2(i)) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1(i)), &
           & to_s(var2(i)), '1d array has difference ' // message)
@@ -1359,12 +1263,8 @@ contains
     complex(kind=kind(1.0D0)), intent (in) :: var1(n), var2(n)
     double precision, intent (in) :: delta
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
     do i = 1, n
         if (abs(var1(i) - var2(i)) > delta) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1(i)), &
           & to_s(var2(i)), '1d array has difference ' // message)
@@ -1381,13 +1281,9 @@ contains
     complex(kind=kind(1.0D0)), intent (in) :: var1(n, m), var2(n, m)
     
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
     do j = 1, m
       do i = 1, n
         if (var1(i, j) /= var2(i, j)) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1(i, j)), &
           & to_s(var2(i, j)), '2d array has difference ' // message)
@@ -1405,13 +1301,9 @@ contains
     complex(kind=kind(1.0D0)), intent (in) :: var1(n, m), var2(n, m)
     double precision, intent (in) :: delta
     character(len = *), intent (in), optional :: message
-    logical :: same_so_far
-
-    same_so_far = .true.
     do j = 1, m
       do i = 1, n
         if (abs(var1(i, j) - var2(i, j)) > delta) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1(i, j)), &
           & to_s(var2(i, j)), '2d array has difference ' // message)

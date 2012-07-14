@@ -43,9 +43,9 @@ contains
     !It's parsed by fruit_processor.
     !Fortran compiler will complain that this variable is unused.
     character(len=*), parameter :: spec = 'calculation should produce 4.0&
-    & when 2.0 &
-      and 2.0 &
-      are inputs'
+     & when 2.0 &
+     &and 2.0 &
+     &are inputs'
 
     real:: result, a, b
     a=2.0

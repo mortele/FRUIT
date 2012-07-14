@@ -63,9 +63,14 @@ all_f.each{|f|
   forward[f].each{|f_needed|
     needed << f_to_o(f_needed, extensions)
   }
+  file needs => needed if defined?(Rake)
+
+  #for rake
   needed_str = "['" + needed.join("', '") + "']"
   print "  file '#{needs}' => #{needed_str}\n"
-  file needs => needed if defined?(Rake)
+
+#   #for makefile
+#   print needs + " : " + needed.join(" ") + "\n"
 }
 
 def get_needed(fortrans, forward)
@@ -81,8 +86,6 @@ def get_needed(fortrans, forward)
   end
   get_needed(fortrans + f_add, forward)
 end
-
-needed = get_needed( [main], forward )
 
 def get_ordered(needed, forward, ordered = [])
   f_add = []
@@ -101,20 +104,24 @@ def get_ordered(needed, forward, ordered = [])
   get_ordered(needed, forward, ordered + f_add)
 end
 
-ordered_f = get_ordered(needed, forward)
+if defined?(main) and main
+  needed = get_needed( [main], forward )
+  ordered_f = get_ordered(needed, forward)
 
-#replacing OBJ with ordered_o
-if defined?(FileList)
-  if ordered_f.size > 0
-    SRC = FileList[]
-    ordered_f.each{|f|
-      SRC.concat(FileList[f])
-    }
-    OBJ = SRC.ext('o')
-    puts "=========="
-    puts "Files to be compiled:"
-    puts " " + OBJ.join(" ")
-    puts "=========="
+  #replacing OBJ with ordered_o
+  if defined?(FileList)
+    if ordered_f.size > 0
+      SRC = FileList[]
+      ordered_f.each{|f|
+        SRC.concat(FileList[f])
+      }
+      OBJ = SRC.ext('o')
+      puts "=========="
+      puts "Files to be compiled for main #{main}:"
+      puts " " + OBJ.join(" ")
+      puts "=========="
+    end
   end
 end
+
 #eof

@@ -92,6 +92,7 @@ def generate_assertation(t, dim, has_range, equals = "1")
     interface_eq  = ""
     interface_neq = "    module procedure " + name + "\n"
   end
+
   f90str = <<-"END"
   !------ #{dim}_#{t} ------
   subroutine #{name}(var1, var2, #{size}#{delta}message)
@@ -99,29 +100,39 @@ def generate_assertation(t, dim, has_range, equals = "1")
     #{t_def[t]}, intent (in) :: var1#{nm}, var2#{nm}
     #{del_def_line}
     character(len = *), intent (in), optional :: message
+  END
+
+  if (not equals)
+    f90str += <<-"END"
     logical :: same_so_far
 
     same_so_far = .true.
-#{loop_from}
-  END
+    END
+  end
+
+  f90str += (loop_from + "\n")
 
   if (equals)
     f90str += <<-"END"
         if (#{condition}) then
-          same_so_far = .false.
           call failed_assert_action(&
           & to_s(var1#{ij}), &
           & to_s(var2#{ij}), #{pre_message}message)
           return
         endif
-#{loop_to}
     END
   else
     f90str += <<-"END"
         if (#{condition}) then
           same_so_far = .false.
         endif
-#{loop_to}
+    END
+  end
+
+  f90str += (loop_to + "\n")
+
+  if (not equals)
+    f90str += <<-"END"
     if (same_so_far) then
       call failed_assert_action(&
       & to_s(var1#{ij_1st}), &
@@ -130,6 +141,7 @@ def generate_assertation(t, dim, has_range, equals = "1")
     endif
     END
   end
+
     f90str += <<-"END"
     call add_success
   end subroutine #{name}
