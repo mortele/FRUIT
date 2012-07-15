@@ -188,6 +188,7 @@ class FruitProcessor
       f.write "  call fruit_basket\n"
       f.write "  call fruit_summary\n"
       f.write "  call fruit_summary_xml\n"
+      f.write "  call fruit_finalize\n"
       f.write "end program #{@driver_program_name}\n"
     end
   end

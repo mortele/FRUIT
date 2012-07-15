@@ -3,8 +3,8 @@ module mydict
   implicit none
 
   type ty_mydict
-    character(len = KEYLEN), pointer :: keys(:)
-    character(len = VALLEN), pointer :: values(:)
+    character(len = KEYLEN), pointer :: keys(:)  ! => null()
+    character(len = VALLEN), pointer :: values(:) ! => null()
     integer :: num_keys
   end type ty_mydict
 contains
@@ -16,6 +16,15 @@ contains
     allocate(new_dict%values(1))
     new_dict%num_keys = 0
   end subroutine new_mydict
+
+  subroutine mydict_final(dict)
+    type(ty_mydict), pointer :: dict
+
+    !! if (associated(dict%keys) then
+    deallocate(dict%keys)
+    deallocate(dict%values)
+    deallocate(dict)
+  end subroutine mydict_final
 
   subroutine mydict_add(a_dict, key, val)
     type(ty_mydict), pointer :: a_dict

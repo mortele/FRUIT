@@ -93,6 +93,7 @@ module fruit
   public :: override_stdout, end_override_stdout
   public :: stash_test_suite, restore_test_suite
   public :: get_messages
+  public :: fruit_finalize
 
   interface initializeFruit
      module procedure obsolete_initializeFruit_
@@ -209,6 +210,10 @@ module fruit
   interface get_case_name
     module procedure get_case_name_
   end interface
+
+  interface fruit_finalize
+    module procedure fruit_finalize_
+  end interface
 contains
 
   subroutine init_fruit
@@ -225,6 +230,13 @@ contains
       allocate(message_array(MSG_ARRAY_INCREMENT))
     end if
   end subroutine init_fruit
+
+
+  subroutine fruit_finalize_
+    if (allocated(message_array)) then
+      deallocate(message_array)
+    endif
+  end subroutine fruit_finalize_
 
   subroutine init_fruit_xml_
     open (XML_OPEN, file = xml_filename)
@@ -662,12 +674,15 @@ contains
     successful_assert_count = stashed_suite%successful_assert_count
     failed_assert_count     = stashed_suite%failed_assert_count
 
-    deallocate(message_array)
     message_index = stashed_suite%message_index
     message_index_from = stashed_suite%message_index_from
     current_max  = stashed_suite%current_max
-    allocate(message_array(current_max))
-    message_array(1:message_index) = stashed_suite%message_array(1:message_index)
+
+    deallocate(message_array)
+    allocate(  message_array(current_max))
+    message_array(1:message_index) = &
+             & stashed_suite%message_array(1:message_index)
+    deallocate(stashed_suite%message_array)
 
     successful_case_count = stashed_suite%successful_case_count
     failed_case_count     = stashed_suite%failed_case_count
