@@ -28,14 +28,14 @@ contains
   end subroutine mystack_final
 
   function mystack_length(sta)
-    type(ty_mystack) :: sta
+    type(ty_mystack), intent(in) :: sta
     integer :: mystack_length
 
     mystack_length = sta%length
   end function mystack_length
   
   subroutine mystack_push(sta, value)
-    type(ty_mystack) :: sta
+    type(ty_mystack), intent(inout) :: sta
     real, intent(in) :: value
     integer :: new_length
     real, allocatable :: save_value(:)
@@ -65,7 +65,7 @@ contains
   end subroutine mystack_push
   
   subroutine mystack_pull(sta, value)
-    type(ty_mystack) :: sta
+    type(ty_mystack), intent(inout) :: sta
     real, intent(out) :: value
 
     if (sta%length <= 0) then

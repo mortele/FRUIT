@@ -4,6 +4,36 @@ module fruit_self_test
 
   character(len = *), parameter :: STDOUTNAME = "override_stdout.txt"
 contains
+  subroutine test_linechar_count
+    character(len = 100) :: line_read(1:5)
+    character(len = 100) :: expected
+    integer :: i
+
+    do i = 1, 39
+      expected(i * 2 - 1: i * 2) = ".F"
+    enddo
+
+    call override_stdout(20, STDOUTNAME)
+      call stash_test_suite
+        do i = 1, 100 !200 = 78 * 2 + 44, 78 is MAX_MARKS_PER_LINE
+          call assert_equals(.true., .true.)
+          call assert_equals(.true., .false.)
+        enddo
+      call restore_test_suite
+    call end_override_stdout
+
+    open (20, file = STDOUTNAME)
+    do i = 1, 3
+      read (20, '(a)') line_read(i)
+    enddo
+    close(20)
+    call assert_equals(78, len_trim(line_read(1)))
+    call assert_equals(78, len_trim(line_read(2)))
+    call assert_equals(44, len_trim(line_read(3)))
+    call assert_equals(expected(1:78), line_read(1))
+    call assert_equals(expected(1:78), line_read(2))
+    call assert_equals(expected(1:44), line_read(3))
+  end subroutine test_linechar_count
 
   subroutine test_assert_equals
     character(len = 500) :: line_read

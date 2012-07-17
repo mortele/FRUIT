@@ -27,10 +27,6 @@ module fruit
   integer, parameter :: XML_WORK = 21
   integer, parameter :: NUMBER_LENGTH = 10
 
-  integer, private, save :: message_index = 1
-  integer, private, save :: message_index_from = 1
-  integer, private, save :: current_max = 50
-
   character (len = *), parameter :: xml_filename     = "result.xml"
   character (len = *), parameter :: xml_filename_work = "result_tmp.xml"
 
@@ -41,8 +37,14 @@ module fruit
 
   character(*), parameter :: DEFAULT_CASE_NAME = '_not_set_'
 
+  !---------- save ----------
   integer, private, save :: successful_assert_count = 0
   integer, private, save :: failed_assert_count = 0
+
+  integer, private, save :: message_index = 1
+  integer, private, save :: message_index_from = 1
+  integer, private, save :: current_max = 50
+
   character (len = MSG_LENGTH), private, allocatable :: message_array(:)
   character (len = MSG_LENGTH), private, save :: msg = '[unit name not set from set_name]: '
   character (len = MSG_LENGTH), private, save :: case_name  = DEFAULT_CASE_NAME
@@ -52,8 +54,9 @@ module fruit
   integer, private, save :: testCaseIndex = 1
   logical, private, save :: last_passed = .false.
   logical, private, save :: case_passed = .false.
-
   integer, private, save :: case_time_from = 0
+  integer, private, save :: linechar_count = 0
+  !---------- save ----------
 
   type ty_stack
     integer :: successful_assert_count
@@ -62,17 +65,19 @@ module fruit
     integer :: message_index
     integer :: message_index_from
     integer :: current_max
+
     character (len = MSG_LENGTH), pointer :: message_array(:)
+    character (len = MSG_LENGTH) :: case_name !  = DEFAULT_CASE_NAME
 
     integer :: successful_case_count
     integer :: failed_case_count
     integer :: testCaseIndex
-
-    character (len = MSG_LENGTH) :: case_name !  = DEFAULT_CASE_NAME
     logical :: last_passed
     logical :: case_passed
     integer :: case_time_from
+    integer :: linechar_count
   end type ty_stack
+
   type(ty_stack), save :: stashed_suite
 
   public :: &
@@ -477,6 +482,7 @@ contains
 
     last_passed = .true.
     case_passed = .true.
+    linechar_count = 0  !! reset linechar_count for each test case.
     message_index_from = message_index
     call system_clock(case_time_from)
 
@@ -585,7 +591,9 @@ contains
   ! Private, helper routine to wrap lines of success/failed marks
   subroutine output_mark_( chr )
     character(1), intent(in) :: chr
-    integer, save :: linechar_count = 0
+  !!  integer, save :: linechar_count = 0
+  !!  Definition of linechar_count is moved to module,
+  !!  so that it can be stashed and restored.
 
     linechar_count = linechar_count + 1
     if ( linechar_count .lt. MAX_MARKS_PER_LINE ) then
@@ -780,6 +788,8 @@ contains
                   case_passed = .false.
     stashed_suite%case_time_from = case_time_from
                   case_time_from = 0
+    stashed_suite%linechar_count = linechar_count     
+                  linechar_count = 0
   end subroutine stash_test_suite
 
   subroutine restore_test_suite
@@ -804,6 +814,7 @@ contains
     last_passed        = stashed_suite%last_passed
     case_passed        = stashed_suite%case_passed
     case_time_from     = stashed_suite%case_time_from
+    linechar_count     = stashed_suite%linechar_count
   end subroutine restore_test_suite
 
   subroutine end_override_stdout_

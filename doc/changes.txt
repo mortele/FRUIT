@@ -1,3 +1,79 @@
+-----------
+FRUIT 2.9.1
+-----------
+
++ Selective build
+
+When there are several *_test.f90 files,
+all these tester files were compiled build fruit driver.
+Method "process_only" is added to fruit_processor.
+New sample "sample_selective" demonstrates it.
+File(s) to compile is given in
+
+ fp.process_only = FileList["mydict_test.f90"]
+
+line of sample_selective/rakefile.
+
+
++ Estimation of dependencies
+
+When there was dependency between fortran files,
+users had to write it in rakefile.
+In this release, a new script "rake_estimate.rb" is added. 
+It scans "module ..." lines and "use ..." lines
+and estimates dependencies between Fortran files.
+To use it, include it from rakefile.
+Examples are
+* sample/test/rakefile
+* sample_selective/rakefile
+* sample_single_dir/rakefile
+
+
++ descriptions of rake target
+
+Descriptions of rake target is added to rakefile.
+Try "rake -T" to see the list of descriptios.
+
+
++ Self-tests
+
+A number of self-tests for fruit.f90 are added as 
+  self_test/various_asserts_test.f90
+
+
++ Generator of fruit.f90 
+
+To support various assertions for various types
+(logical, real, double, complex-double, integer),
+dimensions (0d, 1d, 2d) and equals/not-equals,
+fruit.f90 is now generated using 
+src/fruit_f90_generator.rb and src/fruit_f90_source.txt.
+
+
++ Deallocate
+
+Array for messages used in fruit.f90 was allocated but
+not deallocated. Some compiler report it as memory error.
+For deallocation of it, subroutine "fruit_finalize" is added to fruit.f90.
+It deallocate the array for messages.
+Corresponding memory leak while running self-test is fixed.
+
+
++ Error fixed
+
+There was regression in FRUIT 2.9.
+When Fortran source is updated and older corresponding
+object file exists, rake did not recompile the source. 
+It is fixed in rake_base.rb.
+
+
++ ruby 1.9.3 
+
+In addition to ruby 1.8.7, FRUIT works on ruby 1.9.3.
+
+
+
+
 ---------
 FRUIT 2.9
 ---------
