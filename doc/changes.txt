@@ -4,9 +4,11 @@ FRUIT 2.9.1
 
 + Selective build
 
-When there are several *_test.f90 files,
-all these tester files were compiled build fruit driver.
-Method "process_only" is added to fruit_processor.
+When there are several *_test.f90 files in a directry,
+all these tester files were compiled to build fruit driver.
+One may want to run only few of the tester files.
+To compile only selected tester files, 
+method "process_only" is added to fruit_processor.
 New sample "sample_selective" demonstrates it.
 File(s) to compile is given in
 
@@ -15,18 +17,33 @@ File(s) to compile is given in
 line of sample_selective/rakefile.
 
 
++ When main file exists in directry 
+
+Building fruit driver used to be failed when there was a main program
+(.f90 file with "program" ... "end program" statements).
+Build becomes possible by adding a line
+
+$main = "fruit_driver_gen.f90"
+
+to rakefile. It's demonstrated in samples
+  * sample_single_dir
+  * sample_selective
+In these samples main file (dummy_main.f90) is
+successfully ignored.
+
+
 + Estimation of dependencies
 
 When there was dependency between fortran files,
-users had to write it in rakefile.
+it had to be written it in rakefile.
 In this release, a new script "rake_estimate.rb" is added. 
 It scans "module ..." lines and "use ..." lines
 and estimates dependencies between Fortran files.
 To use it, include it from rakefile.
 Examples are
-* sample/test/rakefile
-* sample_selective/rakefile
-* sample_single_dir/rakefile
+  * sample/test/rakefile
+  * sample_selective/rakefile
+  * sample_single_dir/rakefile
 
 
 + descriptions of rake target
@@ -64,7 +81,8 @@ Corresponding memory leak while running self-test is fixed.
 There was regression in FRUIT 2.9.
 When Fortran source is updated and older corresponding
 object file exists, rake did not recompile the source. 
-It is fixed in rake_base.rb.
+To fix it, relation between Fortran files and object files
+are confirmed in rake_base.rb.
 
 
 + ruby 1.9.3 
