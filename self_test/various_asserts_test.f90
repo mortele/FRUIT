@@ -3,10 +3,11 @@ module various_asserts_test
   implicit none
 
   character(len = *), parameter :: STDOUTNAME = "override_stdout.txt"
+  integer, parameter :: MSG_LEN = 256
 contains
   subroutine test_assert_equals_0d
-    character(len = 500) :: line_read
-    character(len = 500) :: msgs(10)
+    character(len = MSG_LEN) :: line_read
+    character(len = MSG_LEN) :: msgs(10)
     integer :: failed_count
     integer :: total_count
 
@@ -47,8 +48,8 @@ contains
   end subroutine test_assert_equals_0d
 
   subroutine test_assert_equals_1d
-    character(len = 500) :: line_read
-    character(len = 500) :: msgs(6)
+    character(len = MSG_LEN) :: line_read
+    character(len = MSG_LEN) :: msgs(10)
     integer :: failed_count
     integer :: total_count
 
@@ -90,8 +91,8 @@ contains
   end subroutine test_assert_equals_1d
 
   subroutine test_assert_equals_1d_realdouble
-    character(len = 500) :: line_read
-    character(len = 500) :: msgs(6)
+    character(len = MSG_LEN) :: line_read
+    character(len = MSG_LEN) :: msgs(10)
     integer :: failed_count
     integer :: total_count
 
@@ -159,10 +160,10 @@ contains
   end subroutine test_assert_equals_1d_realdouble
 
   subroutine test_assert_equals_1d_complex
-    character(len = 500) :: line_read
+    character(len = MSG_LEN) :: line_read
     integer :: failed_count
     integer :: total_count
-    character(len = 500) :: msgs(6)
+    character(len = MSG_LEN) :: msgs(10)
 
     call override_stdout(20, STDOUTNAME)
       call stash_test_suite
@@ -209,8 +210,8 @@ contains
   end subroutine test_assert_equals_1d_complex
 
   subroutine test_assert_equals_2d
-    character(len = 500) :: line_read
-    character(len = 500) :: msgs(6)
+    character(len = MSG_LEN) :: line_read
+    character(len = MSG_LEN) :: msgs(10)
     integer :: failed_count
     integer :: total_count
     logical :: var1(4, 5)
@@ -267,8 +268,8 @@ contains
   end subroutine test_assert_equals_2d
 
   subroutine test_assert_equals_2d_real
-    character(len = 500) :: line_read
-    character(len = 500) :: msgs(6)
+    character(len = MSG_LEN) :: line_read
+    character(len = MSG_LEN) :: msgs(10)
     integer :: failed_count
     integer :: total_count
     real    :: var1(4, 5)
@@ -334,8 +335,8 @@ contains
 
 
   subroutine test_assert_equals_2d_complex
-    character(len = 500) :: line_read
-    character(len = 500) :: msgs(6)
+    character(len = MSG_LEN) :: line_read
+    character(len = MSG_LEN) :: msgs(10)
     integer :: failed_count
     integer :: total_count
     complex(kind = kind(1.d0)) :: var1(4, 5)
@@ -381,15 +382,16 @@ contains
   subroutine assert_string_has_string_tmp(str1, str2)
     character (len = *), intent(in) :: str1, str2
     logical :: has_string
+    character (len = MSG_LEN) :: str_message
 
     if (index(trim(str1), trim(str2)) /= 0) then
       has_string = .true.
     else
       has_string = .false.
     endif
-    call assert_true(has_string, &
-   &  "String '" // trim(str1) // "' should contain " // trim(str2) &
-   &)
+
+    str_message = "String '" // trim(str1) // "' should contain " // trim(str2)
+    call assert_true(has_string, str_message)
   end subroutine assert_string_has_string_tmp
 
 end module various_asserts_test

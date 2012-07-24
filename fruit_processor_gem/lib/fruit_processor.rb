@@ -175,6 +175,21 @@ class FruitProcessor
       end
     end
   end
+
+  def warn_method_names file_name
+    warned = []
+    File.open(file_name, 'r') do |source_file|
+      source_file.grep( /^\s*subroutine\s*(test\w+)\s*\(/i ) do
+        subroutine_name = $1
+        warned << subroutine_name
+      end
+    end
+    if warned
+      return warned 
+    else
+      return nil
+    end
+  end
   
   # look into all files lib_test_*.a in build_dir, then generate driver files
   def create_driver dir="."

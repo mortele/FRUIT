@@ -17,11 +17,16 @@ task :test => $goal do
   sh "./#{$goal}"
 end
 
+task :valgrind => $goal do
+  sh "valgrind --leak-check=full ./#{$goal}"
+end
+
 CLEAN.include($goal)
 
 #--- Either load it (experimental)
 $main = "fruit_driver_gen.f90"
 load "rake_estimate.rb"
+
 #--- or explicitly give dependencies
 # #File dependencies
 # file 'fruit.o' => ['fruit.f90', 'fruit_util.o']

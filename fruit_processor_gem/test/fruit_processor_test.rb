@@ -75,6 +75,16 @@ class FruitProcessorTest < Test::Unit::TestCase
     assert_equal(expected, spec_names[4])
   end
 
+  def test_warn_method_names
+    fp = FruitProcessor.new
+    warned_names = fp.warn_method_names("a_test.f90")
+    assert(defined?(warned_names))
+    if (warned_names)
+      assert_equal(["test_warned_if_argument"], warned_names)
+#      puts warned_names.to_s + " should be warned"
+    end
+  end
+
   def test_format_spec_fortran
     fp = FruitProcessor.new
 

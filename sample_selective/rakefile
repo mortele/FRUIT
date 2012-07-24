@@ -12,13 +12,23 @@ fp.pre_process
 $build_dir = ""  #If not set, build will be done in ../build/
 $goal = "fruit_driver_selective"
 
-task :default => [:test]
+task :default => [:dummy_main, :test]
 
 task :test => $goal do
   sh "./#{$goal}"
 end
 
+task :valgrind => $goal do
+  sh "valgrind --leak-check=full ./#{$goal}"
+end
+
+task :dummy_main do
+  sh "#{$compiler} constants.f90 mydict.f90 dummy_main.f90 -o dummy_main"
+  sh "./dummy_main"
+end
+
 CLEAN.include($goal)
+CLEAN.include("dummy_main")
 
 $main = "fruit_driver_gen.f90"
 load "../rake_estimate.rb"

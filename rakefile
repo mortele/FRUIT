@@ -8,7 +8,8 @@ $base_dir=Dir.pwd
 $build_dir = "#{$base_dir}/build"
 
 task :default => [
-  :ruby_test, :in_3_minutes,
+  :ruby_test, :rake_estimate_test,
+  :in_3_minutes,
   :sample_selective, 
   :anchor_root, :dirs, :compile, :sample, 
   :self_test]
@@ -28,6 +29,7 @@ CLEAN.include(FileList['**/*.o', '**/*.mod', '**/*.a', '**/*_gen.f90', '**/*frui
   'sample_selective/fruit.f90',
   'sample_selective/fruit_util.f90',
   'sample_selective/fruit_driver_selective',
+  'sample_selective/dummy_main',
   'self_test/fruit_self_test_driver',
   'self_test/override_stdout.txt',
   'fruit_processor_gem/pkg/fruit_processor-*/',
@@ -60,9 +62,19 @@ task :self_test => :compile do
 #  sh "cd \"#{$build_dir}\";./fruit_self_test_driver"
 end
 
+desc "Using valgrind do Self test of fruit.f90 and fruit_util.f90."
+task :self_test_valgrind => :compile do
+  sh 'cd self_test; rake valgrind'
+end
+
 desc "Test of fruit_processor.rb."
 task :ruby_test do
   sh 'cd fruit_processor_gem; rake test'
+end
+
+desc "Test of rake_estimate.rb"
+task :rake_estimate_test do
+  sh 'cd ruby_test; ruby rake_estimate_test.rb'
 end
 
 desc "Compile a sample of multi-directry test."
@@ -79,14 +91,18 @@ end
 desc "Compile a sample of single-directry test."
 task :sample_single_dir => :fruit_f90 do
   dir = "sample_single_dir"
-  sh "cp src/fruit.f90 src/fruit_util.f90 rake_base.rb rake_estimate.rb #{dir}"
+  sh "cd #{dir}; ln -fs ../src/fruit.f90"
+  sh "cd #{dir}; ln -fs ../src/fruit_util.f90"
+  sh "cd #{dir}; ln -fs ../rake_base.rb"
+  sh "cd #{dir}; ln -fs ../rake_estimate.rb"
   sh "cd #{dir}; rake"
 end
 
 desc "Compile a sample which complies only specifiled testerss."
 task :sample_selective => :fruit_f90 do
   dir = "sample_selective"
-  sh "cp src/fruit.f90 src/fruit_util.f90 #{dir}"
+  sh "cd #{dir}; ln -fs ../src/fruit.f90"
+  sh "cd #{dir}; ln -fs ../src/fruit_util.f90"
   sh "cd #{dir}; rake"
 end
 

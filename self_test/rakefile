@@ -20,8 +20,14 @@ $lib_bases = [
 
 task :default => [:run]
 
+desc "Compile self-test and run"
 task :run => [$goal] do
   sh ("./#{$goal}")
+end
+
+desc "Using Valgrind run self-test"
+task :valgrind => [$goal] do
+  sh ("valgrind --leak-check=full --show-reachable=yes ./#{$goal}")
 end
 
 CLEAN.include("fruit_self_test_driver", "override_stdout.txt")

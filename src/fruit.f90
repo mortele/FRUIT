@@ -873,7 +873,7 @@ contains
         if (var1(i) .neqv. var2(i)) then
           call failed_assert_action(&
           & to_s(var1(i)), &
-          & to_s(var2(i)), '1d array has difference ' // message)
+          & to_s(var2(i)), '1d array has difference, ' // message)
           return
         endif
     enddo
@@ -892,7 +892,7 @@ contains
         if (var1(i, j) .neqv. var2(i, j)) then
           call failed_assert_action(&
           & to_s(var1(i, j)), &
-          & to_s(var2(i, j)), '2d array has difference ' // message)
+          & to_s(var2(i, j)), '2d array has difference, ' // message)
           return
         endif
       enddo
@@ -928,7 +928,7 @@ contains
         if (trim(strip(var1(i))) /= trim(strip(var2(i)))) then
           call failed_assert_action(&
           & to_s(var1(i)), &
-          & to_s(var2(i)), '1d array has difference ' // message)
+          & to_s(var2(i)), '1d array has difference, ' // message)
           return
         endif
     enddo
@@ -947,7 +947,7 @@ contains
         if (trim(strip(var1(i, j))) /= trim(strip(var2(i, j)))) then
           call failed_assert_action(&
           & to_s(var1(i, j)), &
-          & to_s(var2(i, j)), '2d array has difference ' // message)
+          & to_s(var2(i, j)), '2d array has difference, ' // message)
           return
         endif
       enddo
@@ -983,7 +983,7 @@ contains
         if (var1(i) /= var2(i)) then
           call failed_assert_action(&
           & to_s(var1(i)), &
-          & to_s(var2(i)), '1d array has difference ' // message)
+          & to_s(var2(i)), '1d array has difference, ' // message)
           return
         endif
     enddo
@@ -1002,7 +1002,7 @@ contains
         if (var1(i, j) /= var2(i, j)) then
           call failed_assert_action(&
           & to_s(var1(i, j)), &
-          & to_s(var2(i, j)), '2d array has difference ' // message)
+          & to_s(var2(i, j)), '2d array has difference, ' // message)
           return
         endif
       enddo
@@ -1055,7 +1055,7 @@ contains
         if (var1(i) /= var2(i)) then
           call failed_assert_action(&
           & to_s(var1(i)), &
-          & to_s(var2(i)), '1d array has difference ' // message)
+          & to_s(var2(i)), '1d array has difference, ' // message)
           return
         endif
     enddo
@@ -1073,7 +1073,7 @@ contains
         if (abs(var1(i) - var2(i)) > delta) then
           call failed_assert_action(&
           & to_s(var1(i)), &
-          & to_s(var2(i)), '1d array has difference ' // message)
+          & to_s(var2(i)), '1d array has difference, ' // message)
           return
         endif
     enddo
@@ -1092,7 +1092,7 @@ contains
         if (var1(i, j) /= var2(i, j)) then
           call failed_assert_action(&
           & to_s(var1(i, j)), &
-          & to_s(var2(i, j)), '2d array has difference ' // message)
+          & to_s(var2(i, j)), '2d array has difference, ' // message)
           return
         endif
       enddo
@@ -1112,7 +1112,7 @@ contains
         if (abs(var1(i, j) - var2(i, j)) > delta) then
           call failed_assert_action(&
           & to_s(var1(i, j)), &
-          & to_s(var2(i, j)), '2d array has difference ' // message)
+          & to_s(var2(i, j)), '2d array has difference, ' // message)
           return
         endif
       enddo
@@ -1165,7 +1165,7 @@ contains
         if (var1(i) /= var2(i)) then
           call failed_assert_action(&
           & to_s(var1(i)), &
-          & to_s(var2(i)), '1d array has difference ' // message)
+          & to_s(var2(i)), '1d array has difference, ' // message)
           return
         endif
     enddo
@@ -1183,7 +1183,7 @@ contains
         if (abs(var1(i) - var2(i)) > delta) then
           call failed_assert_action(&
           & to_s(var1(i)), &
-          & to_s(var2(i)), '1d array has difference ' // message)
+          & to_s(var2(i)), '1d array has difference, ' // message)
           return
         endif
     enddo
@@ -1202,7 +1202,7 @@ contains
         if (var1(i, j) /= var2(i, j)) then
           call failed_assert_action(&
           & to_s(var1(i, j)), &
-          & to_s(var2(i, j)), '2d array has difference ' // message)
+          & to_s(var2(i, j)), '2d array has difference, ' // message)
           return
         endif
       enddo
@@ -1222,7 +1222,7 @@ contains
         if (abs(var1(i, j) - var2(i, j)) > delta) then
           call failed_assert_action(&
           & to_s(var1(i, j)), &
-          & to_s(var2(i, j)), '2d array has difference ' // message)
+          & to_s(var2(i, j)), '2d array has difference, ' // message)
           return
         endif
       enddo
@@ -1275,7 +1275,7 @@ contains
         if (var1(i) /= var2(i)) then
           call failed_assert_action(&
           & to_s(var1(i)), &
-          & to_s(var2(i)), '1d array has difference ' // message)
+          & to_s(var2(i)), '1d array has difference, ' // message)
           return
         endif
     enddo
@@ -1293,7 +1293,7 @@ contains
         if (abs(var1(i) - var2(i)) > delta) then
           call failed_assert_action(&
           & to_s(var1(i)), &
-          & to_s(var2(i)), '1d array has difference ' // message)
+          & to_s(var2(i)), '1d array has difference, ' // message)
           return
         endif
     enddo
@@ -1312,7 +1312,7 @@ contains
         if (var1(i, j) /= var2(i, j)) then
           call failed_assert_action(&
           & to_s(var1(i, j)), &
-          & to_s(var2(i, j)), '2d array has difference ' // message)
+          & to_s(var2(i, j)), '2d array has difference, ' // message)
           return
         endif
       enddo
@@ -1332,7 +1332,7 @@ contains
         if (abs(var1(i, j) - var2(i, j)) > delta) then
           call failed_assert_action(&
           & to_s(var1(i, j)), &
-          & to_s(var2(i, j)), '2d array has difference ' // message)
+          & to_s(var2(i, j)), '2d array has difference, ' // message)
           return
         endif
       enddo
@@ -1381,7 +1381,7 @@ contains
     if (same_so_far) then
       call failed_assert_action(&
       & to_s(var1(1)), &
-      & to_s(var2(1)), '1d array has no difference ' // message)
+      & to_s(var2(1)), '1d array has no difference, ' // message)
       return
     endif
     call add_success
@@ -1407,7 +1407,7 @@ contains
     if (same_so_far) then
       call failed_assert_action(&
       & to_s(var1(1, 1)), &
-      & to_s(var2(1, 1)), '2d array has no difference ' // message)
+      & to_s(var2(1, 1)), '2d array has no difference, ' // message)
       return
     endif
     call add_success
@@ -1454,7 +1454,7 @@ contains
     if (same_so_far) then
       call failed_assert_action(&
       & to_s(var1(1)), &
-      & to_s(var2(1)), '1d array has no difference ' // message)
+      & to_s(var2(1)), '1d array has no difference, ' // message)
       return
     endif
     call add_success
@@ -1480,7 +1480,7 @@ contains
     if (same_so_far) then
       call failed_assert_action(&
       & to_s(var1(1, 1)), &
-      & to_s(var2(1, 1)), '2d array has no difference ' // message)
+      & to_s(var2(1, 1)), '2d array has no difference, ' // message)
       return
     endif
     call add_success
@@ -1527,7 +1527,7 @@ contains
     if (same_so_far) then
       call failed_assert_action(&
       & to_s(var1(1)), &
-      & to_s(var2(1)), '1d array has no difference ' // message)
+      & to_s(var2(1)), '1d array has no difference, ' // message)
       return
     endif
     call add_success
@@ -1553,7 +1553,7 @@ contains
     if (same_so_far) then
       call failed_assert_action(&
       & to_s(var1(1, 1)), &
-      & to_s(var2(1, 1)), '2d array has no difference ' // message)
+      & to_s(var2(1, 1)), '2d array has no difference, ' // message)
       return
     endif
     call add_success
@@ -1623,7 +1623,7 @@ contains
     if (same_so_far) then
       call failed_assert_action(&
       & to_s(var1(1)), &
-      & to_s(var2(1)), '1d array has no difference ' // message)
+      & to_s(var2(1)), '1d array has no difference, ' // message)
       return
     endif
     call add_success
@@ -1647,7 +1647,7 @@ contains
     if (same_so_far) then
       call failed_assert_action(&
       & to_s(var1(1)), &
-      & to_s(var2(1)), '1d array has no difference ' // message)
+      & to_s(var2(1)), '1d array has no difference, ' // message)
       return
     endif
     call add_success
@@ -1673,7 +1673,7 @@ contains
     if (same_so_far) then
       call failed_assert_action(&
       & to_s(var1(1, 1)), &
-      & to_s(var2(1, 1)), '2d array has no difference ' // message)
+      & to_s(var2(1, 1)), '2d array has no difference, ' // message)
       return
     endif
     call add_success
@@ -1699,7 +1699,7 @@ contains
     if (same_so_far) then
       call failed_assert_action(&
       & to_s(var1(1, 1)), &
-      & to_s(var2(1, 1)), '2d array has no difference ' // message)
+      & to_s(var2(1, 1)), '2d array has no difference, ' // message)
       return
     endif
     call add_success
@@ -1769,7 +1769,7 @@ contains
     if (same_so_far) then
       call failed_assert_action(&
       & to_s(var1(1)), &
-      & to_s(var2(1)), '1d array has no difference ' // message)
+      & to_s(var2(1)), '1d array has no difference, ' // message)
       return
     endif
     call add_success
@@ -1793,7 +1793,7 @@ contains
     if (same_so_far) then
       call failed_assert_action(&
       & to_s(var1(1)), &
-      & to_s(var2(1)), '1d array has no difference ' // message)
+      & to_s(var2(1)), '1d array has no difference, ' // message)
       return
     endif
     call add_success
@@ -1819,7 +1819,7 @@ contains
     if (same_so_far) then
       call failed_assert_action(&
       & to_s(var1(1, 1)), &
-      & to_s(var2(1, 1)), '2d array has no difference ' // message)
+      & to_s(var2(1, 1)), '2d array has no difference, ' // message)
       return
     endif
     call add_success
@@ -1845,7 +1845,7 @@ contains
     if (same_so_far) then
       call failed_assert_action(&
       & to_s(var1(1, 1)), &
-      & to_s(var2(1, 1)), '2d array has no difference ' // message)
+      & to_s(var2(1, 1)), '2d array has no difference, ' // message)
       return
     endif
     call add_success
@@ -1915,7 +1915,7 @@ contains
     if (same_so_far) then
       call failed_assert_action(&
       & to_s(var1(1)), &
-      & to_s(var2(1)), '1d array has no difference ' // message)
+      & to_s(var2(1)), '1d array has no difference, ' // message)
       return
     endif
     call add_success
@@ -1939,7 +1939,7 @@ contains
     if (same_so_far) then
       call failed_assert_action(&
       & to_s(var1(1)), &
-      & to_s(var2(1)), '1d array has no difference ' // message)
+      & to_s(var2(1)), '1d array has no difference, ' // message)
       return
     endif
     call add_success
@@ -1965,7 +1965,7 @@ contains
     if (same_so_far) then
       call failed_assert_action(&
       & to_s(var1(1, 1)), &
-      & to_s(var2(1, 1)), '2d array has no difference ' // message)
+      & to_s(var2(1, 1)), '2d array has no difference, ' // message)
       return
     endif
     call add_success
@@ -1991,7 +1991,7 @@ contains
     if (same_so_far) then
       call failed_assert_action(&
       & to_s(var1(1, 1)), &
-      & to_s(var2(1, 1)), '2d array has no difference ' // message)
+      & to_s(var2(1, 1)), '2d array has no difference, ' // message)
       return
     endif
     call add_success

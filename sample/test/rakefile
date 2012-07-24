@@ -23,8 +23,8 @@ task :default => [:spec]
 
 #-------- dependencies
 # Load rake_estimate.rb to estimate dependency.
-$main = "fruit_driver_gen.f90"
 load "#{fp.base_dir}/rake_estimate.rb"
+
 #-------
 # Otherwise
 # if one module has to be compiled after another module, specify like this:

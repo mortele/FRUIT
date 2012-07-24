@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 
 def generate_assertation(t, dim, has_range, equals = "1")
   #---- variable type ------
@@ -52,7 +52,7 @@ def generate_assertation(t, dim, has_range, equals = "1")
     nm     = "(n)"
     loop_from = "    do i = 1, n"
     loop_to   = "    enddo"
-    pre_message = "'1d array #{trouble} ' // "
+    pre_message = "'1d array #{trouble}, ' // "
   elsif dim == "2d"
     name = base_name + "2d_" + t + "_"
     size = "n, m, "
@@ -65,7 +65,7 @@ def generate_assertation(t, dim, has_range, equals = "1")
                 "      do i = 1, n"
     loop_to   = "      enddo" + "\n" + 
                 "    enddo"
-    pre_message = "'2d array #{trouble} ' // "
+    pre_message = "'2d array #{trouble}, ' // "
   else
     raise
   end
