@@ -2,13 +2,15 @@
 
 
 class FruitRakeEstimate
-  attr_accessor :extensions, :forward, :all_f
+  attr_accessor :extensions, :forward, :all_f, :identifiers
 
 
   EXT_DEFAULT = ["f90", "f95", "f03", "f08"]
+  IDENTIFIERS_DEFAULT = []
 
   def initialize
     @extensions = EXT_DEFAULT
+    @identifiers = IDENTIFIERS_DEFAULT
   end
 
   def rake_dependency
@@ -40,17 +42,24 @@ class FruitRakeEstimate
 
     @all_f.each{|filename|
       f_uses_mod[ filename ] = []
+
+      macro_ifdef = nil
+      macro_ifndef = nil
       open(filename, 'r'){|f|
         f.each_line{|line|
-          if line =~ /^\s*use +(\w+)\b?/i
-            f_uses_mod[ filename ] << $1
+          if if_macro(macro_ifdef, macro_ifndef)
+            if line =~ /^\s*use +(\w+)\b?/i
+              f_uses_mod[ filename ] << $1
+            end
+            if line =~ /^\s*module +(\w+)\b*$/i
+              mod = $1
+              mod_in_f[ mod ] = filename unless mod =~ /procedure/i
+            end
           end
-          if line =~ /^\s*module +(\w+)\b/i
-            mod = $1
-            mod_in_f[ mod ] = filename unless mod =~ /procedure/i
-          end
-          if line =~ /^\s*#if(n?)def +(\w+)\b/i
-            puts "macro not supported."
+
+          if line =~ /^\s*#/
+            macro_ifdef, macro_ifndef = 
+              parse_sharp_line(line, macro_ifdef, macro_ifndef)
           end
         }
       }
@@ -64,8 +73,64 @@ class FruitRakeEstimate
         end
       }
     }
-#p @forward
     return @forward
+  end
+
+  def if_macro(macro_ifdef, macro_ifndef)
+    if macro_ifdef
+      return @identifiers.include?(macro_ifdef)
+    end
+
+    if macro_ifndef 
+      #return not(@identifiers.include?(macro_ifndef))
+      return !(@identifiers.include?(macro_ifndef))
+    end
+
+    return true
+  end
+
+  def parse_sharp_line(line, macro_ifdef, macro_ifndef)
+    if line =~ /^\s*#ifdef +(\w+)\b/i
+      if macro_ifdef or macro_ifndef
+        puts "FruitRakeEstimate: nested #ifdef not supported."
+      end
+      macro_ifdef = $1
+    end
+
+    if line =~ /^\s*#ifndef +(\w+)\b/i
+      if macro_ifdef or macro_ifndef
+        puts "FruitRakeEstimate: nested #ifdef not supported."
+      end
+      macro_ifndef = $1
+      ## puts "macro #ifndef found. flag [#{macro_ifndef}]"
+    end
+
+    if line =~ /^\s*#else\b/i
+      if macro_ifdef
+        macro_ifndef = macro_ifdef
+        macro_ifdef = nil
+      elsif macro_ifndef
+        macro_ifdef = macro_ifndef
+        macro_ifndef = nil
+      else
+        puts "FruitRakeEstimate: macro #endif unexpected here."
+      end
+    end
+
+    if line =~ /^\s*#endif\b/i
+      ## puts "macro #endif found."
+      if macro_ifdef
+        macro_ifdef = nil
+      elsif macro_ifndef
+        macro_ifndef = nil
+      else
+        puts "FruitRakeEstimate: macro #endif unexpected here."
+      end
+    end
+    if line =~ /^\s*#define +(\w+)\b/i
+      puts "FruitRakeEstimate: macro #define is not supported."
+    end 
+    return [macro_ifdef, macro_ifndef]
   end
 
   def apply_dependency

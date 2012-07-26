@@ -23,6 +23,21 @@ class FruitRakeEstimateTest < Test::Unit::TestCase
     assert_equal(["test_mod.f03"], forward["main.f90"])
   end
 
+  def test_set_forward_macro
+    esti = FruitRakeEstimate.new
+    forward = esti.set_forward
+    assert_equal([], forward["using_macro.f90"])
+    assert_equal(["sample08.f08"], forward["using_macro_else.f90"])
+  end
+
+  def test_set_forward_macro_set
+    esti = FruitRakeEstimate.new
+    esti.identifiers = ["USE_TEST_MOD"]
+    forward = esti.set_forward
+    assert_equal(["test_mod.f03"], forward["using_macro.f90"])
+    assert_equal(["test_mod.f03"], forward["using_macro_else.f90"])
+  end
+
   def test_f_to_o
     result = FruitRakeEstimate.new.f_to_o("abcdef.f03")
     assert_equal("abcdef.o", result)
