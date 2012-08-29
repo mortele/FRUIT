@@ -1,4 +1,28 @@
 -----------
+FRUIT 2.9.2
+-----------
+
++ Test of rake_estimate.rb
+
+A tester of rake_estimate.rb is added as ruby_test/rake_estimate_test.rb.
+
+
++ Change in rake_estimate.rb
+
+rake_estimate.rb is rewritten as a class FruitRakeEstimate.
+
+
++ Not copy but make symbolic links
+
+In the previous version, rakefile copies
+fortran files (fruit.f90, fruit_util.f90) and 
+ruby files (rake_base.rb, rake_estimate.rb) to directries
+"sample_single_dir", "sample_selective" and "in_3_minutes".
+Now symbolic links are made instead of copying files.
+
+
+
+-----------
 FRUIT 2.9.1
 -----------
 
