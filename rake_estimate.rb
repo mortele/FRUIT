@@ -35,7 +35,7 @@ class FruitRakeEstimate
   def set_forward
     mod_in_f = {}
     f_uses_mod = {}
-  
+
     if (!@all_f)
       set_all_f
     end
@@ -43,11 +43,11 @@ class FruitRakeEstimate
     @all_f.each{|filename|
       f_uses_mod[ filename ] = []
 
-      macro_ifdef = nil
-      macro_ifndef = nil
+      macro_stack = []
+
       open(filename, 'r'){|f|
         f.each_line{|line|
-          if if_macro(macro_ifdef, macro_ifndef)
+          if if_macro_stack(macro_stack)
             if line =~ /^\s*use +(\w+)\b?/i
               f_uses_mod[ filename ] << $1
             end
@@ -58,8 +58,7 @@ class FruitRakeEstimate
           end
 
           if line =~ /^\s*#/
-            macro_ifdef, macro_ifndef = 
-              parse_sharp_line(line, macro_ifdef, macro_ifndef)
+            macro_stack = parse_sharp_line_stack(line, macro_stack)
           end
         }
       }
@@ -69,68 +68,63 @@ class FruitRakeEstimate
       @forward[ f ] = []
       f_uses_mod[f].uniq.each{|a_mod|
         if mod_in_f[a_mod]
-          @forward[ f ] << mod_in_f[ a_mod ]
+          if mod_in_f[a_mod] != f
+            @forward[ f ] << mod_in_f[ a_mod ]
+          end
         end
       }
     }
     return @forward
   end
 
-  def if_macro(macro_ifdef, macro_ifndef)
-    if macro_ifdef
-      return @identifiers.include?(macro_ifdef)
-    end
-
-    if macro_ifndef 
-      #return not(@identifiers.include?(macro_ifndef))
-      return !(@identifiers.include?(macro_ifndef))
-    end
-
+  def if_macro_stack(macro_stack)
+    macro_stack.each{|item|
+      if item =~ /^#not#(.*)$/
+        not_item = $1
+        return false if (@identifiers.include?(not_item))
+      else
+        return false if !(@identifiers.include?(item))
+      end
+    }
     return true
   end
 
-  def parse_sharp_line(line, macro_ifdef, macro_ifndef)
+  def parse_sharp_line_stack(line, macro_stack)
     if line =~ /^\s*#ifdef +(\w+)\b/i
-      if macro_ifdef or macro_ifndef
-        puts "FruitRakeEstimate: nested #ifdef not supported."
-      end
-      macro_ifdef = $1
+      macro_stack.push($1)
     end
 
     if line =~ /^\s*#ifndef +(\w+)\b/i
-      if macro_ifdef or macro_ifndef
-        puts "FruitRakeEstimate: nested #ifdef not supported."
-      end
-      macro_ifndef = $1
-      ## puts "macro #ifndef found. flag [#{macro_ifndef}]"
+      str = "#not#" + $1
+      macro_stack.push(str)
     end
 
     if line =~ /^\s*#else\b/i
-      if macro_ifdef
-        macro_ifndef = macro_ifdef
-        macro_ifdef = nil
-      elsif macro_ifndef
-        macro_ifdef = macro_ifndef
-        macro_ifndef = nil
+      if macro_stack.size == 0
+        puts "FruitRakeEstimate: macro #else unexpected here."
       else
-        puts "FruitRakeEstimate: macro #endif unexpected here."
+        id_now = macro_stack.pop
+        if id_now =~ /^#not#(.*)$/
+          id_now = $1
+        else
+          id_now = "#not#" + id_now
+        end
+        macro_stack.push(id_now)
       end
     end
 
     if line =~ /^\s*#endif\b/i
-      ## puts "macro #endif found."
-      if macro_ifdef
-        macro_ifdef = nil
-      elsif macro_ifndef
-        macro_ifndef = nil
+      if macro_stack.size == 0
+        puts "FruitRakeEstimate: macro #else unexpected here."
       else
-        puts "FruitRakeEstimate: macro #endif unexpected here."
+        macro_stack.pop
       end
     end
+
     if line =~ /^\s*#define +(\w+)\b/i
       puts "FruitRakeEstimate: macro #define is not supported."
-    end 
-    return [macro_ifdef, macro_ifndef]
+    end
+    return macro_stack
   end
 
   def apply_dependency
@@ -139,7 +133,7 @@ class FruitRakeEstimate
 
     @all_f.each{|f|
       next if @forward[f].size == 0
-    
+
       needs = f_to_o(f)
       needed = []
 
@@ -147,18 +141,18 @@ class FruitRakeEstimate
         needed << f_to_o(f_needed)
       }
       file needs => needed if defined?(Rake)
-    
+
       #for rake
       needed_str = "['" + needed.join("', '") + "']"
       print "  file '#{needs}' => #{needed_str}\n"
-    
+
     #   #for makefile
     #   print needs + " : " + needed.join(" ") + "\n"
     }
     puts "=========="
   end
 
-  
+
   def f_to_o(name)
     @extensions.each{|fxx|
       if name =~ /.#{fxx}/
@@ -167,7 +161,7 @@ class FruitRakeEstimate
     }
     return nil
   end
-  
+
   def get_needed(fortrans)
     if (!@forward)
       set_forward
@@ -185,7 +179,7 @@ class FruitRakeEstimate
     end
     get_needed(fortrans + f_add)
   end
-  
+
   def get_ordered(needed, ordered = [])
     f_add = []
     (needed - ordered).each{|f|
@@ -199,15 +193,15 @@ class FruitRakeEstimate
     }
     if f_add.size == 0
       return ordered.uniq
-    end 
+    end
     get_ordered(needed, ordered + f_add)
   end
-  
+
   def src_and_obj_for_main(main)
     if defined?(main) and main
       needed = get_needed( [main] )
       ordered_f = get_ordered(needed)
-    
+
       #replacing OBJ with ordered_o
       if defined?(FileList)
         if ordered_f.size > 0
@@ -235,5 +229,5 @@ if $0 =~ /rake$/
     SRC, OBJ = estim.src_and_obj_for_main($main)
   end
 end
-  
+
 #eof
