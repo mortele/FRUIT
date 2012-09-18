@@ -32,6 +32,8 @@ CLEAN.include(FileList['**/*.o', '**/*.mod', '**/*.a', '**/*_gen.f90', '**/*frui
   'sample_selective/dummy_main',
   'self_test/fruit_self_test_driver',
   'self_test/override_stdout.txt',
+  'self_test/fruit.f90',
+  'self_test/fruit_util.f90',
   'fruit_processor_gem/pkg/fruit_processor-*/',
  ])
 CLOBBER.include(FileList['src/fruit.f90'])
