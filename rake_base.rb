@@ -58,7 +58,7 @@ module RakeBase
     f_obj = f.ext('o')
     next if (f.to_s =~ /fruit_basket_gen\.f90$/)
     next if (f.to_s =~ /fruit_driver_gen\.f90$/)
-    puts "rake_base.rb: Assuming " + f_obj.to_s + " => " + f.to_s
+    # puts "rake_base.rb: Assuming " + f_obj.to_s + " => " + f.to_s
     file f_obj.to_s => f.to_s
   }
 
@@ -71,7 +71,7 @@ module RakeBase
       extensions.each{|fxx|
         b_src = b.sub(/\.o$/, "\.#{fxx}")
         if File.exist?(b_src)
-          puts "rake_base.rb: Assuming \"" + a + "\" depends on \"" + b + "\""
+          # puts "rake_base.rb: Assuming \"" + a + "\" depends on \"" + b + "\""
           file a => b
         end
       }
