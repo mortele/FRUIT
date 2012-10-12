@@ -23,11 +23,13 @@ task :default => [:run]
 desc "Compile self-test and run"
 task :run => [$goal] do
   sh ("./#{$goal}")
+  File.delete("fruit_basket_gen.o")
 end
 
 desc "Using Valgrind run self-test"
 task :valgrind => [$goal] do
   sh ("valgrind --leak-check=full --show-reachable=yes ./#{$goal}")
+  File.delete("fruit_basket_gen.o")
 end
 
 CLEAN.include("fruit_self_test_driver", "override_stdout.txt")

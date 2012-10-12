@@ -1,18 +1,14 @@
 #!/usr/bin/env ruby
 
-require "rubygems"
-require 'fruit_processor'
-require 'rake/clean'
-require 'open3'
-
 include Rake::DSL if defined?(Rake::DSL)
-require 'tk'
 
-class Gui_window
+class GuiWindow
   attr_accessor :btn_exit, :btn_run, :btn_open_dir, :btn_fruitf90
-    # :btn_rake_base
   attr_accessor :textbox, :text_left, :btn_all, :btn_clear
+  attr_accessor :checks
   attr_accessor :core
+
+  require 'tk'
 
   def initialize
     #-------- bottom frame ------
@@ -44,12 +40,6 @@ class Gui_window
       pack(:side => :left, 'padx' => 20)
       state "disabled"
     }
-
-#    @btn_rake_base = TkButton.new(frame_top){
-#      text "location of rake_base.rb"
-#      pack(:side => :left, 'padx' => 20)
-#      state "disabled"
-#    }
     #-------- top frame ------
     
     #======== middle paned ========v
@@ -143,7 +133,7 @@ class Gui_window
     @textbox.update
   end
 
-  def btn_run_activate
+  def enable_fruit_run
     @btn_run.focus
     @btn_run.text("run FRUIT [Ret]")
     @btn_run.state("normal")
@@ -151,8 +141,19 @@ class Gui_window
     self.btn_open_dir_normal
   end
 
-  def btn_run_disable
+  def disable_fruit_run
     @btn_run.state = "disabled"
+  end
+
+  def fruit_running
+    @btn_run.state = "disabled"
+    @btn_run.text = "Running"
+  end
+
+  
+  def fruit_run_done
+    btn_run.state = "normal"
+    btn_run.text("run FRUIT")
   end
 
   def btn_open_dir_activate
@@ -175,29 +176,131 @@ class Gui_window
       }
     )
   end
+  def disable_fruitf90_select
+    self.btn_fruitf90.state("disabled")
+  end
+  def enable_fruitf90_select
+    self.btn_fruitf90.state("normal")
+  end
+
+  def choose_dir
+    dirname = Tk::chooseDirectory{
+      initialdir "./"
+    }
+    return dirname
+  end
+
+  def btn_fruitf90_setup
+    self.btn_fruitf90.command = 
+      proc{
+        @core.choose_fruitf90dir(
+          @core.find_file_using_btn(self.btn_fruitf90, "fruit.f90")
+        )
+      }
+    self.btn_fruitf90.bind('Return', 
+      proc{
+        @core.choose_fruitf90dir(
+          @core.find_file_using_btn(self.btn_fruitf90, "fruit.f90")
+        )
+      }
+    )
+  end
+
+  def add_one_testf90 f
+    self.add_text("  " + File.basename(f) + "\n")
+
+    checks = []
+
+    #--- checkbox ---v
+    check = TkVariable.new
+    check.default_value = 1
+    check.value = 1
+    tcb = TkCheckButton.new(text_left){
+      text File.basename(f)
+      variable check
+    }
+    TkTextWindow.new(text_left, 'end', 'window'=>tcb)
+    text_left.insert("end", "\n")
+    checks << check
+    #--- checkbox ---^
+
+    methods = @core.fp.get_methods_of_filename(f)
+
+    methods.each{|method|
+      self.text_left.insert('end', " "*4 + method + "\n")
+      self.add_text(               " "*4 + method + "\n")
+    }
+    return check
+  end
+
+  def set_btn_clear_and_run(checks, all_f)
+    self.btn_clear.command = proc { 
+      checks.each{|check|
+        check.value = "nil"
+      }
+    }
+    self.btn_all.command = proc { 
+      checks.each{|check|
+        check.value = 1
+      }
+    }
+    self.btn_run.command =
+      proc {
+        @core.run_fruit(checks, @core.fp, all_f)
+     }
+    self.btn_run.bind('Return', 
+      proc {
+        @core.run_fruit(checks, @core.fp, all_f)
+      }
+    )
+  end
+  def show_dirname_of_tester dirname
+    self.text_left.value = dirname + "\n"
+  end
 end
 
 
-class Gui_core
-  attr_accessor :window
+class GuiCore
+  require "rubygems"
+  require 'fruit_processor'
+  require 'rake/clean'
+  require 'open3'
 
-  def reload_all_f(fp)
-    text_left     = @window.text_left
-    btn_fruitf90  = @window.btn_fruitf90 
-    btn_clear     = @window.btn_clear
-    btn_all       = @window.btn_all
-    btn_run       = @window.btn_run
+  attr_accessor :window, :dir_fruit_f90, :fp
+
+  def show_dir_rake_base
+    return @dir_rake_base
+  end
+
+  def open_dir_and_update
+    dirname = @window.choose_dir 
+    return if !dirname
   
+    reload_all_f(dirname)
+
+    return dirname
+  end
+
+  def reload_all_f(dirname)
     checks = []
-    contents = []
-    all_f = []
 
-    text_left.value = @dirname + "\n"
-  
-    @dirname.gsub!(/ /, "\ ")
-    FileUtils.cd(@dirname){
-      all_f = fp.get_files
+    @window.add_text("Reading Directry #{dirname}\n")
+    @window.show_dirname_of_tester(dirname)
+
+    @dirname = dirname
+#    @dirname.gsub!(/ /, "\ ")
+
+    @fp = ""
+    FileUtils.cd(dirname){
+      @fp = FruitProcessor.new
+      @fp.pre_process
     }
+
+    all_f = []
+    FileUtils.cd(dirname){
+      all_f = @fp.get_files
+    }
+
     @ready_testers = false
     @ready_fruitf90 = false
     @ready_rake_base = false
@@ -205,88 +308,70 @@ class Gui_core
     if all_f.size == 0
       @ready_testers = false
       @window.add_text("Tester not found. Choose directry that contains test_*.f90, test_*.f95, test_*.f03, or test_*.f08.\n")
-      @window.btn_run_disable
+      @window.disable_fruit_run
     else
       @ready_testers = true
       @window.add_text("Tester found:\n")
       all_f.each{|f|
-        @window.add_text("  " + File.basename(f) + "\n")
-        #--- checkbox ---v
-        check = TkVariable.new
-        check.default_value = 1
-        check.value = 1
-        tcb = TkCheckButton.new(text_left){
-          text File.basename(f)
-          variable check
-        }
-        TkTextWindow.new(text_left, 'end', 'window'=>tcb)
-        text_left.insert("end", "\n")
+        check = @window.add_one_testf90(f)
         checks << check
-        #--- checkbox ---^
-    
-        methods = fp.get_methods_of_filename(f)
-    
-        methods.each{|method|
-          text_left.insert('end', " "*4 + method + "\n")
-          @window.add_text(       " "*4 + method + "\n")
-        }
       }
     end
   
     self.check_if_ready
 
-    #------ behavior ------v
-    btn_clear.command = proc { 
-      checks.each{|check|
-        check.value = "nil"
-      }
-    }
-    btn_all.command = proc { 
-      checks.each{|check|
-        check.value = 1
-      }
-    }
-    btn_run.command =
-      proc {
-        run_fruit(btn_run, checks, @dirname, fp, all_f)
-     }
-    btn_run.bind('Return', 
-      proc {
-        run_fruit(btn_run, checks, @dirname, fp, all_f)
-      }
+    @window.set_btn_clear_and_run(checks, all_f)
+
+    return all_f
+  end
+
+  def if_ready_fruitf90
+    return @ready_fruitf90 if @ready_fruitf90
+
+    if (@dirname and
+        File.exist?(@dirname + "/fruit.f90") and 
+        File.exist?(@dirname + "/fruit_util.f90")
     )
-    #------ behavior ------^
+      @window.add_text(
+        "#{@dirname}/fruit.f90 and \n#{@dirname}/fruit_util.f90 are used.\n")
+      @ready_fruitf90 = @dirname
+    elsif (
+      @dir_fruit_f90 and 
+      File.exist?(@dir_fruit_f90 + "/fruit.f90") and
+      File.exist?(@dir_fruit_f90 + "/fruit_util.f90")
+    )
+      @window.add_text(
+        "#{@dir_fruit_f90}/fruit.f90 and \n#{@dir_fruit_f90}/fruit_util.f90 are used.\n")
+      @ready_fruitf90 = @dir_fruit_f90
+    else
+      @window.add_text(
+        "At #{@dirname}, fruit.f90 or fruit_util.f90 is not found.\n")
+      if @dir_fruit_f90
+        @window.add_text(
+          "At #{@dir_fruit_f90}, fruit.f90 or fruit_util.f90 is not found.\n")
+        @ready_fruitf90 = false
+      end
+    end
+  end
+
+  def choose_fruitf90dir dir_fruit_f90
+    @dir_fruit_f90 = dir_fruit_f90
+    self.check_if_ready
   end
 
   def check_if_ready
-    #------ fruit.f90 exists? ------v
-    if not @ready_fruitf90
-      FileUtils.cd(@dirname){
-        if File.exist?("fruit.f90")
-          @window.add_text(@dirname + '/fruit.f90 is used.' + "\n")
-          @ready_fruitf90 = true
-        else
-          @window.add_text('fruit.f90 not found at "' + @dirname + '". ' + "\n")
-          if @dir_fruit_f90 and File.exist?(@dir_fruit_f90 + "/fruit.f90")
-            @window.add_text(@dir_fruit_f90 + '/fruit.f90 is used.' + "\n")
-            @ready_fruitf90 = true
-          elsif @dir_fruit_f90
-            @window.add_text_warn('fruit.f90 not found at "' + @dir_fruit_f90 + '". ' + "\n")
-            @ready_fruitf90 = false
-          else
-            @ready_fruitf90 = false
-          end
-        end
-      }
+    if not @dirname
+      @window.disable_fruit_run
+      return false
     end
 
-    if @ready_fruitf90
-      @window.btn_fruitf90.state("disabled")
+    if self.if_ready_fruitf90
+      @window.enable_fruitf90_select
     else
       @window.add_text("Press [location of fruit.f90] above\n")
-      @window.btn_fruitf90.state("normal")
+      @window.enable_fruitf90_select
     end
-    #------ fruit.f90 exists? ------^
+
     #------ rake_base.rb exists? ------v
     if not @ready_rake_base
       FileUtils.cd(@dirname){
@@ -311,9 +396,12 @@ class Gui_core
     #------ rake_base.rb exists? ------^
 
     if @ready_testers and @ready_fruitf90 and @ready_rake_base
-      @window.btn_run_activate
+      @window.add_text("Ready to run FRUIT.\n")
+      @window.enable_fruit_run
+      return true
     else
-      @window.btn_run_disable
+      @window.disable_fruit_run
+      return false
     end
   end
   
@@ -362,15 +450,18 @@ class Gui_core
   
   $build_dir = ""  #If not set, build will be done in ../build/
   $goal = "fruit_driver_gui.exe"
+  file 'fruit_basket_gen.o' => ['rakefile_gui_tmp']
   
   task :default => [:test]
   
   task :test => $goal do
     sh "./#{$goal}"
+    File.delete("fruit_basket_gen.o")
   end
   
   task :valgrind => $goal do
     sh "valgrind --leak-check=full ./#{$goal}"
+    File.delete("fruit_basket_gen.o")
   end
   
   CLEAN.include($goal)
@@ -387,7 +478,7 @@ class Gui_core
     return "done"
   end
   
-  def run_fruit (btn_run, checks, dirname, fp, all_f)
+  def run_fruit (checks, fp, all_f)
     @window.add_text("Running FRUIT\n")
     files_to_process = []
     checks.each_with_index{|check, i|
@@ -405,7 +496,7 @@ class Gui_core
       @window.add_text(FileList[files_to_process].to_s + "\n")
     end
   
-    FileUtils.cd(dirname){
+    FileUtils.cd(@dirname){
       if_wrote = writeout_rakefile("rakefile_gui_tmp", files_to_process, @dir_fruit_f90, @dir_rake_base)
       if not if_wrote
         return
@@ -413,17 +504,17 @@ class Gui_core
     }
   
     Thread.new{
-      btn_run.state = "disabled"
-      btn_run.text = "Running"
-      FileUtils.cd(dirname){
-        Open3.popen3("rake clean -f rakefile_gui_tmp") do |stdin, stdout, stderr|
-          stderr.each do |line|
-            @window.add_text_err(line)
-          end
-          stdout.each do |line|
-            @window.add_text(line)
-          end
-        end
+      @window.fruit_running
+      FileUtils.cd(@dirname){
+
+#        Open3.popen3("rake clean -f rakefile_gui_tmp") do |stdin, stdout, stderr|
+#          stderr.each do |line|
+#            @window.add_text_err(line)
+#          end
+#          stdout.each do |line|
+#            @window.add_text(line)
+#          end
+#        end
   
         Open3.popen3("rake -f rakefile_gui_tmp") do |stdin, stdout, stderr|
           stderr.each do |line|
@@ -434,25 +525,8 @@ class Gui_core
           end
         end
       }
-      btn_run.state = "normal"
-      btn_run.text("run FRUIT")
+      @window.fruit_run_done
     }
-  end
-  
-  def open_directry
-    dirname = Tk::chooseDirectory{
-      initialdir "./"
-    }
-    if dirname == ""
-      return nil 
-    end
-  
-    fp = ""
-    FileUtils.cd(dirname){
-      fp = FruitProcessor.new
-      fp.pre_process
-    }
-    return dirname, fp
   end
   
   def find_file_using_btn (btn, file_to_find)
@@ -476,15 +550,6 @@ class Gui_core
     return nil
   end
   
-  def open_dir_and_update
-    (@dirname, fp) = open_directry
-    return if !@dirname
-  
-    @window.add_text("Reading Directry #{@dirname}\n")
-  
-    reload_all_f(fp)
-  end
-  
   def initial (window)
     @dir_fruit_f90 = nil
     @dir_rake_base = File.expand_path(File.dirname(__FILE__))
@@ -503,23 +568,13 @@ class Gui_core
 
     @dirname = false
 
-    @window.btn_fruitf90.command = 
-      proc{
-        @dir_fruit_f90 = find_file_using_btn(@window.btn_fruitf90, "fruit.f90")
-        self.check_if_ready
-      }
-    @window.btn_fruitf90.bind('Return', 
-      proc{
-        @dir_fruit_f90 = find_file_using_btn(@window.btn_fruitf90, "fruit.f90")
-        self.check_if_ready
-      }
-    )
+    @window.btn_fruitf90_setup
   end
 end
   
 if $0 == __FILE__
-  window = Gui_window.new
-  core = Gui_core.new
+  window = GuiWindow.new
+  core = GuiCore.new
   
   window.core = core
   core.initial(window)

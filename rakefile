@@ -8,7 +8,7 @@ $base_dir=Dir.pwd
 $build_dir = "#{$base_dir}/build"
 
 task :default => [
-  :ruby_test, :rake_estimate_test,
+  :ruby_test, :rake_estimate_test, 
   :in_3_minutes,
   :sample_selective, 
   :anchor_root, :dirs, :compile, :sample, 
@@ -16,6 +16,10 @@ task :default => [
 # :test is not included as :self_test covers tests done in :test.
 # :sample_single_dir is not included
 #    because fortran compiler must recognize .f95 extension.
+
+if ENV['DISPLAY']
+  task :default => [ :gui_fruit_test ]
+end
 
 CLEAN.include(FileList['**/*.o', '**/*.mod', '**/*.a', '**/*_gen.f90', '**/*fruit_driver',
   '**/result*.xml',
@@ -77,6 +81,11 @@ end
 desc "Test of rake_estimate.rb"
 task :rake_estimate_test do
   sh 'cd ruby_test; ruby rake_estimate_test.rb'
+end
+
+desc "Test of gui_fruit.rb"
+task :gui_fruit_test do
+  sh 'cd ruby_test; ruby gui_fruit_test.rb'
 end
 
 desc "Compile a sample of multi-directry test."

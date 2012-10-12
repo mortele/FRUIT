@@ -9,6 +9,8 @@ fp = FruitProcessor.new
 fp.process_only = FileList["mydict_test.f90"] #only files here are processed.
 fp.pre_process
 
+file 'fruit_basket_gen.o' => ['rakefile']
+
 $build_dir = ""  #If not set, build will be done in ../build/
 $goal = "fruit_driver_selective"
 
@@ -16,10 +18,12 @@ task :default => [:dummy_main, :test]
 
 task :test => $goal do
   sh "./#{$goal}"
+  File.delete("fruit_basket_gen.o")
 end
 
 task :valgrind => $goal do
   sh "valgrind --leak-check=full ./#{$goal}"
+  File.delete("fruit_basket_gen.o")
 end
 
 task :dummy_main do
