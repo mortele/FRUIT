@@ -1,5 +1,5 @@
 module mydict
-  use constants
+  use constant
   implicit none
 
   type ty_mydict

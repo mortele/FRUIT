@@ -19,6 +19,7 @@ class FruitRakeEstimate
     self.apply_dependency
   end
 
+
   def set_all_f
     @all_f = []
 
@@ -32,7 +33,17 @@ class FruitRakeEstimate
     #puts all_f.join(" ")
   end
 
+  def missing_modules
+    forward, missings = self.set_forward_and_missings
+    return missings
+  end
+
   def set_forward
+    forward, missings = self.set_forward_and_missings
+    return forward
+  end
+
+  def set_forward_and_missings
     mod_in_f = {}
     f_uses_mod = {}
 
@@ -64,6 +75,7 @@ class FruitRakeEstimate
       }
     }
     @forward = {}
+    missings = []
     @all_f.each{|f|
       @forward[ f ] = []
       f_uses_mod[f].uniq.each{|a_mod|
@@ -71,10 +83,12 @@ class FruitRakeEstimate
           if mod_in_f[a_mod] != f
             @forward[ f ] << mod_in_f[ a_mod ]
           end
+        else
+          missings.push(a_mod)
         end
       }
     }
-    return @forward
+    return @forward, missings.uniq
   end
 
   def if_macro_stack(macro_stack)

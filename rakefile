@@ -13,6 +13,7 @@ task :default => [
   :sample_selective, 
   :anchor_root, :dirs, :compile, :sample, 
   :self_test]
+
 # :test is not included as :self_test covers tests done in :test.
 # :sample_single_dir is not included
 #    because fortran compiler must recognize .f95 extension.
@@ -24,8 +25,14 @@ end
 CLEAN.include(FileList['**/*.o', '**/*.mod', '**/*.a', '**/*_gen.f90', '**/*fruit_driver',
   '**/result*.xml',
   '**/fruit_driver_fxx.exe',
+  '**/rakefile_gui_tmp',
+  '**/rakefile_gui_tester',
+  '**/rakefile_gui_src',
+  '**/fruit_driver_gui.exe',
   'in_3_minutes/fruit.f90',
   'in_3_minutes/fruit_util.f90',
+  'sample/test/fruit.f90',
+  'sample/test/fruit_util.f90',
   'sample_single_dir/fruit.f90',
   'sample_single_dir/fruit_util.f90',
   'sample_single_dir/rake_base.rb',
@@ -65,7 +72,6 @@ end
 desc "Self test of fruit.f90 and fruit_util.f90."
 task :self_test => :compile do
   sh 'cd self_test; rake;'
-#  sh "cd \"#{$build_dir}\";./fruit_self_test_driver"
 end
 
 desc "Using valgrind do Self test of fruit.f90 and fruit_util.f90."
@@ -91,7 +97,6 @@ end
 desc "Compile a sample of multi-directry test."
 task :sample => :compile do
   sh 'cd sample;rake;'
-#  sh "cd \"#{$build_dir}\";./calculator_fruit_driver"
 end
 
 desc "Compile a sample of manually written test."

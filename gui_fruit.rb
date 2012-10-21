@@ -3,7 +3,8 @@
 include Rake::DSL if defined?(Rake::DSL)
 
 class GuiWindow
-  attr_accessor :btn_exit, :btn_run, :btn_open_dir, :btn_fruitf90
+  attr_accessor :btn_exit, :btn_run
+  attr_accessor :btn_open_dir, :btn_source_dir, :btn_fruitf90
   attr_accessor :textbox, :text_left, :btn_all, :btn_clear
   attr_accessor :checks
   attr_accessor :core
@@ -32,12 +33,18 @@ class GuiWindow
       pack(:fill => :x, :side => :top)
     }
     @btn_open_dir = TkButton.new(frame_top){
-      text "Open Directry"
+      text "Tester Directry"
       pack(:side => :left)
+    }
+
+    @btn_source_dir = TkButton.new(frame_top){
+      text "Source Directry"
+      pack(:side => :left, 'padx' => 20)
+      #state "disabled"
     }
     @btn_fruitf90 = TkButton.new(frame_top){
       text "location of fruit.f90"
-      pack(:side => :left, 'padx' => 20)
+      pack(:side => :left) ###, 'padx' => 20)
       state "disabled"
     }
     #-------- top frame ------
@@ -158,11 +165,11 @@ class GuiWindow
 
   def btn_open_dir_activate
     @btn_open_dir.focus
-    @btn_open_dir.text("Open Directry [Ret]")
+    @btn_open_dir.text("Tester Directry [Ret]")
   end
 
   def btn_open_dir_normal
-    @btn_open_dir.text("Open Directry")
+    @btn_open_dir.text("Tester Directry")
   end
 
   def btn_open_dir_setup
@@ -176,6 +183,21 @@ class GuiWindow
       }
     )
   end
+
+
+  def btn_source_dir_setup
+    @btn_source_dir.command = proc{
+      @core.open_source_dir
+    }
+  end
+  def enable_btn_source_dir
+    @btn_source_dir.state("normal")
+  end
+  def disable_btn_source_dir
+    @btn_source_dir.state("disabled")
+  end
+  
+
   def disable_fruitf90_select
     self.btn_fruitf90.state("disabled")
   end
@@ -246,16 +268,16 @@ class GuiWindow
     }
     self.btn_run.command =
       proc {
-        @core.run_fruit(checks, @core.fp, all_f)
+        @core.run_fruit(checks, all_f)
      }
     self.btn_run.bind('Return', 
       proc {
-        @core.run_fruit(checks, @core.fp, all_f)
+        @core.run_fruit(checks, all_f)
       }
     )
   end
-  def show_dirname_of_tester dirname
-    self.text_left.value = dirname + "\n"
+  def show_dirname_of_tester tester_dirname
+    self.text_left.value = tester_dirname + "\n"
   end
 end
 
@@ -266,38 +288,106 @@ class GuiCore
   require 'rake/clean'
   require 'open3'
 
-  attr_accessor :window, :dir_fruit_f90, :fp
+  attr_accessor :window, :dir_fruit_f90, :fp, :source_dir
+
+  @@extensions = ["f90", "f95", "f03", "f08"]
+  @@lib_name = "src_gui_tmp"
+  @@lib_filename = "lib" + @@lib_name + ".a"
 
   def show_dir_rake_base
     return @dir_rake_base
   end
 
   def open_dir_and_update
-    dirname = @window.choose_dir 
-    return if !dirname
-  
-    reload_all_f(dirname)
-
-    return dirname
+    tester_dir = @window.choose_dir 
+    if !tester_dir or tester_dir == ""
+      @window.add_text_warn("No directry selected.\n")
+      return false
+    end
+    reload_all_f(tester_dir)
+    return tester_dir
   end
 
-  def reload_all_f(dirname)
+  def open_source_dir
+    source_dir = @window.choose_dir
+
+    @source_dir = nil
+    if !source_dir or source_dir == ""
+      @window.add_text_warn("No directry selected.\n")
+      return false
+    end
+
+    @window.add_text( "\nDirectry #{source_dir} selected.\n" )
+    @source_dir = source_dir
+    self.check_if_ready
+    return true
+  end
+
+  def fetch_missing_mod(tester_dir, source_dir)
+    self.if_source_exist(tester_dir) if !@esti
+    
+    missings = []
+    FileUtils.cd(tester_dir){
+      missings = @esti.missing_modules - ["fruit", "fruit_util"]
+    }
+
+    all_ok = true
+    missings.each{|mod|
+      candi = source_dir + "/" + mod + ".mod"
+      link  = tester_dir + "/" + mod + ".mod"
+      if File.exist?(candi)
+        if !File.symlink? link
+          @window.add_text "make symbolic link to " + candi + "\n"
+          File.symlink(candi, link)
+        end
+      else
+        @window.add_text_warn "module #{mod} missing.\n"
+        all_ok = false
+      end
+    }
+    return all_ok
+  end
+
+  def if_source_exist(tester_dir)
+    if File.exist?(@dir_rake_base + "/rake_estimate.rb")
+      require "#{@dir_rake_base}/rake_estimate"
+    else
+      raise "rake_estimate.rb needed at #{@dir_rake_base}"
+    end
+
+    missings = []
+    FileUtils.cd(tester_dir){
+      @esti = FruitRakeEstimate.new
+      missings = @esti.missing_modules - ["fruit", "fruit_util"]
+    }
+    if missings.size == 0
+      return true
+    end
+
+    @window.add_text_warn("Modules missing: " + missings.join(", ") + "\n")
+    return false
+  end
+
+
+  def reload_all_f(tester_dir)
     checks = []
 
-    @window.add_text("Reading Directry #{dirname}\n")
-    @window.show_dirname_of_tester(dirname)
+    return false if !File.exist? tester_dir 
 
-    @dirname = dirname
-#    @dirname.gsub!(/ /, "\ ")
+    @window.add_text("Reading Directry #{tester_dir}\n")
+    @window.show_dirname_of_tester(tester_dir)
+
+    @tester_dir = tester_dir
 
     @fp = ""
-    FileUtils.cd(dirname){
+
+    FileUtils.cd(tester_dir){
       @fp = FruitProcessor.new
-      @fp.pre_process
+      @fp.load_files
     }
 
     all_f = []
-    FileUtils.cd(dirname){
+    FileUtils.cd(tester_dir){
       all_f = @fp.get_files
     }
 
@@ -307,15 +397,29 @@ class GuiCore
 
     if all_f.size == 0
       @ready_testers = false
-      @window.add_text("Tester not found. Choose directry that contains test_*.f90, test_*.f95, test_*.f03, or test_*.f08.\n")
+      @window.add_text_warn("Tester not found. Choose directry that contains test_*.f90, test_*.f95, test_*.f03, or test_*.f08.\n")
       @window.disable_fruit_run
+      return []
+    end
+
+    FileUtils.cd(tester_dir){
+      @fp.pre_process    ### here fruit_driver_gen.f90 is generated
+    }
+
+    @ready_testers = true
+    @window.add_text("Tester found:\n")
+    all_f.each{|f|
+      check = @window.add_one_testf90(f)
+      checks << check
+    }
+  
+    @source_dir = nil
+    if self.if_source_exist(@tester_dir)
+      @window.disable_btn_source_dir
+      @source_dir = ""
     else
-      @ready_testers = true
-      @window.add_text("Tester found:\n")
-      all_f.each{|f|
-        check = @window.add_one_testf90(f)
-        checks << check
-      }
+      @window.add_text_warn("Tested source not found. \nPress [Source Directry] and choose a directry that contains sources tested by the testers.\n")
+      @window.enable_btn_source_dir
     end
   
     self.check_if_ready
@@ -328,13 +432,13 @@ class GuiCore
   def if_ready_fruitf90
     return @ready_fruitf90 if @ready_fruitf90
 
-    if (@dirname and
-        File.exist?(@dirname + "/fruit.f90") and 
-        File.exist?(@dirname + "/fruit_util.f90")
+    if (@tester_dir and
+        File.exist?(@tester_dir + "/fruit.f90") and 
+        File.exist?(@tester_dir + "/fruit_util.f90")
     )
       @window.add_text(
-        "#{@dirname}/fruit.f90 and \n#{@dirname}/fruit_util.f90 are used.\n")
-      @ready_fruitf90 = @dirname
+        "#{@tester_dir}/fruit.f90 and \n#{@tester_dir}/fruit_util.f90 are used.\n")
+      @ready_fruitf90 = @tester_dir
     elsif (
       @dir_fruit_f90 and 
       File.exist?(@dir_fruit_f90 + "/fruit.f90") and
@@ -345,7 +449,7 @@ class GuiCore
       @ready_fruitf90 = @dir_fruit_f90
     else
       @window.add_text(
-        "At #{@dirname}, fruit.f90 or fruit_util.f90 is not found.\n")
+        "At #{@tester_dir}, fruit.f90 or fruit_util.f90 is not found.\n")
       if @dir_fruit_f90
         @window.add_text(
           "At #{@dir_fruit_f90}, fruit.f90 or fruit_util.f90 is not found.\n")
@@ -360,7 +464,7 @@ class GuiCore
   end
 
   def check_if_ready
-    if not @dirname
+    if not @tester_dir
       @window.disable_fruit_run
       return false
     end
@@ -368,16 +472,16 @@ class GuiCore
     if self.if_ready_fruitf90
       @window.enable_fruitf90_select
     else
-      @window.add_text("Press [location of fruit.f90] above\n")
+      @window.add_text_warn("Press [location of fruit.f90] above\n")
       @window.enable_fruitf90_select
     end
 
     #------ rake_base.rb exists? ------v
     if not @ready_rake_base
-      FileUtils.cd(@dirname){
+      FileUtils.cd(@tester_dir){
         if File.exist?("rake_base.rb")
           @window.add_text(
-            "rake_base.rb is found at " + File.expand_path(@dirname) +"\n"
+            "rake_base.rb is found at " + File.expand_path(@tester_dir) +"\n"
           )
           @ready_rake_base = true
         elsif @dir_rake_base and File.exist?(@dir_rake_base + "/rake_base.rb")
@@ -395,7 +499,7 @@ class GuiCore
     end
     #------ rake_base.rb exists? ------^
 
-    if @ready_testers and @ready_fruitf90 and @ready_rake_base
+    if @ready_testers and @ready_fruitf90 and @ready_rake_base and @source_dir
       @window.add_text("Ready to run FRUIT.\n")
       @window.enable_fruit_run
       return true
@@ -403,6 +507,28 @@ class GuiCore
       @window.disable_fruit_run
       return false
     end
+  end
+
+
+  def writeout_rakefile_source(source_dir, filename, build_dir = "./")
+    filename = source_dir + "/" + filename
+
+    File::open(filename, 'w'){|f|
+      f.write <<-"EOS"
+        require 'rubygems'
+        require 'fruit_processor'
+
+        include Rake::DSL if defined?(Rake::DSL)
+
+        $goal='#{@@lib_filename}'
+      EOS
+
+      f.write "$build_dir='" + build_dir + "'\n"
+      f.write <<-'EOS'
+        load "#{FruitProcessor.new.base_dir}/rake_base.rb"
+        include RakeBase
+      EOS
+    }
   end
   
   def writeout_rakefile(filename, all_f, dir_fruit_f90, dir_rake_base)
@@ -431,54 +557,61 @@ class GuiCore
     }
   
     File::open(filename, 'w'){|f|
-      f.write <<-'EOS'
-  require 'rubygems'
-  require 'fruit_processor'
-  require 'rake/clean'
+      f.write <<-"EOS"
+require 'rubygems'
+require 'fruit_processor'
+require 'rake/clean'
   
-  include Rake::DSL if defined?(Rake::DSL)
+include Rake::DSL if defined?(Rake::DSL)
   
-  fp = FruitProcessor.new
+fp = FruitProcessor.new
       EOS
   
       f.write "fp.process_only = "
       f.write all_f.inspect
       f.write "\n"
   
+      f.write <<-"EOS"
+fp.pre_process
+  
+$build_dir = ""  #If not set, build will be done in ../build/
+$goal = "fruit_driver_gui.exe"
+      EOS
+
+      if @source_dir and @source_dir != ""
+        f.write "$lib_bases = [['#{@@lib_name}', '#{@source_dir}']]\n"
+      end
+      
       f.write <<-'EOS'
-  fp.pre_process
+file 'fruit_basket_gen.o' => ['rakefile_gui_tester']
   
-  $build_dir = ""  #If not set, build will be done in ../build/
-  $goal = "fruit_driver_gui.exe"
-  file 'fruit_basket_gen.o' => ['rakefile_gui_tmp']
+task :default => [:test]
   
-  task :default => [:test]
+task :test => $goal do
+  sh "./#{$goal}"
+  File.delete("fruit_basket_gen.o")
+end
   
-  task :test => $goal do
-    sh "./#{$goal}"
-    File.delete("fruit_basket_gen.o")
-  end
+task :valgrind => $goal do
+  sh "valgrind --leak-check=full ./#{$goal}"
+  File.delete("fruit_basket_gen.o")
+end
   
-  task :valgrind => $goal do
-    sh "valgrind --leak-check=full ./#{$goal}"
-    File.delete("fruit_basket_gen.o")
-  end
-  
-  CLEAN.include($goal)
+CLEAN.include($goal)
   
       EOS
       f.write <<-"EOS"
-  $main = "fruit_driver_gen.f90"
-  load "#{which_rake_estimate}"
+$main = "fruit_driver_gen.f90"
+load "#{which_rake_estimate}"
   
-  load "#{which_rake_base}"
-  include RakeBase
+load "#{which_rake_base}"
+include RakeBase
       EOS
     }
     return "done"
   end
   
-  def run_fruit (checks, fp, all_f)
+  def run_fruit (checks, all_f)
     @window.add_text("Running FRUIT\n")
     files_to_process = []
     checks.each_with_index{|check, i|
@@ -496,27 +629,42 @@ class GuiCore
       @window.add_text(FileList[files_to_process].to_s + "\n")
     end
   
-    FileUtils.cd(@dirname){
-      if_wrote = writeout_rakefile("rakefile_gui_tmp", files_to_process, @dir_fruit_f90, @dir_rake_base)
+    if @source_dir and @source_dir != ""
+      writeout_rakefile_source(@source_dir, "rakefile_gui_src", @tester_dir)
+    end
+  
+    FileUtils.cd(@tester_dir){
+      if_wrote = writeout_rakefile("rakefile_gui_tester", files_to_process, @dir_fruit_f90, @dir_rake_base)
       if not if_wrote
         return
       end
     }
-  
+
+
     Thread.new{
       @window.fruit_running
-      FileUtils.cd(@dirname){
+      if @source_dir and @source_dir != ""
+        FileUtils.cd(@source_dir){
+#puts "Files in " + @source_dir
+#p Dir.glob("*")
+          Open3.popen3("rake -f rakefile_gui_src") do |stdin, stdout, stderr|
+            stderr.each do |line|
+              @window.add_text_err(line)
+            end
+            stdout.each do |line|
+              @window.add_text(line)
+            end
+          end
+        }
+      end
 
-#        Open3.popen3("rake clean -f rakefile_gui_tmp") do |stdin, stdout, stderr|
-#          stderr.each do |line|
-#            @window.add_text_err(line)
-#          end
-#          stdout.each do |line|
-#            @window.add_text(line)
-#          end
-#        end
-  
-        Open3.popen3("rake -f rakefile_gui_tmp") do |stdin, stdout, stderr|
+      if (! self.fetch_missing_mod(@tester_dir, @source_dir))
+        @window.add_text_warn("Somehow module still missing.\n")
+        Thread.exit
+      end
+
+      FileUtils.cd(@tester_dir){
+        Open3.popen3("rake -f rakefile_gui_tester") do |stdin, stdout, stderr|
           stderr.each do |line|
             @window.add_text_err(line)
           end
@@ -556,17 +704,22 @@ class GuiCore
 
     @window = window
     @window.add_text(
-      "Press [Open Directry] and open directry which contains " + 
+      "\nPress [Tester Directry] and open directry which contains " + 
       "tester programs\n"
     )
     @window.btn_open_dir_setup
     @window.btn_open_dir_activate
 
+    @window.btn_source_dir_setup
+    @window.disable_btn_source_dir
+
     @ready_testers = false
     @ready_fruitf90 = false
     @ready_rake_base = false
 
-    @dirname = false
+    @tester_dir = false
+    @source_dir = nil
+    @esti = nil
 
     @window.btn_fruitf90_setup
   end

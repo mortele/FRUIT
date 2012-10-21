@@ -7,6 +7,24 @@ require 'fruit_processor'
 
 class FruitRakeEstimateTest < Test::Unit::TestCase
 
+  def test_missing_modules
+    FileUtils.cd("dir_only_tester"){
+      esti = FruitRakeEstimate.new
+      missings = esti.missing_modules
+      assert_equal(["aaa"], missings, "missing module is aaa")
+    }
+    FileUtils.cd("dir_tester_and_tested2"){
+      esti = FruitRakeEstimate.new
+      missings = esti.missing_modules
+      assert_equal([], missings, "All used module exist")
+    }
+    FileUtils.cd("dir_tester_and_tested3"){
+      esti = FruitRakeEstimate.new
+      missings = esti.missing_modules
+      assert_equal(["fruit"], missings, "All used module exist")
+    }
+  end
+
   def test_parse_sharp_line_stack
     esti = FruitRakeEstimate.new
 
@@ -109,6 +127,24 @@ class FruitRakeEstimateTest < Test::Unit::TestCase
     assert_equal([], forward["need_itself.f90"])
     assert_equal(["need_itself.f90"], forward["main_for_need_itself.f90"])
   end
+
+  def test_set_forward3_lacking
+    FileUtils.cd("dir_only_tester"){
+      esti = FruitRakeEstimate.new
+      forward = esti.set_forward
+      assert_equal([],  forward["test_aaa.f90"], 
+        "test_aaa.f90 needs module aaa. but no source for module aaa there."
+      )
+    }
+    FileUtils.cd("dir_tester_and_tested2"){
+      esti = FruitRakeEstimate.new
+      forward = esti.set_forward
+      assert_equal(["some_name.f90"],  forward["some_test.f90"], 
+        "some_test.f90 needs module 'some_name_2' provided by 'some_name.f90"
+      )
+    }
+  end
+
 
   def test_set_forward_macro
     esti = FruitRakeEstimate.new

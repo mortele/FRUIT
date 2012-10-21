@@ -13,12 +13,12 @@ module RakeBase
   extensions = ["f90", "f95", "f03", "f08"]
 
   # Intel FORTRAN compiler tested on Linux
-   $compiler = 'ifort'
-   $option = "-check all -warn all"
+  $compiler = 'ifort'
+  $option = "-check all -warn all"
 
   # GCC FORTRAN compiler tested on MacOs (10.6.8 Snow Leopard) and Windows Vista + cygwin
   #$compiler = "gfortran"
-  #$option = "-Wall -Wextra -pedantic -fbounds-check -Wuninitialized -O -g"
+  #$option = "-Wall -Wextra -pedantic -fbounds-check -Wuninitialized -O -g -Wno-unused-parameter"
   # With " -std=f95",
   # subroutines whose name is longer than 31 characters cause error.
 
@@ -27,12 +27,10 @@ module RakeBase
   #$option = "-Wall -Wobsolescent -Wunused-module-vars -Wunused-internal-procs -Wunused-parameter -Wunused-types -Wmissing-intent -Wimplicit-interface -pedantic -fbounds-check -Wuninitialized"
 
   if open("| which #{$compiler} 2>/dev/null"){|f| f.gets}
-  #  puts "Fortran compiler " + $compiler + " exists."
   else
-    puts "***** Fortran compiler " + $compiler + " not exists. *****"
+    puts "Fortran compiler " + $compiler + " not exists. Using gfortran instead."
     $compiler = "gfortran"
     $option = "-Wall -Wextra -pedantic -fbounds-check -Wuninitialized -O -g -Wno-unused-parameter"
-    # " -fbacktrace"
   end
 
   $goal = '' if !$goal
@@ -129,9 +127,6 @@ module RakeBase
     elsif $goal =~ /.a$/
       sh "ar cr #{$goal} #{OBJ}"
     else
-      #--------v
-      #sh "#{$compiler} #{$option} \"-I#{$build_dir}\" -o #{$goal} #{OBJ} #{FruitProcessor.new.lib_name_flag($lib_bases, $build_dir)} \"#{FruitProcessor.new.lib_dir_flag($lib_bases, $build_dir)}\""
-      #--
       lib_name_flag = FruitProcessor.new.lib_name_flag($lib_bases, $build_dir)
 
       lib_dir = FruitProcessor.new.lib_dir_flag($lib_bases, $build_dir)
@@ -141,7 +136,6 @@ module RakeBase
       flag = '"-I' + flag + '"' if flag.size > 0
 
       sh "#{$compiler} #{$option} #{flag} -o #{$goal} #{OBJ} #{lib_name_flag} #{lib_dir}"
-      #--------^
     end
   end
 

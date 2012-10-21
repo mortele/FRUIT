@@ -8,7 +8,7 @@ $goal = "fruit_driver"
 
 task :default => [:test]
 
-task :test do
+task :test => [:clean] do
   #following the procedure in "Add Fruit to Your Diet in 3 Minutes"
   sh "ln -fs ../src/fruit.f90 ./"
   sh "ln -fs ../src/fruit_util.f90 ./"

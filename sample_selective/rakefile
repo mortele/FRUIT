@@ -27,7 +27,7 @@ task :valgrind => $goal do
 end
 
 task :dummy_main do
-  sh "#{$compiler} constants.f90 mydict.f90 dummy_main.f90 -o dummy_main"
+  sh "#{$compiler} constant.f90 mydict.f90 dummy_main.f90 -o dummy_main"
   sh "./dummy_main"
 end
 

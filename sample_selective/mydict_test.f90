@@ -1,5 +1,5 @@
 module mydict_test
-  use constants
+  use constant
   use mydict
   use fruit
   implicit none

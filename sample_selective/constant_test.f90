@@ -1,5 +1,5 @@
 module constant_test
-  use constants
+  use constant
   use fruit
   implicit none
 contains
