@@ -246,7 +246,7 @@ class GuiWindow
     checks << check
     #--- checkbox ---^
 
-    methods = @core.fp.get_methods_of_filename(f)
+    methods = @core.get_methods_of_filename(f)
 
     methods.each{|method|
       self.text_left.insert('end', " "*4 + method + "\n")
@@ -288,11 +288,16 @@ class GuiCore
   require 'rake/clean'
   require 'open3'
 
-  attr_accessor :window, :dir_fruit_f90, :fp, :source_dir
+  attr_accessor :window, :dir_fruit_f90, :source_dir
 
   @@extensions = ["f90", "f95", "f03", "f08"]
   @@lib_name = "src_gui_tmp"
   @@lib_filename = "lib" + @@lib_name + ".a"
+
+  def get_methods_of_filename (f)
+    methods = @fp.get_methods_of_filename(f)
+    return methods
+  end
 
   def show_dir_rake_base
     return @dir_rake_base
@@ -678,10 +683,9 @@ include RakeBase
   end
   
   def find_file_using_btn (btn, file_to_find)
-    dirname_got = Tk::chooseDirectory{
-      initialdir "./"
-    }
-    if dirname_got == ""
+    dirname_got = @window.choose_dir
+
+    if !dirname_got or dirname_got == ""
       @window.add_text_warn("No directry selected.\n")
       return nil 
     end

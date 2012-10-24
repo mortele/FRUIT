@@ -4,5 +4,5 @@ To generate and install gem:
 rake install
 
 To install existing gem:
-gem install pkg/fruit_processor-2.9.2.gem
+gem install pkg/fruit_processor-3.0.gem
 

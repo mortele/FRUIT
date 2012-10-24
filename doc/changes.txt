@@ -1,4 +1,26 @@
 -----------
+FRUIT 3.0
+-----------
+
++ Test runner GUI gui_fruit.rb is added.
+
+  To use "gui_fruit.rb", other two ruby scripts
+  "rake_base.rb" and "rake_estimate.rb" must be in the same directory.
+  Before starting GUI, Fortran compiler setting in "rake_base_db"
+  should be edited. 
+
+  Works both for single directory projects and multiple directry projects.
+  Here multiple directry project means project consist of 
+  one source directry (contains tested fortran files) and 
+  one tester directry (contains tester fortran files *_test.f90).
+  For example, within fruit distribution tests 
+    "self_test", "sample_selective", "sample_single_dir", 
+    "in_3_minutes" and 
+    "sample"
+  can be run using GUI. 
+
+
+-----------
 FRUIT 2.9.2
 -----------
 
