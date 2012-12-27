@@ -20,6 +20,69 @@ class FruitProcessorTest < Test::Unit::TestCase
 #    got_hash = @fixture.get_spec_hash("calculator_test.f90")
 #  end
 
+  def test_fruit_picker
+    basket        = "for_test_picker/fruit_basket_gen.f90"
+    with_setup    = "for_test_picker/a_setup_test.f90"
+    with_teardown = "for_test_picker/a_teardown_test.f90"
+    if (File.exist?(basket))
+      File.unlink(basket)
+    end
+    fp = FruitProcessor.new
+    fp.load_files "for_test_picker"
+    assert(fp.get_files.include?(with_setup))
+
+    assert_equal("each", fp.get_spec_hash_filename(with_setup)['setup'])
+    assert_equal(nil,    fp.get_spec_hash_filename(with_setup)['teardown'])
+
+    assert_equal(nil,    fp.get_spec_hash_filename(with_teardown)['setup'])
+    assert_equal("each", fp.get_spec_hash_filename(with_teardown)['teardown'])
+
+    fp.fruit_picker "for_test_picker"
+
+    done = {}
+    File.open(basket, 'r') do |file|
+      first_sub = nil
+      last_sub = nil
+      count_setup = 0
+      count_teardown = 0
+      while line = file.gets
+        if line =~ /^ *subroutine +([a-zA-Z_]+)_all_tests/
+          present_tester_file = $1
+          first_sub = nil
+          last_sub = nil
+          count_setup = 0
+          count_teardown = 0
+        end
+        if line =~ /^ *call +([a-zA-Z_]+)/
+          first_sub = $1 if !first_sub
+          last_sub = $1
+          count_setup    += 1 if $1 == "setup"
+          count_teardown += 1 if $1 == "teardown"
+        end
+        if line =~ /^ *end +subroutine +([a-zA-Z_]+)_all_tests/
+          done[present_tester_file] = 1
+          if present_tester_file == "a_setup_test"
+            assert_equal("setup", first_sub)
+            assert_equal(2, count_setup, "setup twice")
+          end
+          if present_tester_file == "a_teardown_test"
+            assert_equal("teardown", last_sub)
+            assert_equal(2, count_teardown, "teardown twice")
+          end
+          if present_tester_file == "both_setup_teardown_test"
+            assert_equal("setup", first_sub)
+            assert_equal("teardown", last_sub)
+            assert_equal(2, count_setup, "setup twice")
+            assert_equal(2, count_teardown, "teardown twice")
+          end
+        end
+      end
+    end
+    assert(done['a_setup_test'])
+    assert(done['a_teardown_test'])
+    assert(done['both_setup_teardown_test'])
+  end
+
   def test_load_files
     @fixture.load_files "."
 

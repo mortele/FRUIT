@@ -109,7 +109,7 @@ class FruitProcessor
           f.write "     &  \"#{test_module_name}\")\n"
           f.write "    end if\n"
           
-          if @spec_hash[file]['setup'] != nil
+          if @spec_hash[file]['teardown'] != nil
             if @spec_hash[file]['teardown']=='each'
               f.write "    call teardown\n"
             end
@@ -118,7 +118,7 @@ class FruitProcessor
           spec_counter += 1
         end
         
-        if @spec_hash[file]['setup'] != nil
+        if @spec_hash[file]['teardown'] != nil
           if @spec_hash[file]['teardown']=='all'
             f.write "    call teardown_after_all\n"
           end
