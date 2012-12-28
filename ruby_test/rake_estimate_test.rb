@@ -145,6 +145,14 @@ class FruitRakeEstimateTest < Test::Unit::TestCase
     }
   end
 
+  def test_set_forward_crlf_and_cr
+    esti = FruitRakeEstimate.new
+    forward = esti.set_forward
+    assert(forward["needs_mod_3.f90"].include?("mod_3_crlf.f90"), "needs mod_3_crlf")
+    assert(forward["needs_mod_3.f90"].include?("mod_4_cr.f90"), "needs mod_4_cr")
+    assert_equal(2, forward["needs_mod_3.f90"].size, "needs mod_3_crlf and mod_4_cr")
+  end
+
 
   def test_set_forward_macro
     esti = FruitRakeEstimate.new

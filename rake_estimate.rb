@@ -59,16 +59,16 @@ class FruitRakeEstimate
       open(filename, 'r'){|f|
         f.each_line{|line|
           if if_macro_stack(macro_stack)
-            if line =~ /^\s*use +(\w+)\b?/i
+            if line =~ /(?:^|\r|\n)\s*use +(\w+)\b?/i
               f_uses_mod[ filename ] << $1
             end
-            if line =~ /^\s*module +(\w+)\b*$/i
+            if line =~ /(?:^|\r|\n)\s*module +(\w+)\b?/i
               mod = $1
               mod_in_f[ mod ] = filename unless mod =~ /procedure/i
             end
           end
 
-          if line =~ /^\s*#/
+          if line =~ /(?:^|\r|\n)\s*#/
             macro_stack = parse_sharp_line_stack(line, macro_stack)
           end
         }
@@ -104,16 +104,16 @@ class FruitRakeEstimate
   end
 
   def parse_sharp_line_stack(line, macro_stack)
-    if line =~ /^\s*#ifdef +(\w+)\b/i
+    if line =~ /(?:^|\r|\n)\s*#ifdef +(\w+)\b/i
       macro_stack.push($1)
     end
 
-    if line =~ /^\s*#ifndef +(\w+)\b/i
+    if line =~ /(?:^|\r|\n)\s*#ifndef +(\w+)\b/i
       str = "#not#" + $1
       macro_stack.push(str)
     end
 
-    if line =~ /^\s*#else\b/i
+    if line =~ /(?:^|\r|\n)\s*#else\b/i
       if macro_stack.size == 0
         puts "FruitRakeEstimate: macro #else unexpected here."
       else
@@ -127,7 +127,7 @@ class FruitRakeEstimate
       end
     end
 
-    if line =~ /^\s*#endif\b/i
+    if line =~ /(?:^|\r|\n)\s*#endif\b/i
       if macro_stack.size == 0
         puts "FruitRakeEstimate: macro #else unexpected here."
       else
@@ -135,7 +135,7 @@ class FruitRakeEstimate
       end
     end
 
-    if line =~ /^\s*#define +(\w+)\b/i
+    if line =~ /(?:^|\r|\n)\s*#define +(\w+)\b/i
       puts "FruitRakeEstimate: macro #define is not supported."
     end
     return macro_stack
