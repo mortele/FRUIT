@@ -1,4 +1,21 @@
 -----------
+FRUIT 3.0.1
+-----------
+
++ rake_estimate.rb
+
+  A problem that rake_estimate.rb failed to read
+  lines ending in CR+LF is fixed.
+
+
++ setup and teardown
+
+  When tester file (*_test.f90 etc.) did not have setup subroutine,
+  its teardown subroutine was not called. 
+  Corresponding error in fruit_processor.rb is fixed.
+
+
+-----------
 FRUIT 3.0
 -----------
 
