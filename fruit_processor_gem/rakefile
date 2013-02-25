@@ -1,5 +1,11 @@
 require 'rubygems'
-require 'rake/gempackagetask'
+
+if (RUBY_VERSION.split('.').shift.to_i < 2)
+  require 'rake/gempackagetask'
+else
+  require 'rubygems/package_task'
+end
+
 require 'rake/clean'
 
 CLEAN.include(FileList['test/*_gen.f90'])
@@ -24,8 +30,14 @@ spec = Gem::Specification.new do |s|
   s.description = "The fruit_processor gem works with fortranxunit (fruit) on sourceforge."
 end
 
-Rake::GemPackageTask.new(spec) do |pkg|
-  pkg.need_tar = true
+if (RUBY_VERSION.split('.').shift.to_i < 2)
+  Rake::GemPackageTask.new(spec) do |pkg|
+    pkg.need_tar = true
+  end
+else
+  Gem::PackageTask.new(spec) do |pkg|
+    pkg.need_tar = true
+  end
 end
 
 task :default => [:clean, :test, "pkg/#{spec.name}-#{spec.version}.gem"] do
