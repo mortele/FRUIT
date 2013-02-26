@@ -19,7 +19,12 @@ task :default => [
 #    because fortran compiler must recognize .f95 extension.
 
 if ENV['DISPLAY']
-  task :default => [ :gui_fruit_test ]
+  begin
+    require 'tk'
+    task :default => [ :gui_fruit_test ]
+  rescue LoadError
+    puts "failed to require 'tk'"
+  end
 end
 
 CLEAN.include(FileList['**/*.o', '**/*.mod', '**/*.a', '**/*_gen.f90', '**/*fruit_driver',
