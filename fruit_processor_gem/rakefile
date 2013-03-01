@@ -1,8 +1,14 @@
 require 'rubygems'
 
-if (RUBY_VERSION.split('.').shift.to_i < 2)
+version = `rake --version`
+version =~ /ersion +([0-9]+)\.([0-9]+)\./
+major = $1.to_i
+minor = $2.to_i
+if (major < 1 and minor < 9)
+  p      'rake/gempackagetask'
   require 'rake/gempackagetask'
 else
+  p       'rubygems/package_task'
   require 'rubygems/package_task'
 end
 
@@ -30,7 +36,7 @@ spec = Gem::Specification.new do |s|
   s.description = "The fruit_processor gem works with fortranxunit (fruit) on sourceforge."
 end
 
-if (RUBY_VERSION.split('.').shift.to_i < 2)
+if (major < 1 and minor < 9)
   Rake::GemPackageTask.new(spec) do |pkg|
     pkg.need_tar = true
   end
