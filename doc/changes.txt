@@ -1,4 +1,13 @@
 -----------
+FRUIT 3.0.2
+-----------
+
++ fruit_processor_gem/rakefile
+
+  Changed to work with rake 10.0.x
+
+
+-----------
 FRUIT 3.0.1
 -----------
 
