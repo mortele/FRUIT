@@ -145,6 +145,30 @@ contains
   end subroutine test_assert_true_message
 
 
+  subroutine test_assert_true_message_nospace
+    character(len = 500) :: line_read
+    character(len = 100) :: message
+
+    call override_stdout(20, STDOUTNAME)
+      call stash_test_suite
+        call init_fruit
+
+        message = "short message." !this variable holds many space characters.
+        call assert_true (.false., message)
+
+        call fruit_summary
+      call restore_test_suite
+    call end_override_stdout
+
+    open (20, file = STDOUTNAME)
+      call read_until_string(20, 'User message:', line_read)
+
+      call assert_string_has_string(line_read, &
+      &  "[short message.]")
+    close (20)
+  end subroutine test_assert_true_message_nospace
+
+
   ! Test add_success and is_all_successful
   ! -----------------------------------
   subroutine test_add_success
