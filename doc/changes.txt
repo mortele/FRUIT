@@ -1,4 +1,13 @@
 -----------
+FRUIT 3.0.3
+-----------
+
++ sample_build_dir 
+
+  This sample puts *.o, *.mod, and executable to a sub directry.
+
+
+-----------
 FRUIT 3.0.2
 -----------
 

@@ -41,6 +41,9 @@ module RakeBase
   $lib_bases = {} if !$lib_bases
   $inc_dirs = [] if !$inc_dirs
 
+  $source_dir = "" if !$source_dir
+  $obj_dir    = "" if !$obj_dir
+
   #---------v
   if not defined?(OBJ)
     SRC = FileList[]
@@ -48,12 +51,12 @@ module RakeBase
       SRC.concat(FileList['*.' + fxx])
     }
     SRC.sort!
-    OBJ = SRC.ext('o')
+    OBJ = SRC.ext('o').gsub!(/^/, $obj_dir)
   end
   #---------^
 
   SRC.each{|f|
-    f_obj = f.ext('o')
+    f_obj = f.ext('o').gsub!(/^/, $obj_dir)
     next if (f.to_s =~ /fruit_basket_gen\.f90$/)
     next if (f.to_s =~ /fruit_driver_gen\.f90$/)
     # puts "rake_base.rb: Assuming " + f_obj.to_s + " => " + f.to_s
@@ -91,11 +94,17 @@ module RakeBase
   extensions.each{|fxx|
     objs.concat(FileList['*.' + fxx])
   }
-  objs = objs.ext('o')
+  objs = objs.ext('o').gsub!(/^/, $obj_dir)
   #---------^
   if objs.include?'fruit_basket_gen.o'
     file 'fruit_basket_gen.o' =>  objs - ['fruit_basket_gen.o', 'fruit_driver_gen.o']
     file 'fruit_driver_gen.o' =>  'fruit_basket_gen.o'
+
+    file "#{$obj_dir}fruit_basket_gen.o" =>  objs - [
+         "#{$obj_dir}fruit_basket_gen.o", 
+         "#{$obj_dir}fruit_driver_gen.o"
+    ]
+    file "#{$obj_dir}fruit_driver_gen.o" =>  "#{$obj_dir}fruit_basket_gen.o"
   end
 
   # final goal link is depending on the libraries
@@ -107,7 +116,7 @@ module RakeBase
   end
 
   extensions.each{|fxx|
-    rule '.o' => ['.' + fxx] do |t|
+    rule '.o' => $source_dir + '%X.' + fxx do |t|
       Rake::Task[:dirs].invoke if Rake::Task.task_defined?('dirs')
 
       flag = $build_dir

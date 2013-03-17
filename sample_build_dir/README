@@ -1,0 +1,7 @@
+This sample puts *.o, *.mod, and executable
+to directry "build_unittest".
+
+Source file (*.f90) and tester file (*_test.f90)
+are put on this directry.
+
+

@@ -8,10 +8,10 @@ $base_dir=Dir.pwd
 $build_dir = "#{$base_dir}/build"
 
 task :default => [
-  :ruby_test, :rake_estimate_test, 
+  :ruby_test, :rake_base_test, :rake_estimate_test,
   :in_3_minutes,
-  :sample_selective, 
-  :anchor_root, :dirs, :compile, :sample, 
+  :sample_selective,
+  :anchor_root, :dirs, :compile, :sample,
   :self_test]
 
 # :test is not included as :self_test covers tests done in :test.
@@ -27,31 +27,33 @@ if ENV['DISPLAY']
   end
 end
 
-CLEAN.include(FileList['**/*.o', '**/*.mod', '**/*.a', '**/*_gen.f90', '**/*fruit_driver',
+CLEAN.include(FileList[
+  '**/*.o', '**/*.mod', '**/*.a', '**/*_gen.f90', '**/*fruit_driver',
   '**/result*.xml',
   '**/fruit_driver_fxx.exe',
   '**/rakefile_gui_tmp',
   '**/rakefile_gui_tester',
   '**/rakefile_gui_src',
   '**/fruit_driver_gui.exe',
-  'in_3_minutes/fruit.f90',
-  'in_3_minutes/fruit_util.f90',
-  'sample/test/fruit.f90',
-  'sample/test/fruit_util.f90',
-  'sample_single_dir/fruit.f90',
-  'sample_single_dir/fruit_util.f90',
   'sample_single_dir/rake_base.rb',
   'sample_single_dir/rake_estimate.rb',
-  'sample_selective/fruit.f90',
-  'sample_selective/fruit_util.f90',
   'sample_selective/fruit_driver_selective',
   'sample_selective/dummy_main',
+  'sample_build_dir/*/*.exe',
   'self_test/fruit_self_test_driver',
   'self_test/override_stdout.txt',
-  'self_test/fruit.f90',
-  'self_test/fruit_util.f90',
   'fruit_processor_gem/pkg/fruit_processor-*/',
- ])
+])
+
+[
+  "in_3_minutes",
+  "sample", "sample_single_dir", "sample_selective", "sample_build_dir",
+  "self_test"
+].each do |d|
+  CLEAN.include(FileList[d + "/fruit.f90"])
+  CLEAN.include(FileList[d + "/fruit_util.f90"])
+end
+
 CLOBBER.include(FileList['src/fruit.f90'])
 CLOBBER.include($build_dir)
 
@@ -89,6 +91,11 @@ task :ruby_test do
   sh 'cd fruit_processor_gem; rake test'
 end
 
+desc "Test of rake_base.rb"
+task :rake_base_test do
+  sh 'cd ruby_test; ruby rake_base_test.rb'
+end
+
 desc "Test of rake_estimate.rb"
 task :rake_estimate_test do
   sh 'cd ruby_test; ruby rake_estimate_test.rb'
@@ -98,6 +105,7 @@ desc "Test of gui_fruit.rb"
 task :gui_fruit_test do
   sh 'cd ruby_test; ruby gui_fruit_test.rb'
 end
+
 
 desc "Compile a sample of multi-directry test."
 task :sample => :compile do
@@ -122,6 +130,14 @@ end
 desc "Compile a sample which complies only specifiled testerss."
 task :sample_selective => :fruit_f90 do
   dir = "sample_selective"
+  sh "cd #{dir}; ln -fs ../src/fruit.f90"
+  sh "cd #{dir}; ln -fs ../src/fruit_util.f90"
+  sh "cd #{dir}; rake"
+end
+
+desc "Compile a sample whose build directry is a subdirectry"
+task :sample_build_dir => :fruit_f90 do
+  dir = "sample_build_dir"
   sh "cd #{dir}; ln -fs ../src/fruit.f90"
   sh "cd #{dir}; ln -fs ../src/fruit_util.f90"
   sh "cd #{dir}; rake"

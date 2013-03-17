@@ -1,0 +1,37 @@
+
+require 'rubygems'
+require 'fruit_processor'
+require 'rake/clean'
+
+include Rake::DSL if defined?(Rake::DSL)
+
+$build_dir = "./"
+$obj_dir = "./"
+$source_dir = "../"
+$goal = 'fruit_driver.exe'
+$main = '../fruit_driver_gen.f90'
+
+CLEAN.include(FileList[
+  $source_dir + 'fruit_driver_gen.f90',
+  $source_dir + 'fruit_basket_gen.f90', 
+  $build_dir + '*.mod', 
+  $build_dir + '*.o', 
+  $source_dir + '*.o', 
+  $build_dir + $goal
+])
+
+fp = FruitProcessor.new
+## fp.process_only = FileList[""] #only files here are processed.
+fp.pre_process($source_dir)
+
+load "../../rake_estimate.rb"
+load "../../rake_base.rb"
+
+
+task :default => :test
+
+task :test => $goal do
+  sh "./#{$goal}"
+end
+
+

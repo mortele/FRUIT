@@ -2,8 +2,7 @@
 
 
 class FruitRakeEstimate
-  attr_accessor :extensions, :forward, :all_f, :identifiers
-
+  attr_accessor :extensions, :forward, :all_f, :identifiers, :source_dir, :obj_dir
 
   EXT_DEFAULT = ["f90", "f95", "f03", "f08"]
   IDENTIFIERS_DEFAULT = []
@@ -11,6 +10,8 @@ class FruitRakeEstimate
   def initialize
     @extensions = EXT_DEFAULT
     @identifiers = IDENTIFIERS_DEFAULT
+    @source_dir = ''
+    @obj_dir = ''
   end
 
   def rake_dependency
@@ -24,7 +25,7 @@ class FruitRakeEstimate
     @all_f = []
 
     @extensions.each{|fxx|
-      Dir::glob("*.#{fxx}").each{|filename|
+      Dir::glob("#{@source_dir}*.#{fxx}").each{|filename|
         @all_f << filename
       }
     }
@@ -224,9 +225,10 @@ class FruitRakeEstimate
             src.concat(FileList[f])
           }
           obj = src.ext('o')
+          if (@obj_dir != "")
+            obj.gsub!(/^#{@source_dir}/, @obj_dir)
+          end
 
-          # puts "Files to be compiled for main #{main}:"
-          # puts " " + obj.join(" ")
         end
       end
       return [src, obj]
@@ -238,6 +240,9 @@ end
 #----- execute the following if loaded within rake
 if $0 =~ /rake$/
   estim = FruitRakeEstimate.new
+
+  estim.source_dir = $source_dir if $source_dir
+  estim.obj_dir    = $obj_dir    if $obj_dir
   estim.rake_dependency
   if $main
     SRC, OBJ = estim.src_and_obj_for_main($main)

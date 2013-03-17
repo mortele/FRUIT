@@ -132,14 +132,14 @@ class FruitRakeEstimateTest < Test::Unit::TestCase
     FileUtils.cd("dir_only_tester"){
       esti = FruitRakeEstimate.new
       forward = esti.set_forward
-      assert_equal([],  forward["test_aaa.f90"], 
+      assert_equal([],  forward["test_aaa.f90"],
         "test_aaa.f90 needs module aaa. but no source for module aaa there."
       )
     }
     FileUtils.cd("dir_tester_and_tested2"){
       esti = FruitRakeEstimate.new
       forward = esti.set_forward
-      assert_equal(["some_name.f90"],  forward["some_test.f90"], 
+      assert_equal(["some_name.f90"],  forward["some_test.f90"],
         "some_test.f90 needs module 'some_name_2' provided by 'some_name.f90"
       )
     }
@@ -213,6 +213,21 @@ class FruitRakeEstimateTest < Test::Unit::TestCase
     assert_equal(
       ["sample08.o", "test_mod.o", "main.o"],
       obj)
+  end
+
+  def test_src_and_obj_for_main__obj_dir
+    esti = FruitRakeEstimate.new
+    esti.obj_dir = "dummy_obj_dir/"
+    src, obj = esti.src_and_obj_for_main("main.f90")
+
+    assert_equal(
+      ["sample08.f08", "test_mod.f03", "main.f90"],
+      src)
+    assert_equal([
+      "dummy_obj_dir/sample08.o",
+      "dummy_obj_dir/test_mod.o",
+      "dummy_obj_dir/main.o"
+    ], obj)
   end
 end
 
