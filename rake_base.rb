@@ -42,7 +42,6 @@ module RakeBase
   $inc_dirs = [] if !$inc_dirs
 
   $source_dir = "" if !$source_dir
-  $obj_dir    = "" if !$obj_dir
 
   #---------v
   if not defined?(OBJ)
@@ -51,17 +50,20 @@ module RakeBase
       SRC.concat(FileList['*.' + fxx])
     }
     SRC.sort!
-    OBJ = SRC.ext('o').gsub!(/^/, $obj_dir)
+    OBJ = SRC.ext('o')
   end
   #---------^
 
-  SRC.each{|f|
-    f_obj = f.ext('o').gsub!(/^/, $obj_dir)
-    next if (f.to_s =~ /fruit_basket_gen\.f90$/)
-    next if (f.to_s =~ /fruit_driver_gen\.f90$/)
-    # puts "rake_base.rb: Assuming " + f_obj.to_s + " => " + f.to_s
-    file f_obj.to_s => f.to_s
-  }
+  if !$source_dirs
+    SRC.each{|f|
+      f_obj = f.ext('o')
+      next if (f.to_s =~ /fruit_basket_gen\.f90$/)
+      next if (f.to_s =~ /fruit_driver_gen\.f90$/)
+
+      #  puts "rake_base.rb: Assuming " + f_obj.to_s + " => " + f.to_s
+      file f_obj.to_s => f.to_s
+    }
+  end
 
   #-------------v
   # assume a_test.fxx depends on a.fxx if a.fxx exists
@@ -94,17 +96,11 @@ module RakeBase
   extensions.each{|fxx|
     objs.concat(FileList['*.' + fxx])
   }
-  objs = objs.ext('o').gsub!(/^/, $obj_dir)
+  objs = objs.ext('o')
   #---------^
   if objs.include?'fruit_basket_gen.o'
     file 'fruit_basket_gen.o' =>  objs - ['fruit_basket_gen.o', 'fruit_driver_gen.o']
     file 'fruit_driver_gen.o' =>  'fruit_basket_gen.o'
-
-    file "#{$obj_dir}fruit_basket_gen.o" =>  objs - [
-         "#{$obj_dir}fruit_basket_gen.o", 
-         "#{$obj_dir}fruit_driver_gen.o"
-    ]
-    file "#{$obj_dir}fruit_driver_gen.o" =>  "#{$obj_dir}fruit_basket_gen.o"
   end
 
   # final goal link is depending on the libraries
@@ -115,26 +111,55 @@ module RakeBase
     file $goal => lib if File.exist? lib
   end
 
-  extensions.each{|fxx|
-    rule '.o' => $source_dir + '%X.' + fxx do |t|
-      Rake::Task[:dirs].invoke if Rake::Task.task_defined?('dirs')
+  if !$source_dirs
+    extensions.each{|fxx|
+      rule '.o' => $source_dir + '%X.' + fxx do |t|
+        Rake::Task[:dirs].invoke if Rake::Task.task_defined?('dirs')
 
-      flag = $build_dir
-      flag = '"-I' + flag + '"' if flag.size > 0
+        flag = $build_dir
+        flag = '"-I' + flag + '"' if flag.size > 0
 
-      sh "#{$compiler} #{$option} -c -o #{t.name} #{t.source} #{flag} #{FruitProcessor.new.inc_flag($inc_dirs)}"
-      FileList["*.mod"].each do |module_file|
-        if $build_dir != "" and $build_dir !~ /^\.\/*$/
-          os_install File.expand_path(module_file), $build_dir
+        sh "#{$compiler} #{$option} -c -o #{t.name} #{t.source} #{flag} #{FruitProcessor.new.inc_flag($inc_dirs)}"
+        FileList["*.mod"].each do |module_file|
+          if $build_dir != "" and $build_dir !~ /^\.\/*$/
+            os_install File.expand_path(module_file), $build_dir
+          end
         end
       end
-    end
-  }
+    }
+  end
+
+  if $source_dirs
+    $source_dirs.each{|dir|
+      extensions.each{|fxx|
+        FileList[ dir + "*." + fxx ].each do |ff|
+          basename_o = ff.sub(/^(.*\/)?/, "").ext('o')
+
+          file basename_o => ff do |t|
+            Rake::Task[:dirs].invoke if Rake::Task.task_defined?('dirs')
+
+            flag = $build_dir
+            flag = '"-I' + flag + '"' if flag.size > 0
+
+            sh "#{$compiler} #{$option} -c -o #{t.name} #{ff} #{flag} #{FruitProcessor.new.inc_flag($inc_dirs)}"
+            FileList["*.mod"].each do |module_file|
+              if $build_dir != "" and $build_dir !~ /^\.\/*$/
+                os_install File.expand_path(module_file), $build_dir
+              end
+            end
+          end
+        end
+      }
+    }
+  end
 
   file $goal => OBJ do
     if OBJ.size == 0
     elsif $goal =~ /.a$/
-      sh "ar cr #{$goal} #{OBJ}"
+      if open ("| which ar 2> /dev/null"){|f| f.gets}
+        sh "ar cr #{$goal} #{OBJ}"
+      else
+      end
     else
       lib_name_flag = FruitProcessor.new.lib_name_flag($lib_bases, $build_dir)
 

@@ -25,8 +25,11 @@ spec = Gem::Specification.new do |s|
   s.email     =   "meihome meihome.com"
   s.summary   =   "A package for fortranxunit (fruit)."
 
-  s.files     =   FileList['lib/*.rb', 'test/*.rb',
-    'test/*_test.f90', 'test/*_test.f03', 'test/for_test_gather_specs.txt'].to_a
+  s.files     =   FileList[
+    'lib/*.rb', 'test/*.rb',
+    'test/*_test.f90', 'test/*_test.f03', 'test/for_test_gather_specs.txt',
+    'test/os_install_from.txt'
+  ].to_a
 
   s.require_path  =   "lib"
   s.test_files = Dir.glob('tests/*.rb')
@@ -55,6 +58,9 @@ task :install => :default do
 end
 
 task :test do
-  sh "cd test; ruby fruit_processor_test.rb"
+  Dir.chdir("test") do
+    sh "ruby fruit_processor_test.rb"
+    sh "ruby misc_test.rb"
+  end
 end
 

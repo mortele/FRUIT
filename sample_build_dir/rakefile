@@ -3,11 +3,15 @@ require 'rake/clean'
 
 desc "sample unit test"
 task :test do
-  sh 'cd build_unittest; rake'
+  Dir.chdir "build_unittest" do
+    sh 'rake'
+  end
 end
 
 task :main do
-  sh 'cd build_main; rake'
+  Dir.chdir "build_main" do
+    sh 'rake'
+  end
 end
 
 task :default => [:main, :test]

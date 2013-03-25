@@ -1,8 +1,7 @@
 #!/usr/bin/env ruby
 
-
 class FruitRakeEstimate
-  attr_accessor :extensions, :forward, :all_f, :identifiers, :source_dir, :obj_dir
+  attr_accessor :extensions, :forward, :all_f, :identifiers, :source_dirs
 
   EXT_DEFAULT = ["f90", "f95", "f03", "f08"]
   IDENTIFIERS_DEFAULT = []
@@ -10,8 +9,7 @@ class FruitRakeEstimate
   def initialize
     @extensions = EXT_DEFAULT
     @identifiers = IDENTIFIERS_DEFAULT
-    @source_dir = ''
-    @obj_dir = ''
+    @source_dirs = [""]
   end
 
   def rake_dependency
@@ -25,13 +23,15 @@ class FruitRakeEstimate
     @all_f = []
 
     @extensions.each{|fxx|
-      Dir::glob("#{@source_dir}*.#{fxx}").each{|filename|
-        @all_f << filename
+      @source_dirs.each{|dir|
+        Dir::glob("#{dir}*.#{fxx}").each{|filename|
+          @all_f << filename
+        }
       }
     }
 
-    #puts "fortran files:"
-    #puts all_f.join(" ")
+    # puts "fortran files:"
+    # puts all_f.join(" ")
   end
 
   def missing_modules
@@ -53,7 +53,10 @@ class FruitRakeEstimate
     end
 
     @all_f.each{|filename|
-      f_uses_mod[ filename ] = []
+      f_base = filename.sub(/^.*\//, "")
+
+      f_uses_mod[ f_base ] = []
+
 
       macro_stack = []
 
@@ -61,11 +64,11 @@ class FruitRakeEstimate
         f.each_line{|line|
           if if_macro_stack(macro_stack)
             if line =~ /(?:^|\r|\n)\s*use +(\w+)\b?/i
-              f_uses_mod[ filename ] << $1
+              f_uses_mod[ f_base ] << $1
             end
             if line =~ /(?:^|\r|\n)\s*module +(\w+)\b?/i
               mod = $1
-              mod_in_f[ mod ] = filename unless mod =~ /procedure/i
+              mod_in_f[ mod ] = f_base unless mod =~ /procedure/i
             end
           end
 
@@ -78,11 +81,14 @@ class FruitRakeEstimate
     @forward = {}
     missings = []
     @all_f.each{|f|
-      @forward[ f ] = []
-      f_uses_mod[f].uniq.each{|a_mod|
+      f_base = f.sub(/^.*\//, "")
+
+      @forward[ f_base ] = []
+
+      f_uses_mod[f_base].uniq.each{|a_mod|
         if mod_in_f[a_mod]
-          if mod_in_f[a_mod] != f
-            @forward[ f ] << mod_in_f[ a_mod ]
+          if mod_in_f[a_mod] != f_base
+            @forward[ f_base ] << mod_in_f[ a_mod ]
           end
         else
           missings.push(a_mod)
@@ -145,14 +151,14 @@ class FruitRakeEstimate
   def apply_dependency
     puts "=========="
     puts "Dependencies Estimated:"
-
     @all_f.each{|f|
-      next if @forward[f].size == 0
+      f_base = f.sub(/^.*\//, "")
+      next if @forward[f_base].size == 0
 
-      needs = f_to_o(f)
+      needs = f_to_o(f_base)
       needed = []
 
-      @forward[f].each{|f_needed|
+      @forward[f_base].each{|f_needed|
         needed << f_to_o(f_needed)
       }
       file needs => needed if defined?(Rake)
@@ -197,7 +203,9 @@ class FruitRakeEstimate
 
   def get_ordered(needed, ordered = [])
     f_add = []
+
     (needed - ordered).each{|f|
+
       next if ordered.index(f)
       if @forward[f].size == 0
         f_add << f
@@ -225,10 +233,6 @@ class FruitRakeEstimate
             src.concat(FileList[f])
           }
           obj = src.ext('o')
-          if (@obj_dir != "")
-            obj.gsub!(/^#{@source_dir}/, @obj_dir)
-          end
-
         end
       end
       return [src, obj]
@@ -241,8 +245,13 @@ end
 if $0 =~ /rake$/
   estim = FruitRakeEstimate.new
 
-  estim.source_dir = $source_dir if $source_dir
-  estim.obj_dir    = $obj_dir    if $obj_dir
+  if $source_dirs
+    estim.source_dirs = $source_dirs.push("").uniq
+  elsif $source_dir
+    estim.source_dirs = [$source_dir]
+  else
+    estim.source_dirs = [""]
+  end
   estim.rake_dependency
   if $main
     SRC, OBJ = estim.src_and_obj_for_main($main)

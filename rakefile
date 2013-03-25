@@ -11,6 +11,8 @@ task :default => [
   :ruby_test, :rake_base_test, :rake_estimate_test,
   :in_3_minutes,
   :sample_selective,
+  :sample_build_dir,
+  :sample_multi_dir,
   :anchor_root, :dirs, :compile, :sample,
   :self_test]
 
@@ -31,12 +33,11 @@ CLEAN.include(FileList[
   '**/*.o', '**/*.mod', '**/*.a', '**/*_gen.f90', '**/*fruit_driver',
   '**/result*.xml',
   '**/fruit_driver_fxx.exe',
+  '**/fruit_driver.exe',
   '**/rakefile_gui_tmp',
   '**/rakefile_gui_tester',
   '**/rakefile_gui_src',
   '**/fruit_driver_gui.exe',
-  'sample_single_dir/rake_base.rb',
-  'sample_single_dir/rake_estimate.rb',
   'sample_selective/fruit_driver_selective',
   'sample_selective/dummy_main',
   'sample_build_dir/*/*.exe',
@@ -52,6 +53,8 @@ CLEAN.include(FileList[
 ].each do |d|
   CLEAN.include(FileList[d + "/fruit.f90"])
   CLEAN.include(FileList[d + "/fruit_util.f90"])
+  CLEAN.include(FileList[d + "/rake_base.rb"])
+  CLEAN.include(FileList[d + "/rake_estimate.rb"])
 end
 
 CLOBBER.include(FileList['src/fruit.f90'])
@@ -59,12 +62,16 @@ CLOBBER.include($build_dir)
 
 desc "Complie src/fruit*.f90 and build build/libfruit.a"
 task :compile do
-  sh 'cd src;rake'
+  Dir.chdir("src") do 
+    sh 'rake'
+  end
 end
 
 desc "(Obsolete) Test of fruit.f90 and fruit_util.f90."
 task :test => :compile do
-  sh 'cd test;rake;'
+  Dir.chdir("test") do 
+    sh 'rake'
+  end
   driver_programs = FileList["#{$build_dir}/fruit_driver"]
   driver_programs.each do |driver|
     sh "\"#{driver}\""
@@ -73,74 +80,103 @@ end
 
 desc "Update fruit.f90"
 task :fruit_f90 do
-  sh 'cd src; rake fruit.f90'
+  Dir.chdir("src") do 
+    sh 'rake fruit.f90'
+  end
 end
 
 desc "Self test of fruit.f90 and fruit_util.f90."
 task :self_test => :compile do
-  sh 'cd self_test; rake;'
+  Dir.chdir("self_test") do
+    sh 'rake'
+  end
 end
 
 desc "Using valgrind do Self test of fruit.f90 and fruit_util.f90."
 task :self_test_valgrind => :compile do
-  sh 'cd self_test; rake valgrind'
+  Dir.chdir("self_test") do 
+    sh 'rake valgrind'
+  end
 end
 
 desc "Test of fruit_processor.rb."
 task :ruby_test do
-  sh 'cd fruit_processor_gem; rake test'
+  Dir.chdir("fruit_processor_gem") do 
+    sh 'rake test'
+  end
 end
 
 desc "Test of rake_base.rb"
 task :rake_base_test do
-  sh 'cd ruby_test; ruby rake_base_test.rb'
+  Dir.chdir("ruby_test") do 
+    sh 'ruby rake_base_test.rb'
+  end
 end
 
 desc "Test of rake_estimate.rb"
 task :rake_estimate_test do
-  sh 'cd ruby_test; ruby rake_estimate_test.rb'
+  Dir.chdir("ruby_test") do 
+    sh 'ruby rake_estimate_test.rb'
+  end
 end
 
 desc "Test of gui_fruit.rb"
 task :gui_fruit_test do
-  sh 'cd ruby_test; ruby gui_fruit_test.rb'
+  Dir.chdir("ruby_test") do 
+    sh 'ruby gui_fruit_test.rb'
+  end
 end
 
 
 desc "Compile a sample of multi-directry test."
 task :sample => :compile do
-  sh 'cd sample;rake;'
+  Dir.chdir("sample") do 
+    sh 'rake'
+  end
 end
 
 desc "Compile a sample of manually written test."
 task :in_3_minutes => :fruit_f90 do
-  sh 'cd in_3_minutes;rake'
+  Dir.chdir("in_3_minutes") do 
+    sh 'rake'
+  end
 end
 
 desc "Compile a sample of single-directry test."
 task :sample_single_dir => :fruit_f90 do
   dir = "sample_single_dir"
-  sh "cd #{dir}; ln -fs ../src/fruit.f90"
-  sh "cd #{dir}; ln -fs ../src/fruit_util.f90"
-  sh "cd #{dir}; ln -fs ../rake_base.rb"
-  sh "cd #{dir}; ln -fs ../rake_estimate.rb"
-  sh "cd #{dir}; rake"
+  Dir.chdir(dir) do 
+    os_install("../src/fruit.f90",      "fruit.f90")
+    os_install("../src/fruit_util.f90", "fruit_util.f90")
+    os_install("../rake_base.rb", "rake_base.rb")
+    os_install("../rake_estimate.rb", "rake_estimate.rb")
+    sh "rake"
+  end
 end
+
+desc "Compile a sample of multi-directry test."
+task :sample_multi_dir => :fruit_f90 do
+  dir = "sample_multi_dir/build"
+  Dir.chdir(dir) do 
+    sh "rake"
+  end
+end
+
 
 desc "Compile a sample which complies only specifiled testerss."
 task :sample_selective => :fruit_f90 do
-  dir = "sample_selective"
-  sh "cd #{dir}; ln -fs ../src/fruit.f90"
-  sh "cd #{dir}; ln -fs ../src/fruit_util.f90"
-  sh "cd #{dir}; rake"
+  Dir.chdir("sample_selective") do
+    os_install("../src/fruit.f90",      "fruit.f90")
+    os_install("../src/fruit_util.f90", "fruit_util.f90")
+    sh "rake"
+  end
 end
 
 desc "Compile a sample whose build directry is a subdirectry"
 task :sample_build_dir => :fruit_f90 do
-  dir = "sample_build_dir"
-  sh "cd #{dir}; ln -fs ../src/fruit.f90"
-  sh "cd #{dir}; ln -fs ../src/fruit_util.f90"
-  sh "cd #{dir}; rake"
+  Dir.chdir("sample_build_dir") do
+    sh "rake"
+  end
 end
 
 load 'rake_base.rb'

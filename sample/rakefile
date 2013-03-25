@@ -5,15 +5,23 @@ include Rake::DSL if defined?(Rake::DSL)
 
 
 task :compile do
-  sh 'cd src;rake'
+  Dir.chdir("src") { 
+    sh 'rake'
+  }
 end
 
 task :test => :compile do
-  sh 'cd test;rake;./calculator_fruit_driver'
+  Dir.chdir("test") { 
+    sh 'rake'
+    sh './calculator_fruit_driver'
+  }
 end
 
 task :valgrind => :compile do
-  sh 'cd test; rake; valgrind --leak-check=full ./calculator_fruit_driver'
+  Dir.chdir("test") { 
+    sh 'rake'
+    sh 'valgrind --leak-check=full ./calculator_fruit_driver'
+ }
 end
 
 load "#{FruitProcessor.new.base_dir}/rake_base.rb"

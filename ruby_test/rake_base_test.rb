@@ -16,7 +16,6 @@ class FruitRakeBaseTest < Test::Unit::TestCase
     assert($build_dir,    "$build_dir defined")
 
     assert_equal("", $source_dir)
-    assert_equal("", $obj_dir)
 
     assert(RakeBase::OBJ.index("sample08.o"), "OBJ has sample08.o")
   end

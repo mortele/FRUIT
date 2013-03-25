@@ -20,6 +20,29 @@ class FruitProcessorTest < Test::Unit::TestCase
 #    got_hash = @fixture.get_spec_hash("calculator_test.f90")
 #  end
 
+  def test_fruit_picker__dirs
+    basket        = "fruit_basket_gen.f90"
+    if (File.exist?(basket))
+      File.unlink(basket)
+    end
+
+    fp = FruitProcessor.new
+    fp.load_files ["subdir", "subdir2"]
+    files = fp.get_files
+    assert(
+      files.include?("subdir/in_subdir_test.f90"),
+      "has subdir/..._test.f90"
+    )
+    assert(
+      files.include?("subdir2/in_subdir2_test.f90"),
+      "has subdir2/..._test.f90"
+    )
+
+    assert(!File.exist?(basket), "#{basket} absent")
+    fp.fruit_picker ["subdir", "subdir2"]
+    assert( File.exist?(basket), "#{basket} created")
+  end
+
   def test_fruit_picker
     basket        = "for_test_picker/fruit_basket_gen.f90"
     with_setup    = "for_test_picker/a_setup_test.f90"
@@ -91,11 +114,20 @@ class FruitProcessorTest < Test::Unit::TestCase
     assert_equal(1, files.grep(/myvector_test\.f03$/).length, "detect .f03 files")
   end
 
+  def test_load_files__dirs
+    @fixture.load_files [".", "subdir"]
+    files = @fixture.get_files
+    assert(
+      files.include?("subdir/in_subdir_test.f90"),
+      "has subdir/..._test.f90"
+    )
+  end
+
   def test_process_only
     fp = FruitProcessor.new
     fp.process_only = ["a_test.f90"]
     fp.process_only << "b_test.f90"
- 
+
     assert_equal(["a_test.f90", "b_test.f90"], fp.process_only)
 
     fp.load_files "."
@@ -103,7 +135,7 @@ class FruitProcessorTest < Test::Unit::TestCase
 
     spec_hash = fp.get_spec_hash_filename("./a_test.f90")
     assert_equal(
-      ["test_aaa", "test_aaa2nd"], 
+      ["test_aaa", "test_aaa2nd"],
       spec_hash["methods"]["name"],
       "test subroutine test_aaaa")
   end
@@ -115,6 +147,48 @@ class FruitProcessorTest < Test::Unit::TestCase
     result = @fixture.test_module_name_from_file_path("mmm/nnn/ppp_qqq.f03")
     assert_equal("ppp_qqq", result)
   end
+
+
+  def test_parse_method_names
+    fp = FruitProcessor.new
+    filename = "def_upper_lower_test.f90"
+    fp.parse_method_names(filename)
+    method_names = fp.get_methods_of_filename(filename)
+
+    assert_equal("test_lower", method_names[0])
+    assert_equal("test_upper", method_names[1])
+  end
+  def test_parse_method_names__cause_error
+    fp = FruitProcessor.new
+    filename = "cause_error/def_upper_lower_test.f90"
+
+    fp.parse_method_names(filename)
+    method_names = fp.get_methods_of_filename(filename)
+
+    fp.gather_specs(filename)
+    spec_names =   fp.get_specs_of_filename(filename)
+
+    assert_equal("test_lower", method_names[0])
+    assert_equal("test_upper", method_names[1])
+
+    assert_equal("lower", spec_names[0])
+    assert_equal("upper", spec_names[1])
+  end
+
+  def test_load_files__cause_error
+    fp = FruitProcessor.new
+    dir = "cause_error/"
+    fp.load_files(dir)
+
+    filename_expected = "cause_error/def_upper_lower_test.f90"
+    assert_equal(
+      File.expand_path(filename_expected),
+      File.expand_path(fp.get_files[0]),
+      "a file in cause_error directry"
+    )
+  end
+
+
 
   def test_gather_specs_2
     fp = FruitProcessor.new
@@ -219,13 +293,13 @@ class FruitProcessorTest < Test::Unit::TestCase
     assert_equal(sub_names.length, specs.length)
 
     assert_equal(
-      "test_calculator_should_produce_4_when_2_and_2_are_inputs", 
+      "test_calculator_should_produce_4_when_2_and_2_are_inputs",
       sub_names[0])
     assert_equal(
-      "test_more_with_spec_in_spec_variable", 
+      "test_more_with_spec_in_spec_variable",
       sub_names[1])
     assert_equal(
-      "calculation should produce 4.0 when 2.0 and 2.0 \nare \ninputs", 
+      "calculation should produce 4.0 when 2.0 and 2.0 \nare \ninputs",
       specs    [1])
 
     assert_equal("test_calculator_should_remember_previous_calculation_results", sub_names[2])

@@ -169,6 +169,13 @@ class FruitRakeEstimateTest < Test::Unit::TestCase
     assert_equal(["test_mod.f03"], forward["using_macro_else.f90"])
   end
 
+  def test_set_forward_subdir
+    esti = FruitRakeEstimate.new
+    esti.source_dirs = ["./", "subdir/"]
+    forward = esti.set_forward
+    assert_equal(["mod_in_subdir.f90"], forward["main_use_subdir.f90"])
+  end
+
   def test_f_to_o
     result = FruitRakeEstimate.new.f_to_o("abcdef.f03")
     assert_equal("abcdef.o", result)
@@ -215,19 +222,21 @@ class FruitRakeEstimateTest < Test::Unit::TestCase
       obj)
   end
 
-  def test_src_and_obj_for_main__obj_dir
+  def test_src_and_obj_for_main__2
     esti = FruitRakeEstimate.new
-    esti.obj_dir = "dummy_obj_dir/"
     src, obj = esti.src_and_obj_for_main("main.f90")
 
-    assert_equal(
-      ["sample08.f08", "test_mod.f03", "main.f90"],
-      src)
-    assert_equal([
-      "dummy_obj_dir/sample08.o",
-      "dummy_obj_dir/test_mod.o",
-      "dummy_obj_dir/main.o"
-    ], obj)
+    assert_equal(["sample08.f08", "test_mod.f03", "main.f90"], src)
+    assert_equal(["sample08.o", "test_mod.o", "main.o"], obj)
+  end
+
+  def test_src_and_obj_for_main__subdir
+    esti = FruitRakeEstimate.new
+    esti.source_dirs = ["./", "subdir/"]
+    src, obj = esti.src_and_obj_for_main("main_use_subdir.f90")
+
+    assert_equal(["mod_in_subdir.f90", "main_use_subdir.f90"], src)
+    assert_equal(["mod_in_subdir.o", "main_use_subdir.o"], obj)
   end
 end
 

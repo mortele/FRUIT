@@ -10,7 +10,16 @@ module Misc
       "Mac"
     elsif RUBY_PLATFORM =~ /mswin/i
       "Windows"
+    elsif RUBY_PLATFORM =~ /cygwin/i
+      "Cygwin"
+    elsif RUBY_PLATFORM =~ /mingw/i
+      "Mingw"
     end
+
+    #sample: 
+    #i386-cygwin
+    #i386-mingw32
+    #universal.x86_64-darwin10.8.0
   end
   
   def is_windows?
@@ -42,11 +51,20 @@ module Misc
   end
   
   def os_install from, to
-    if is_windows?
-      install(from, to)
-    else
-      ln_sf(from, to)
+
+# #until fruit3.0.2
+#    if is_windows?
+#      install(from, to)
+#    else
+#      ln_sf(from, to)
+#    end
+
+    begin
+      FileUtils.ln_sf(from, to)
+    rescue NotImplementedError
+     FileUtils.install(from, to)
     end
+
   end
   
 end
