@@ -4,19 +4,16 @@ require 'rake/clean'
 
 include Rake::DSL if defined?(Rake::DSL)
 
-# Add this line at the beginning if there are generated code involved
-FruitProcessor.new.pre_process
-
+$build_dir = "./"
+$source_dirs = ["./", "../src/"]
 $goal='fruit_self_test_driver'
+$main = "fruit_driver_gen.f90"
 
-# the link of the executable depends on libfruit.a.
-# spefify where the files are here:
-# It is in array, because order matters
-$lib_bases = [
-  ['fruit', FruitProcessor.new.build_dir],
-]
+fp = FruitProcessor.new
+fp.pre_process($source_dirs)
 
-# if $build_dir is defined, then use build_dir
+load "../rake_estimate.rb"
+load "../rake_base.rb"
 
 task :default => [:run]
 
@@ -34,8 +31,4 @@ end
 
 CLEAN.include("fruit_self_test_driver", "override_stdout.txt")
 
-# if one module has to be compiled after another module, specify like this:
-#file ['module_b_test.o']  => 'calculator_test.o'
 
-load "#{FruitProcessor.new.base_dir}/rake_base.rb"
-include RakeBase

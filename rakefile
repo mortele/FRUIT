@@ -16,7 +16,7 @@ task :default => [
   :anchor_root, :dirs, :compile, :sample,
   :self_test]
 
-# :test is not included as :self_test covers tests done in :test.
+# :test is not included because :self_test covers tests done in :test.
 # :sample_single_dir is not included
 #    because fortran compiler must recognize .f95 extension.
 
@@ -86,14 +86,14 @@ task :fruit_f90 do
 end
 
 desc "Self test of fruit.f90 and fruit_util.f90."
-task :self_test => :compile do
+task :self_test => :fruit_f90 do
   Dir.chdir("self_test") do
     sh 'rake'
   end
 end
 
 desc "Using valgrind do Self test of fruit.f90 and fruit_util.f90."
-task :self_test_valgrind => :compile do
+task :self_test_valgrind => :fruit_f90 do
   Dir.chdir("self_test") do 
     sh 'rake valgrind'
   end
