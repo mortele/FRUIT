@@ -1,3 +1,8 @@
+require 'rake/clean'
+
+include Rake::DSL if defined?(Rake::DSL)
+
+CLEAN.include(FileList['main.exe'])
 
 task :default => [
   :run_main
@@ -5,10 +10,11 @@ task :default => [
 
 desc "main executable"
 file 'main.exe' => ["../main.f90", "../atoz.f90"] do
-  sh 'gfortran ../atoz.f90 ../main.f90 -o main.exe'
+  sh "#{$compiler} ../atoz.f90 ../main.f90 -o main.exe"
 end
 
 task :run_main => "main.exe" do
   sh './main.exe'
 end
 
+load "../../rake_base.rb"

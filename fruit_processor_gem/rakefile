@@ -28,7 +28,11 @@ spec = Gem::Specification.new do |s|
   s.files     =   FileList[
     'lib/*.rb', 'test/*.rb',
     'test/*_test.f90', 'test/*_test.f03', 'test/for_test_gather_specs.txt',
-    'test/os_install_from.txt'
+    'test/os_install_from.txt',
+    'test/cause_error/*.f90',
+    'test/for_test_picker/*.f90',
+    'test/subdir/*.f90',
+    'test/subdir2/*.f90',
   ].to_a
 
   s.require_path  =   "lib"
