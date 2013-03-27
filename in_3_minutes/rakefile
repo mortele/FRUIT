@@ -4,7 +4,7 @@ require 'fruit_processor'
 include Rake::DSL if defined?(Rake::DSL)
 
 $build_dir = "."
-$goal = "fruit_driver"
+$goal = "fruit_driver_3min.exe"
 
 task :default => [:test]
 
@@ -17,13 +17,14 @@ task :test => [:clean] do
   sh "#{$compiler} #{$option} -c calculator.f90"
   sh "#{$compiler} #{$option} -c calculator_test.f90"
   sh "#{$compiler} #{$option} -c fruit_driver.f90"
-  sh "#{$compiler} #{$option} -o fruit_driver *.o"
-  sh "./fruit_driver"
+  sh "#{$compiler} #{$option} -o #{$goal} *.o"
+  sh "./#{$goal}"
 end
 
 task :clean do
   sh "rm -f fruit.f90"
   sh "rm -f fruit_util.f90"
+  sh "rm -f #{$goal}"
 end
 
 load '../rake_base.rb'

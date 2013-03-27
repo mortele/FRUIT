@@ -38,6 +38,8 @@ CLEAN.include(FileList[
   '**/rakefile_gui_tester',
   '**/rakefile_gui_src',
   '**/fruit_driver_gui.exe',
+  '**/fruit_driver_3min.exe',
+  '**/fruit_driver_3min',
   'sample_selective/fruit_driver_selective',
   'sample_selective/dummy_main',
   'sample_build_dir/*/*.exe',

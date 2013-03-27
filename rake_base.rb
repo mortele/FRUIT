@@ -18,7 +18,8 @@ module RakeBase
 
   # GCC FORTRAN compiler tested on MacOs (10.6.8 Snow Leopard) and Windows Vista + cygwin
   #$compiler = "gfortran"
-  #$option = "-Wall -Wextra -pedantic -fbounds-check -Wuninitialized -O -g -Wno-unused-parameter"
+  #$option = "-Wall -Wextra -pedantic -fbounds-check " +
+  #          "-Wuninitialized -O -g -Wno-unused-parameter"
   # With " -std=f95",
   # subroutines whose name is longer than 31 characters cause error.
 
@@ -26,12 +27,21 @@ module RakeBase
   #$compiler = "g95"
   #$option = "-Wall -Wobsolescent -Wunused-module-vars -Wunused-internal-procs -Wunused-parameter -Wunused-types -Wmissing-intent -Wimplicit-interface -pedantic -fbounds-check -Wuninitialized"
 
-  if open("| which #{$compiler} 2>/dev/null"){|f| f.gets}
+  #`where ...` works on windows vista, 7 and 8. Not works on Windows XP.
+  test_where = `where mkdir 2>&1`
+  if $?.to_i == 0
+    where_or_which = "where"
   else
+    where_or_which = "which"
+  end
+  result = `#{where_or_which} #{$compiler} 2>&1`  
+  if $?.to_i != 0
     puts "Fortran compiler " + $compiler + " not exists. Using gfortran instead."
     $compiler = "gfortran"
-    $option = "-Wall -Wextra -pedantic -fbounds-check -Wuninitialized -O -g -Wno-unused-parameter"
+    $option = "-Wall -Wextra -pedantic -fbounds-check " + 
+              "-Wuninitialized -O -g -Wno-unused-parameter"
   end
+
 
   $goal = '' if !$goal
 
@@ -156,9 +166,9 @@ module RakeBase
   file $goal => OBJ do
     if OBJ.size == 0
     elsif $goal =~ /.a$/
-      if open ("| which ar 2> /dev/null"){|f| f.gets}
+      result = `#{where_or_which} ar 2>&1`  
+      if $?.to_i == 0
         sh "ar cr #{$goal} #{OBJ}"
-      else
       end
     else
       lib_name_flag = FruitProcessor.new.lib_name_flag($lib_bases, $build_dir)
