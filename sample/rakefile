@@ -11,9 +11,11 @@ task :compile do
 end
 
 task :test => :compile do
+  rake_opt = ""
+  result_which = `which ar 2>&1`
+  rake_opt = " -f rakefile_mingw " if $?.to_i != 0
   Dir.chdir("test") { 
-    sh 'rake'
-    sh './calculator_fruit_driver'
+    sh "rake #{rake_opt} test"
   }
 end
 

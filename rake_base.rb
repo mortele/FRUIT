@@ -28,7 +28,7 @@ module RakeBase
   #$option = "-Wall -Wobsolescent -Wunused-module-vars -Wunused-internal-procs -Wunused-parameter -Wunused-types -Wmissing-intent -Wimplicit-interface -pedantic -fbounds-check -Wuninitialized"
 
   #`where ...` works on windows vista, 7 and 8. Not works on Windows XP.
-  test_where = `where mkdir 2>&1`
+  test_where = `where where 2>&1`
   if $?.to_i == 0
     where_or_which = "where"
   else

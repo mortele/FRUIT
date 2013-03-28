@@ -1,0 +1,22 @@
+require 'rubygems'
+require 'fruit_processor'
+
+include Rake::DSL if defined?(Rake::DSL)
+
+$build_dir = "./"
+$source_dirs = ["./", "../src/", "../../src/"]
+$goal='calculator_fruit_driver.exe'
+$main='fruit_driver_gen.f90'
+
+fp = FruitProcessor.new
+fp.pre_process
+
+task :default => [:spec]
+task :test => $goal do
+  sh "./#{$goal}"
+end
+
+load "../../rake_estimate.rb"
+load "../../rake_base.rb"
+include RakeBase
+

@@ -21,6 +21,10 @@ $lib_bases = [
 
 task :default => [:spec]
 
+task :test => $goal do
+  sh "./#{$goal}"
+end
+
 #-------- dependencies
 # Load rake_estimate.rb to estimate dependency.
 load "#{fp.base_dir}/rake_estimate.rb"

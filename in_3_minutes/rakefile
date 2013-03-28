@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'fruit_processor'
+require 'rake/clean'
 
 include Rake::DSL if defined?(Rake::DSL)
 
@@ -21,11 +22,7 @@ task :test => [:clean] do
   sh "./#{$goal}"
 end
 
-task :clean do
-  sh "rm -f fruit.f90"
-  sh "rm -f fruit_util.f90"
-  sh "rm -f #{$goal}"
-end
+CLEAN.include(FileList["fruit.f90", "fruit_util.f90", $goal])
 
 load '../rake_base.rb'
 include RakeBase
