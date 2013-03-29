@@ -1,5 +1,9 @@
 #!/usr/bin/env ruby
 
+# Copyright (c) 2005-2010, 2012-2013, Andrew Hang Chen and contributors,
+# All rights reserved.
+# Licensed under the 3-clause BSD license.
+
 include Rake::DSL if defined?(Rake::DSL)
 
 class GuiWindow

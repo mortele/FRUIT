@@ -1,3 +1,8 @@
+
+# Copyright (c) 2005-2010, 2012-2013, Andrew Hang Chen and contributors,
+# All rights reserved.
+# Licensed under the 3-clause BSD license.
+
 require 'misc'
 
 module RakeBase
@@ -20,8 +25,8 @@ module RakeBase
   #$compiler = "gfortran"
   #$option = "-Wall -Wextra -pedantic -fbounds-check " +
   #          "-Wuninitialized -O -g -Wno-unused-parameter"
-  # With " -std=f95",
-  # subroutines whose name is longer than 31 characters cause error.
+  # # With " -std=f95",
+  # # subroutines whose name is longer than 31 characters cause error.
 
   # G95 FORTRAN compiler tested on Linux and Windows Vista + cygwin
   #$compiler = "g95"

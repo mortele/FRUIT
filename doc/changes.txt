@@ -1,10 +1,27 @@
 -----------
-FRUIT 3.0.3
+FRUIT 3.1.0
 -----------
 
-+ sample_build_dir 
++ LICENSE.txt added
 
-  This sample puts *.o, *.mod, and executable to a sub directry.
++ Comment on copyright added to each file
+
++ Samples added or changed
+
+  + sample_build_dir 
+    This sample puts *.o, *.mod, *_gen.f90, and executable to a sub directry.
+
+  + sample
+    rakefile "rakefile_mingw" added that works with MinGW.
+    It does not use library. Instead fruit.f90 and fruit_util.f90 are compiled.
+
+  + sample_multi_dir
+    Source files in multiple directries are compiled within single rakefile.
+    This sample puts *.o, *.mod, *_gen.f90, and executable to a sub directry.
+    Source directries are kept unchanged.
+
++ FruitProcessor and rake_estimate.rb may process multiple source directries.
+  See sample sample_multi_dir.
 
 
 -----------
