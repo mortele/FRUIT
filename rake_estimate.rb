@@ -6,14 +6,17 @@
 
 class FruitRakeEstimate
   attr_accessor :extensions, :forward, :all_f, :identifiers, :source_dirs
+  attr_accessor :ext_obj
 
   EXT_DEFAULT = ["f90", "f95", "f03", "f08"]
   IDENTIFIERS_DEFAULT = []
+  EXT_OBJ_DEFAULT = "o"
 
   def initialize
     @extensions = EXT_DEFAULT
     @identifiers = IDENTIFIERS_DEFAULT
     @source_dirs = [""]
+    @ext_obj = EXT_OBJ_DEFAULT
   end
 
   def rake_dependency
@@ -181,7 +184,7 @@ class FruitRakeEstimate
   def f_to_o(name)
     @extensions.each{|fxx|
       if name =~ /.#{fxx}/
-        return name.sub(".#{fxx}", ".o")
+        return name.sub(".#{fxx}", ".#{@ext_obj}")
       end
     }
     return nil
@@ -236,7 +239,7 @@ class FruitRakeEstimate
           ordered_f.each{|f|
             src.concat(FileList[f])
           }
-          obj = src.ext('o')
+          obj = src.ext(@ext_obj)
         end
       end
       return [src, obj]
@@ -246,7 +249,7 @@ class FruitRakeEstimate
 end
 
 #----- execute the following if loaded within rake
-if $0 =~ /rake$/
+if $0 =~ /rake$/ or $0 =~ /rake\.bat$/
   estim = FruitRakeEstimate.new
 
   if $source_dirs
@@ -255,6 +258,10 @@ if $0 =~ /rake$/
     estim.source_dirs = [$source_dir]
   else
     estim.source_dirs = [""]
+  end
+
+  if $ext_obj
+    estim.ext_obj = $ext_obj
   end
   estim.rake_dependency
   if $main

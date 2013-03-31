@@ -28,7 +28,7 @@ module RakeBase
   # # With " -std=f95",
   # # subroutines whose name is longer than 31 characters cause error.
 
-  # G95 FORTRAN compiler tested on Linux and Windows Vista + cygwin
+  # #G95 FORTRAN compiler tested on Linux and Windows Vista + cygwin
   #$compiler = "g95"
   #$option = "-Wall -Wobsolescent -Wunused-module-vars -Wunused-internal-procs -Wunused-parameter -Wunused-types -Wmissing-intent -Wimplicit-interface -pedantic -fbounds-check -Wuninitialized"
 
@@ -39,14 +39,21 @@ module RakeBase
   else
     where_or_which = "which"
   end
-  result = `#{where_or_which} #{$compiler} 2>&1`  
+  result = `#{where_or_which} #{$compiler} 2>&1`
   if $?.to_i != 0
     puts "Fortran compiler " + $compiler + " not exists. Using gfortran instead."
     $compiler = "gfortran"
-    $option = "-Wall -Wextra -pedantic -fbounds-check " + 
+    $option = "-Wall -Wextra -pedantic -fbounds-check " +
               "-Wuninitialized -O -g -Wno-unused-parameter"
   end
 
+  #####################################
+
+  $linker = $compiler if !$linker
+
+  $option_obj = " -c -o " if !$option_obj
+  $ext_obj    = "o"       if !$ext_obj
+  $option_exe = " -o "    if !$option_exe
 
   $goal = '' if !$goal
 
@@ -65,13 +72,13 @@ module RakeBase
       SRC.concat(FileList['*.' + fxx])
     }
     SRC.sort!
-    OBJ = SRC.ext('o')
+    OBJ = SRC.ext($ext_obj)
   end
   #---------^
 
   if !$source_dirs
     SRC.each{|f|
-      f_obj = f.ext('o')
+      f_obj = f.ext($ext_obj)
       next if (f.to_s =~ /fruit_basket_gen\.f90$/)
       next if (f.to_s =~ /fruit_driver_gen\.f90$/)
 
@@ -84,10 +91,10 @@ module RakeBase
   # assume a_test.fxx depends on a.fxx if a.fxx exists
   OBJ.each{|a_obj|
     a = a_obj.to_s
-    b = a.sub(/_test\.o$/, "\.o")
+    b = a.sub(/_test\.#{$ext_obj}$/, "\.#{$ext_obj}")
     if a != b then
       extensions.each{|fxx|
-        b_src = b.sub(/\.o$/, "\.#{fxx}")
+        b_src = b.sub(/\.#{$ext_obj}$/, "\.#{fxx}")
         if File.exist?(b_src)
           # puts "rake_base.rb: Assuming \"" + a + "\" depends on \"" + b + "\""
           file a => b
@@ -97,25 +104,25 @@ module RakeBase
   }
   #-------------^
 
-  CLEAN.include(['*.o', '*.a', '*.mod', '*_gen.f90', '*fruit_driver', 'result*.xml',
+  CLEAN.include([
+    '*.o', '*.obj', '*.a', '*.mod',
+    '*_gen.f90', '*fruit_driver', 'result*.xml',
     '*_gen.f90', FruitProcessor.new.module_files(SRC, $build_dir)])
   CLOBBER.include("#{$build_dir}/#{$goal}")
 
   task :default => [:deploy]
 
   # generated files must be built last
-  #---------v
-  # objs = FileList['*.f90'].ext('o')
-  #--
   objs = FileList[]
   extensions.each{|fxx|
     objs.concat(FileList['*.' + fxx])
   }
-  objs = objs.ext('o')
-  #---------^
-  if objs.include?'fruit_basket_gen.o'
-    file 'fruit_basket_gen.o' =>  objs - ['fruit_basket_gen.o', 'fruit_driver_gen.o']
-    file 'fruit_driver_gen.o' =>  'fruit_basket_gen.o'
+  objs = objs.ext($ext_obj)
+
+  if objs.include?('fruit_basket_gen.' + $ext_obj)
+    file 'fruit_basket_gen.' + $ext_obj =>  objs - ['fruit_basket_gen.' + $ext_obj,
+                                                    'fruit_driver_gen.' + $ext_obj]
+    file 'fruit_driver_gen.' + $ext_obj =>  'fruit_basket_gen.' + $ext_obj
   end
 
   # final goal link is depending on the libraries
@@ -128,13 +135,13 @@ module RakeBase
 
   if !$source_dirs
     extensions.each{|fxx|
-      rule '.o' => $source_dir + '%X.' + fxx do |t|
+      rule '.' + $ext_obj => $source_dir + '%X.' + fxx do |t|
         Rake::Task[:dirs].invoke if Rake::Task.task_defined?('dirs')
 
         flag = $build_dir
         flag = '"-I' + flag + '"' if flag.size > 0
 
-        sh "#{$compiler} #{$option} -c -o #{t.name} #{t.source} #{flag} #{FruitProcessor.new.inc_flag($inc_dirs)}"
+        sh "#{$compiler} #{$option} #{$option_obj} #{t.name} #{t.source} #{flag} #{FruitProcessor.new.inc_flag($inc_dirs)}"
         FileList["*.mod"].each do |module_file|
           if $build_dir != "" and $build_dir !~ /^\.\/*$/
             os_install File.expand_path(module_file), $build_dir
@@ -148,7 +155,7 @@ module RakeBase
     $source_dirs.each{|dir|
       extensions.each{|fxx|
         FileList[ dir + "*." + fxx ].each do |ff|
-          basename_o = ff.sub(/^(.*\/)?/, "").ext('o')
+          basename_o = ff.sub(/^(.*\/)?/, "").ext($ext_obj)
 
           file basename_o => ff do |t|
             Rake::Task[:dirs].invoke if Rake::Task.task_defined?('dirs')
@@ -156,7 +163,7 @@ module RakeBase
             flag = $build_dir
             flag = '"-I' + flag + '"' if flag.size > 0
 
-            sh "#{$compiler} #{$option} -c -o #{t.name} #{ff} #{flag} #{FruitProcessor.new.inc_flag($inc_dirs)}"
+            sh "#{$compiler} #{$option} #{$option_obj} #{t.name} #{ff} #{flag} #{FruitProcessor.new.inc_flag($inc_dirs)}"
             FileList["*.mod"].each do |module_file|
               if $build_dir != "" and $build_dir !~ /^\.\/*$/
                 os_install File.expand_path(module_file), $build_dir
@@ -171,7 +178,7 @@ module RakeBase
   file $goal => OBJ do
     if OBJ.size == 0
     elsif $goal =~ /.a$/
-      result = `#{where_or_which} ar 2>&1`  
+      result = `#{where_or_which} ar 2>&1`
       if $?.to_i == 0
         sh "ar cr #{$goal} #{OBJ}"
       end
@@ -184,7 +191,7 @@ module RakeBase
       flag = $build_dir
       flag = '"-I' + flag + '"' if flag.size > 0
 
-      sh "#{$compiler} #{$option} #{flag} -o #{$goal} #{OBJ} #{lib_name_flag} #{lib_dir}"
+      sh "#{$linker} #{$option} #{flag} #{$option_exe}#{$goal} #{OBJ} #{lib_name_flag} #{lib_dir}"
     end
   end
 
