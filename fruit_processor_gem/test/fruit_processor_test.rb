@@ -1,5 +1,6 @@
 require 'test/unit'
 require '../lib/fruit_processor'
+require 'pathname'
 
 class FruitProcessorTest < Test::Unit::TestCase
   @@driver = "fruit_driver_gen.f90"
@@ -123,15 +124,26 @@ class FruitProcessorTest < Test::Unit::TestCase
     )
   end
 
+  def test_process_only__dirs
+    fp = FruitProcessor.new
+    fp.process_only = ["in_subdir_test.f90", "in_subdir2_test.f90"]
+    fp.load_files(["subdir/", "subdir2", "subdir2/"])
+    assert_equal(["subdir/in_subdir_test.f90", "subdir2/in_subdir2_test.f90"], fp.get_files)
+  end
+
   def test_process_only
     fp = FruitProcessor.new
     fp.process_only = ["a_test.f90"]
     fp.process_only << "b_test.f90"
 
-    assert_equal(["a_test.f90", "b_test.f90"], fp.process_only)
+    results = fp.process_only
+    assert_equal("a_test.f90", Pathname(results[0]).to_s)
+    assert_equal("b_test.f90", Pathname(results[1]).to_s)
 
     fp.load_files "."
-    assert_equal(["./a_test.f90", "./b_test.f90"], fp.get_files)
+    results = fp.process_only
+    assert_equal("a_test.f90", Pathname(results[0]).to_s)
+    assert_equal("b_test.f90", Pathname(results[1]).to_s)
 
     spec_hash = fp.get_spec_hash_filename("./a_test.f90")
     assert_equal(

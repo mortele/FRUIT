@@ -2,6 +2,7 @@
 
 require 'rubygems'
 require 'rake'
+require "pathname"
 
 class FruitProcessor
   attr_accessor :process_only
@@ -15,7 +16,7 @@ class FruitProcessor
   end
 
   def get_spec_hash_filename file_name
-    return @spec_hash[file_name]
+    return @spec_hash[Pathname(file_name).cleanpath.to_s]
   end
 
   def get_methods_of_filename file_name
@@ -44,7 +45,10 @@ class FruitProcessor
     if @process_only
       @process_only.each{|f|
         dirs.each{|a_dir|
-          @files.concat( FileList["#{a_dir}/#{f}"])
+          candi = (Pathname(a_dir) + f).to_s
+          if File.exist?(candi)
+            @files.concat(FileList[candi])
+          end
         }
       }
     else
@@ -56,6 +60,8 @@ class FruitProcessor
         }
       }
     end
+
+    @files.uniq!
 
     @files.each do |file|
       parse_method_names file
@@ -397,19 +403,14 @@ class FruitProcessor
   end
 
   def test_module_name_from_file_path file_name
-
-#---
-#    test_module_name=file_name.gsub(".f90", "")
-#---
     test_module_name=""
     @extensions.each{|fxx|
       if file_name =~ /(.+)\.#{fxx}/
         test_module_name=$1
       end
     }
-#---
 
-
-    test_module_name[test_module_name.rindex("/")+1 ..  -1]
+    ## test_module_name[test_module_name.rindex("/")+1 ..  -1]
+    Pathname(test_module_name).basename.to_s
   end
 end
