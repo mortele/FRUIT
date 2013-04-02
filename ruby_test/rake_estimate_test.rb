@@ -222,6 +222,14 @@ class FruitRakeEstimateTest < Test::Unit::TestCase
       obj)
   end
 
+  def test_src_and_obj_for_main__absent
+    esti = FruitRakeEstimate.new
+
+    assert_raise RuntimeError do
+      src, obj = esti.src_and_obj_for_main("not_existing.f90")
+    end
+  end
+
   def test_src_and_obj_for_main__2
     esti = FruitRakeEstimate.new
     src, obj = esti.src_and_obj_for_main("main.f90")

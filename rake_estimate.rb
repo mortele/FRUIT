@@ -229,6 +229,10 @@ class FruitRakeEstimate
 
   def src_and_obj_for_main(main)
     if defined?(main) and main
+      if (! File.exist?(main))
+        puts "File '#{main}' not exists."
+        raise
+      end
       needed = get_needed( [main] )
       ordered_f = get_ordered(needed)
 

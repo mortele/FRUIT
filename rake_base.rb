@@ -20,11 +20,21 @@ module RakeBase
   # Intel FORTRAN compiler tested on Linux
   $compiler = 'ifort'
   $option = "-check all -warn all"
+  $ext_obj = "o"
+
+
+  #-- on Windows
+  # $compiler = 'ifort'
+  # $option = "-check:all -warn:all"
+  # $ext_obj = "obj"
+  #--
+  
 
   # GCC FORTRAN compiler tested on MacOs (10.6.8 Snow Leopard) and Windows Vista + cygwin
   #$compiler = "gfortran"
   #$option = "-Wall -Wextra -pedantic -fbounds-check " +
   #          "-Wuninitialized -O -g -Wno-unused-parameter"
+  #$ext_obj = "o"
   # # With " -std=f95",
   # # subroutines whose name is longer than 31 characters cause error.
 
@@ -45,6 +55,7 @@ module RakeBase
     $compiler = "gfortran"
     $option = "-Wall -Wextra -pedantic -fbounds-check " +
               "-Wuninitialized -O -g -Wno-unused-parameter"
+    $ext_obj = "o"
   end
 
   #####################################
