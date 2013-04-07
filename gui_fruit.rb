@@ -535,7 +535,7 @@ class GuiCore
       f.write "$build_dir='" + build_dir + "'\n"
       f.write <<-'EOS'
         load "#{FruitProcessor.new.base_dir}/rake_base.rb"
-        include RakeBase
+        load "#{FruitProcessor.new.base_dir}/rake_base_deps.rb"
       EOS
     }
   end
@@ -553,11 +553,12 @@ class GuiCore
     which_rake_estimate = "rake_estimate.rb"
     which_rake_base     = "rake_base.rb"
     if dir_rake_base
-      which_rake_estimate = dir_rake_base + "/rake_estimate.rb"
-      which_rake_base     = dir_rake_base + "/rake_base.rb"
+      which_rake_estimate  = dir_rake_base + "/rake_estimate.rb"
+      which_rake_base      = dir_rake_base + "/rake_base.rb"
+      which_rake_base_deps = dir_rake_base + "/rake_base_deps.rb"
     end
   
-    files_needed = [which_rake_base, which_rake_estimate, "fruit.f90", "fruit_util.f90"]
+    files_needed = [which_rake_base, which_rake_estimate, which_rake_base_deps, "fruit.f90", "fruit_util.f90"]
     files_needed.each{|f|
       if !File.exist?(f)
         @window.add_text_warn(f + " not found.\n")
@@ -590,31 +591,32 @@ $goal = "fruit_driver_gui.exe"
       if @source_dir and @source_dir != ""
         f.write "$lib_bases = [['#{@@lib_name}', '#{@source_dir}']]\n"
       end
-      
-      f.write <<-'EOS'
-file 'fruit_basket_gen.o' => ['rakefile_gui_tester']
-  
-task :default => [:test]
-  
-task :test => $goal do
-  sh "./#{$goal}"
-  File.delete("fruit_basket_gen.o")
-end
-  
-task :valgrind => $goal do
-  sh "valgrind --leak-check=full ./#{$goal}"
-  File.delete("fruit_basket_gen.o")
-end
-  
-CLEAN.include($goal)
-  
-      EOS
+
       f.write <<-"EOS"
 $main = "fruit_driver_gen.f90"
 load "#{which_rake_estimate}"
   
 load "#{which_rake_base}"
-include RakeBase
+load "#{which_rake_base_deps}"
+      EOS
+      
+      f.write <<-'EOS'
+file 'fruit_basket_gen.' + $ext_obj => ['rakefile_gui_tester']
+  
+task :default => [:test]
+  
+task :test => $goal do
+  sh "./#{$goal}"
+  File.delete("fruit_basket_gen." + $ext_obj)
+end
+  
+task :valgrind => $goal do
+  sh "valgrind --leak-check=full ./#{$goal}"
+  File.delete("fruit_basket_gen." + $ext_obj)
+end
+  
+CLEAN.include($goal)
+  
       EOS
     }
     return "done"

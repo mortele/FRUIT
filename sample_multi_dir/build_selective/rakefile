@@ -1,35 +1,21 @@
-
 require 'rubygems'
 require 'fruit_processor'
 require 'rake/clean'
-
 include Rake::DSL if defined?(Rake::DSL)
+load "../../rake_base.rb"
 
 $build_dir = "./"
 $source_dirs = ["../src/", "../test/", "../../src/"]
 $goal = 'fruit_driver.exe'
 $main = 'fruit_driver_gen.f90'
 
-CLEAN.include(FileList[
-  $build_dir + '*.mod',
-  $build_dir + '*.o',
-  $build_dir + $goal
-])
-
-$source_dirs.each{|dir|
-  CLEAN.include(FileList[
-    dir + 'fruit_driver_gen.f90',
-    dir + 'fruit_basket_gen.f90',
-    dir + '*.o',
-  ])
-}
-
 fp = FruitProcessor.new
-fp.process_only = FileList["../test/def_upper_lower_test.f90"] #only files here are processed.
+
+fp.process_only = FileList["def_upper_lower_test.f90"] #only files here are processed.
 fp.pre_process($source_dirs)
 
-load "../../rake_estimate.rb"
-load "../../rake_base.rb"
+load "../../rake_estimate.rb"  #Load this after fruit_*_gen.f90 generated.
+load "../../rake_base_deps.rb" #It uses SRC and OBJ updated by rake_estimate.rb
 
 
 task :default => :test
@@ -38,4 +24,19 @@ task :test => $goal do
   sh "./#{$goal}"
 end
 
+CLEAN.include(FileList[
+  $build_dir + '*.mod',
+  $build_dir + '*.o',
+  $build_dir + '*.obj',
+  $build_dir + $goal
+])
+
+$source_dirs.each{|dir|
+  CLEAN.include(FileList[
+    dir + 'fruit_driver_gen.f90',
+    dir + 'fruit_basket_gen.f90',
+    dir + '*.o',
+    dir + '*.obj',
+  ])
+}
 

@@ -1,22 +1,19 @@
 require 'rubygems'
 require 'fruit_processor'
 require 'rake/clean'
-
 include Rake::DSL if defined?(Rake::DSL)
+load "../rake_base.rb"
 
 $goal = 'libfruit.a'
 
 SRC = FileList['*.f90']
-OBJ = SRC.ext('o')
+OBJ = SRC.ext($ext_obj)  # $ext_obj is either "o" or "obj"
 
-CLOBBER.include(FileList['fruit.f90'])
-
-load "#{FruitProcessor.new.base_dir}/rake_base.rb"
-include RakeBase
+load "../rake_base_deps.rb"  #It use SRC and OBJ
 
 # File dependencies go here ...
 #file 'libfruit.a' => ['fruit.o', 'fruit_utility.o']
-file 'fruit.o' => ['fruit.f90', 'fruit_util.o']
+file 'fruit.' + $ext_obj => ['fruit.f90', 'fruit_util.' + $ext_obj]
 
 desc "build #{$goal}"
 file $goal => 'fruit.f90'
@@ -25,4 +22,7 @@ desc "update fruit.f90"
 file 'fruit.f90' => ["fruit_f90_generator.rb", "fruit_f90_source.txt"] do
   sh 'ruby fruit_f90_generator.rb'
 end
+
+CLOBBER.include(FileList['fruit.f90'])
+
 

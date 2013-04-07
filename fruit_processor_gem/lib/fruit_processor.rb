@@ -79,7 +79,9 @@ class FruitProcessor
     dir = "." if dir.instance_of?(Array)
 
     test_subroutine_names=[]
-    fruit_basket_file = "#{dir}/#{@fruit_basket_module_name}.f90"
+
+    fruit_basket_file = (Pathname(dir) + "#{@fruit_basket_module_name}.f90").to_s
+
     File.open(fruit_basket_file, 'w') do |f|
       f.write "module #{@fruit_basket_module_name}\n"
       f.write "  use fruit\n"
@@ -224,7 +226,8 @@ class FruitProcessor
   def create_driver dir="."
     dir = "." if dir.instance_of?(Array)
 
-    File.open("#{dir}/#{@driver_program_name}.f90", 'w') do |f|
+    filename = (Pathname(dir) + "#{@driver_program_name}.f90")
+    File.open(filename, 'w') do |f|
       f.write "program #{@driver_program_name}\n"
       f.write "  use fruit\n"
       f.write "  use #{@fruit_basket_module_name}\n"
@@ -351,7 +354,7 @@ class FruitProcessor
   end
 
   def build_dir
-    "#{base_dir}/build"
+    (Pathname(base_dir) + "build").to_s
   end
 
   def module_files(all_f90_files, build_dir)
@@ -359,7 +362,7 @@ class FruitProcessor
     module_with_path=[]
     # assume each source .f90 has a module.  This is a cleanup task, doesn't matter if removed non-existing file
     all_f90_files.ext('mod').each do |file|
-      module_with_path << "#{build_dir}/#{file}"
+      module_with_path << (Pathname(build_dir) + file).to_s
     end
     return module_with_path
   end
@@ -372,7 +375,7 @@ class FruitProcessor
     return if lib_bases == nil
     lib_base_files =[]
     lib_bases.each do |pair|
-      lib_base_files << "#{pair[1]}/lib#{pair[0]}.a"
+      lib_base_files << Pathname(pair[1]) + "lib#{pair[0]}.a"
     end
     return lib_base_files
   end

@@ -361,12 +361,14 @@ contains
   end subroutine fruit_finalize_
 
   subroutine init_fruit_xml_
+#ifndef FTN95
     open (XML_OPEN, file = xml_filename)
     write(XML_OPEN, '("<?xml version=""1.0"" encoding=""UTF-8""?>")')
     write(XML_OPEN, '("<testsuites>")')
     close(XML_OPEN)
     open (XML_WORK, FILE = xml_filename_work, status='replace')
     close (XML_WORK)
+#endif
   end subroutine init_fruit_xml_
 
   function  case_delta_t()
@@ -393,16 +395,19 @@ contains
     character(*), intent(in) :: tc_name
     character(*), intent(in) :: classname
 
+#ifndef FTN95
     open (XML_WORK, FILE = xml_filename_work, position='append')
     write(XML_WORK, &
    &  '("    <testcase name=""", a, """ classname=""", a, """ time=""", a, """/>")') &
    &  trim(tc_name), trim(classname), trim(case_delta_t())
     close (XML_WORK)
+#endif
   end subroutine case_passed_xml_
 
   subroutine case_failed_xml_(tc_name, classname)
     character(*), intent(in) :: tc_name
     character(*), intent(in) :: classname
+#ifndef FTN95
     integer :: i
 
     open (XML_WORK, FILE = xml_filename_work, position='append')
@@ -424,9 +429,11 @@ contains
     write(XML_WORK, &
    &  '("    </testcase>")')
     close(XML_WORK)
+#endif
   end subroutine case_failed_xml_
 
   subroutine fruit_summary_xml_
+#ifndef FTN95
     character(len = 1000) :: whole_line
 
     open (XML_OPEN, FILE = xml_filename, position='append')
@@ -450,6 +457,7 @@ contains
     write(XML_OPEN, '("  </testsuite>")')
     write(XML_OPEN, '("</testsuites>")')
     close(XML_OPEN)
+#endif
   end subroutine fruit_summary_xml_
 
   function int_to_str(i)

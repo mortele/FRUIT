@@ -1,42 +1,56 @@
 require 'rubygems'
 require 'fruit_processor'
 require 'rake/clean'
-
 include Rake::DSL if defined?(Rake::DSL)
+load "../rake_base.rb"
+
+
+$build_dir = ""  #If not set, build will be done in ../build/
+$goal = "fruit_driver_selective"
+$main = "fruit_driver_gen.f90"
 
 # Add this line at the beginning if there are generated code involved
 fp = FruitProcessor.new
 fp.process_only = FileList["mydict_test.f90"] #only files here are processed.
 fp.pre_process
 
-file 'fruit_basket_gen.o' => ['rakefile']
+load "../rake_estimate.rb"  #Load this after fruit_*_gen.f90 generated.
+load '../rake_base_deps.rb' #It uses SRC and OBJ updated by rake_estimate.rb
 
-$build_dir = ""  #If not set, build will be done in ../build/
-$goal = "fruit_driver_selective"
+file 'fruit_basket_gen.' + $ext_obj => ['rakefile']
 
 task :default => [:dummy_main, :test]
 
 task :test => $goal do
   sh "./#{$goal}"
-  File.delete("fruit_basket_gen.o")
+  delete_obj
 end
 
 task :valgrind => $goal do
   sh "valgrind --leak-check=full ./#{$goal}"
-  File.delete("fruit_basket_gen.o")
+  delete_obj
 end
 
+def delete_obj
+  ["o", "obj"].each{|ext|
+    name = "fruit_basket_gen." + ext
+    File.delete(name)   if File.exist?(name )
+  }
+end
+
+
 task :dummy_main do
-  sh "#{$compiler} constant.f90 mydict.f90 dummy_main.f90 -o dummy_main"
-  sh "./dummy_main"
+  if $compiler != "ftn95"
+    sh "#{$compiler} constant.f90 mydict.f90 dummy_main.f90 #{$option_exe} dummy_main"
+    sh "./dummy_main"
+  else
+    sh "#{$compiler} constant.f90"
+		sh "#{$compiler} mydict.f90"
+		sh "#{$compiler} dummy_main.f90"
+		sh "#{$linker} constant.obj mydict.obj dummy_main.obj #{$option_exe}dummy_main"
+  end
 end
 
 CLEAN.include($goal)
 CLEAN.include("dummy_main")
-
-$main = "fruit_driver_gen.f90"
-load "../rake_estimate.rb"
-
-load "../rake_base.rb"
-include RakeBase
 

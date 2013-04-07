@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'fruit_processor'
-
 include Rake::DSL if defined?(Rake::DSL)
+load "../../rake_base.rb"
 
 # Add this line at the beginning if there are generated code involved
 fp = FruitProcessor.new
@@ -19,21 +19,23 @@ $lib_bases = [
 
 # if $build_dir is defined, then use build_dir
 
-task :default => [:spec]
-
-task :test => $goal do
-  sh "./#{$goal}"
-end
-
 #-------- dependencies
 # Load rake_estimate.rb to estimate dependency.
-load "#{fp.base_dir}/rake_estimate.rb"
+load "../../rake_estimate.rb"  #Load this after fruit_*_gen.f90 generated.
+load "../../rake_base_deps.rb" #It uses SRC and OBJ updated by rake_estimate.rb
 
 #-------
 # Otherwise
 # if one module has to be compiled after another module, specify like this:
 #file ['module_b_test.o']  => 'calculator_test.o'
+#load "../../rake_base_deps.rb"
 #-------
 
-load "#{fp.base_dir}/rake_base.rb"
-include RakeBase
+task :default => [:spec, :test]
+
+task :test => $goal do
+  sh "./#{$goal}"
+end
+
+
+

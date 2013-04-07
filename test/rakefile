@@ -1,8 +1,8 @@
 require 'rubygems'
 require 'fruit_processor'
 require 'rake/clean'
-
 include Rake::DSL if defined?(Rake::DSL)
+load "../rake_base.rb"
 
 $goal = 'fruit_driver'
 
@@ -13,5 +13,6 @@ file 'fruit_driver.o' => ['fruit_data_test.o', 'fruit_test.o', 'fruit_util_test.
 #file 'fruit_data_test.o' => ['fruit_data_test.f90']
 #file 'fruit_test.o' => ['fruit_test.f90']
 
-load "#{FruitProcessor.new.base_dir}/rake_base.rb"
-include RakeBase
+
+load "../rake_base_deps.rb"
+

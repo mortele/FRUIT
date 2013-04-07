@@ -1,8 +1,9 @@
 require 'rubygems'
 require 'fruit_processor'
 require 'rake/clean'
-
 include Rake::DSL if defined?(Rake::DSL)
+load "../rake_base.rb"
+
 
 # Add this line at the beginning if there are generated code involved
 fp = FruitProcessor.new
@@ -10,6 +11,26 @@ fp.pre_process
 
 $build_dir = ""  #If not set, build will be done in ../build/
 $goal = "fruit_driver_fxx.exe"
+
+#--- Either load it
+$main = "fruit_driver_gen.f90"
+load "../rake_estimate.rb"  #Load this after fruit_*_gen.f90 generated.
+load '../rake_base_deps.rb' #It uses SRC and OBJ updated by rake_estimate.rb
+
+#--- or explicitly give dependencies
+# #File dependencies
+# file 'fruit.o' => ['fruit.f90', 'fruit_util.o']
+# 
+# #dependencies of your file
+# file 'mystack.o' => ['Z_constants.o']
+# 
+# #In this way you must delete dummy_main.f90,
+# #because only one fortran file with "program" statement 
+# #is allowed in this directry.
+#
+# load '../rake_base_deps.rb'
+#----
+
 
 task :default => [:test]
 
@@ -22,25 +43,4 @@ task :valgrind => $goal do
 end
 
 CLEAN.include($goal)
-
-#--- Either load it (experimental)
-$main = "fruit_driver_gen.f90"
-load "rake_estimate.rb"
-
-#--- or explicitly give dependencies
-# #File dependencies
-# file 'fruit.o' => ['fruit.f90', 'fruit_util.o']
-# 
-# #dependencies of your file
-# file 'mystack.o' => ['Z_constants.o']
-# 
-# #In this way you must delete dummy_main.f90,
-# #because only one fortran file with "program" statement 
-# #is allowed in this directry.
-#----
-
-
-#load "#{FruitProcessor.new.base_dir}/rake_base.rb"
-load "rake_base.rb"
-include RakeBase
 

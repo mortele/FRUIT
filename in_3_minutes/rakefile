@@ -1,8 +1,10 @@
 require 'rubygems'
 require 'fruit_processor'
 require 'rake/clean'
-
 include Rake::DSL if defined?(Rake::DSL)
+load '../rake_base.rb'
+
+require 'misc' #just for os_install
 
 $build_dir = "."
 $goal = "fruit_driver_3min.exe"
@@ -18,11 +20,15 @@ task :test => [:clean] do
   sh "#{$compiler} #{$option} -c calculator.f90"
   sh "#{$compiler} #{$option} -c calculator_test.f90"
   sh "#{$compiler} #{$option} -c fruit_driver.f90"
-  sh "#{$compiler} #{$option} -o #{$goal} *.o"
+  if $compiler == "ftn95"
+    sh "#{$linker} #{$linker_option} #{$option_exe}#{$goal} " + 
+       "fruit_util.obj fruit.obj calculator.obj calculator_test.obj fruit_driver.obj"
+  else
+    sh "#{$linker} #{$option} #{$option_exe}#{$goal} *.o"
+  end
   sh "./#{$goal}"
 end
 
 CLEAN.include(FileList["fruit.f90", "fruit_util.f90", $goal])
 
-load '../rake_base.rb'
-include RakeBase
+

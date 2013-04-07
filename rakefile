@@ -9,11 +9,17 @@ require 'fruit_processor'
 
 include Rake::DSL if defined?(Rake::DSL)
 
+load 'rake_base.rb'
+include RakeBase
+
+load 'rake_base_deps.rb'
+include RakeBaseDeps
+
 $base_dir=Dir.pwd
 $build_dir = "#{$base_dir}/build"
 
 task :default => [
-  :ruby_test, :rake_base_test, :rake_estimate_test,
+  :ruby_test, :rake_base_deps_test, :rake_estimate_test,
   :in_3_minutes,
   :sample_selective,
   :sample_build_dir,
@@ -35,7 +41,7 @@ if ENV['DISPLAY']
 end
 
 CLEAN.include(FileList[
-  '**/*.o', '**/*.mod', '**/*.a', '**/*_gen.f90', '**/*fruit_driver',
+  '**/*.o', '**/*.obj', '**/*.mod', '**/*.a', '**/*_gen.f90', '**/*fruit_driver',
   '**/result*.xml',
   '**/fruit_driver_fxx.exe',
   '**/fruit_driver.exe',
@@ -60,7 +66,7 @@ CLEAN.include(FileList[
 ].each do |d|
   CLEAN.include(FileList[d + "/fruit.f90"])
   CLEAN.include(FileList[d + "/fruit_util.f90"])
-  CLEAN.include(FileList[d + "/rake_base.rb"])
+  CLEAN.include(FileList[d + "/rake_base_deps.rb"])
   CLEAN.include(FileList[d + "/rake_estimate.rb"])
 end
 
@@ -69,8 +75,10 @@ CLOBBER.include($build_dir)
 
 desc "Complie src/fruit*.f90 and build build/libfruit.a"
 task :compile do
-  Dir.chdir("src") do
-    sh 'rake'
+  if $compiler != "ftn95"
+    Dir.chdir("src") do
+      sh 'rake'
+    end
   end
 end
 
@@ -113,10 +121,10 @@ task :ruby_test do
   end
 end
 
-desc "Test of rake_base.rb"
-task :rake_base_test do
+desc "Test of rake_base_deps.rb"
+task :rake_base_deps_test do
   Dir.chdir("ruby_test") do
-    sh 'ruby rake_base_test.rb'
+    sh 'ruby rake_base_deps_test.rb'
   end
 end
 
@@ -155,8 +163,6 @@ task :sample_single_dir => :fruit_f90 do
   Dir.chdir(dir) do
     os_install("../src/fruit.f90",      "fruit.f90")
     os_install("../src/fruit_util.f90", "fruit_util.f90")
-    os_install("../rake_base.rb", "rake_base.rb")
-    os_install("../rake_estimate.rb", "rake_estimate.rb")
     sh "rake"
   end
 end
@@ -190,5 +196,5 @@ task :sample_build_dir => :fruit_f90 do
   end
 end
 
-load 'rake_base.rb'
-include RakeBase
+load 'rake_base_deps.rb'
+include RakeBaseDeps

@@ -1,6 +1,7 @@
 require 'rake/clean'
-
 include Rake::DSL if defined?(Rake::DSL)
+load "../../rake_base.rb"
+load "../../rake_base_deps.rb"
 
 CLEAN.include(FileList['main.exe'])
 
@@ -10,11 +11,17 @@ task :default => [
 
 desc "main executable"
 file 'main.exe' => ["../main.f90", "../atoz.f90"] do
-  sh "#{$compiler} ../atoz.f90 ../main.f90 -o main.exe"
+  if ($compiler == "ftn95")
+    sh "#{$compiler} ..\\atoz.f90 #{$option_obj} atoz.obj"
+    sh "#{$compiler} ..\\main.f90 #{$option_obj} main.obj"
+    sh "#{$linker} atoz.obj main.obj #{$option_exe}main.exe"
+  else
+    sh "#{$compiler} ../atoz.f90 ../main.f90 #{$option_exe} main.exe"
+  end
 end
 
 task :run_main => "main.exe" do
   sh './main.exe'
 end
 
-load "../../rake_base.rb"
+
