@@ -60,7 +60,7 @@ CLEAN.include(FileList[
 ])
 
 [
-  "in_3_minutes",
+  "in_3_minutes", "sample/test",
   "sample", "sample_single_dir", "sample_selective", "sample_build_dir",
   "self_test"
 ].each do |d|

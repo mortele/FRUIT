@@ -20,12 +20,7 @@ task :test => [:clean] do
   sh "#{$compiler} #{$option} -c calculator.f90"
   sh "#{$compiler} #{$option} -c calculator_test.f90"
   sh "#{$compiler} #{$option} -c fruit_driver.f90"
-  if $compiler == "ftn95"
-    sh "#{$linker} #{$linker_option} #{$option_exe}#{$goal} " + 
-       "fruit_util.obj fruit.obj calculator.obj calculator_test.obj fruit_driver.obj"
-  else
-    sh "#{$linker} #{$option} #{$option_exe}#{$goal} *.o"
-  end
+  sh "#{$linker} #{$linker_option} #{$option_exe}#{$goal} *.#{$ext_obj}"
   sh "./#{$goal}"
 end
 
