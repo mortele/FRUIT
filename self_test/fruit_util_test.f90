@@ -33,7 +33,7 @@ contains
   !  call assert_equals ('1.2345679E+08', to_s(123456789.123))
     string = to_s(123456789.123)
     read(string, *) reread
-    call assert_equals(123456789.123, reread)
+    call assert_equals(123456789.123, reread, 10.0, "difference 10.0 allowed")
 
   !  call assert_equals ('0.0000000E+00', to_s(0.0))
     string = to_s(0.0)

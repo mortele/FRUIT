@@ -1,4 +1,21 @@
 -----------
+FRUIT 3.2.0
+-----------
+
++ Works on FTN95. 
+  FTN95 is Fortran compiler for Windows.
+  http://www.silverfrost.com
+
++ Works on gfortran of TDM-GCC on Windows.
+  http://tdm-gcc.tdragon.net/
+
++ To support extension .obj and path backslash path,
+  rake_base.rb is divided into 
+  compiler definition part (rake_base.rb) and
+  dependencies part (rake_base_deps.rb).
+
+
+-----------
 FRUIT 3.1.0
 -----------
 
