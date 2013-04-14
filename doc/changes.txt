@@ -9,7 +9,7 @@ FRUIT 3.2.0
 + Works on gfortran of TDM-GCC on Windows.
   http://tdm-gcc.tdragon.net/
 
-+ To support extension .obj and path backslash path,
++ To support extension .obj and backslash path,
   rake_base.rb is divided into 
   compiler definition part (rake_base.rb) and
   dependencies part (rake_base_deps.rb).

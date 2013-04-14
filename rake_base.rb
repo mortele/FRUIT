@@ -14,6 +14,7 @@ module RakeBase
   # $compiler = 'ifort'
   # $option = "/check:all /warn:all /fpp"
   # $ext_obj = "obj"
+  # $dosish_path = true
   #--
 
 
@@ -28,10 +29,20 @@ module RakeBase
 
   # #G95 FORTRAN compiler tested on Linux and Windows Vista + cygwin
   #$compiler = "g95"
+  #$ext_obj = "o"
   #$option = "-Wall -Wobsolescent -Wunused-module-vars " +
   #  "-Wunused-internal-procs -Wunused-parameter -Wunused-types " +
   #  "-Wmissing-intent -Wimplicit-interface -pedantic -fbounds-check -Wuninitialized"
 
+
+  # #FTN95 Fortran compiler
+  #  $linker = "slink"
+  #  $option = "/CFPP /DEFINE FTN95 1 /SILENT "
+  #  $linker_option = ""
+  #  $option_obj = "/binary"
+  #  $ext_obj = "obj"
+  #  $option_exe = "-out:"
+  #  $dosish_path = true
 
   #---------------------------------------------------
   #`where ...` works on windows vista, 7 and 8. Not works on Windows XP.
@@ -52,7 +63,7 @@ module RakeBase
     $ext_obj = "o"
   end
 
-  # ----- experimental FTN95
+  # ----- if absent try FTN95
   result = `#{where_or_which} #{$compiler} 2>&1`
   if $?.to_i != 0
     puts "Fortran compiler " + $compiler + " not exists. Trying ftn95."
