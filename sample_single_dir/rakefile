@@ -4,6 +4,7 @@ require 'rake/clean'
 include Rake::DSL if defined?(Rake::DSL)
 load "../rake_base.rb"
 
+# fruit.f90 and fruit_util.f90 must exist in this directry.
 
 # Add this line at the beginning if there are generated code involved
 fp = FruitProcessor.new

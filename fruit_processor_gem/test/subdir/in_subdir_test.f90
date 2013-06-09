@@ -1,4 +1,4 @@
-module aaabbb
+module in_subdir_test
   implicit none
 contains
 

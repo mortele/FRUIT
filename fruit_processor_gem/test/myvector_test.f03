@@ -1,5 +1,5 @@
 
-module mod_myvector_test
+module myvector_test
   use mod_myvector
   use fruit
   implicit none
@@ -57,5 +57,4 @@ contains
 
   end subroutine test_all_elems
 
-
-end module mod_myvector_test
+end module myvector_test

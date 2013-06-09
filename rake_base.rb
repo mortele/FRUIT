@@ -8,6 +8,7 @@ module RakeBase
   $compiler = 'ifort'
   $option = "-check all -warn all -fpp"
   $ext_obj = "o"
+  $dosish_path = false
 
 
   #-- on Windows
@@ -23,6 +24,7 @@ module RakeBase
   #$option = "-Wall -Wextra -pedantic -fbounds-check " +
   #          "-Wuninitialized -O -g -Wno-unused-parameter -cpp"
   #$ext_obj = "o"
+  #$dosish_path = false
   # # With " -std=f95",
   # # subroutines whose name is longer than 31 characters cause error.
 
@@ -30,6 +32,7 @@ module RakeBase
   # #G95 FORTRAN compiler tested on Linux and Windows Vista + cygwin
   #$compiler = "g95"
   #$ext_obj = "o"
+  #$dosish_path = false
   #$option = "-Wall -Wobsolescent -Wunused-module-vars " +
   #  "-Wunused-internal-procs -Wunused-parameter -Wunused-types " +
   #  "-Wmissing-intent -Wimplicit-interface -pedantic -fbounds-check -Wuninitialized"
@@ -61,6 +64,7 @@ module RakeBase
     $option = "-Wall -Wextra -pedantic -fbounds-check " +
               "-Wuninitialized -O -g -Wno-unused-parameter -cpp"
     $ext_obj = "o"
+    $dosish_path = false
   end
 
   # ----- if absent try FTN95

@@ -264,6 +264,10 @@ if $0 =~ /rake$/ or $0 =~ /rake\.bat$/
     estim.source_dirs = [""]
   end
 
+  if $identifiers
+    estim.identifiers = $identifiers
+  end
+
   if $ext_obj
     estim.ext_obj = $ext_obj
   end

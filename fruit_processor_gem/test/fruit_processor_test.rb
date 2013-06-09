@@ -160,6 +160,26 @@ class FruitProcessorTest < Test::Unit::TestCase
     assert_equal("ppp_qqq", result)
   end
 
+  def test_parse_module_name_of_file
+    result = @fixture.parse_module_name_of_file("subdir3/a_filename_mismatch_test.f90")
+    assert_equal("some_testermodule_test", result[0])
+    assert_equal("second_module_test", result[1])
+  end
+
+
+  def test_module_name_consistent?
+    result, err_msg = @fixture.module_name_consistent?("subdir3/a_filename_mismatch_test.f90")
+    assert(! result, "module name should be inconsistent")
+    assert(err_msg =~ /More than one/i, "More than one")
+
+    result, err_msg = @fixture.module_name_consistent?("subdir3/no_tester_module_test.f90")
+    assert(! result, "no test module")
+    assert(err_msg =~ /no test module/i, "message ok")
+
+    result, err_msg = @fixture.module_name_consistent?("subdir3/one_tester_module_test.f90")
+    assert(result, "module name consistent")
+    assert(err_msg == "", "no message if ok")
+  end
 
   def test_parse_method_names
     fp = FruitProcessor.new

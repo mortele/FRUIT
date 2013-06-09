@@ -75,6 +75,31 @@ class FruitProcessor
     create_driver dir
   end
 
+
+  def module_name_consistent? file
+    test_module_name = test_module_name_from_file_path file
+
+    mods = parse_module_name_of_file file
+
+    if mods.size == 1 and mods.include?(test_module_name.downcase)
+      return true, ""
+    end
+
+    if ! mods or mods.size == 0
+      error_msg = "FRUIT Error: No test module (*_test) found in file " + file + "\n"
+    elsif mods.size > 1
+      error_msg =  "FRUIT Error: More than one tester modules in file #{file}\n"
+      error_msg += "  existing modules (*_test): " + mods.join(", ") + "\n"
+      error_msg += "  expected module:           " + test_module_name
+    elsif ! mods.include?(test_module_name.downcase)
+      error_msg  = "FRUIT Error: No test module #{test_module_name} found in file #{file}\n"
+      error_msg += "  existing modules (*_test): " + mods.join(", ") + "\n"
+      error_msg += "  expected module:           " + test_module_name
+    end
+    return false, error_msg
+  end
+
+
   def fruit_picker dir="."
     dir = "." if dir.instance_of?(Array)
 
@@ -95,10 +120,14 @@ class FruitProcessor
       @files.each do |file|
         test_module_name = test_module_name_from_file_path file
 
+        if_ok, error_msg = module_name_consistent? file
+        warn error_msg if (!if_ok) 
+
         subroutine_name="#{test_module_name}_all_tests"
         test_subroutine_names << subroutine_name
         f.write "  subroutine #{subroutine_name}\n"
         f.write "    use #{test_module_name}\n"
+                     #memo: this "use" will fail if tester filename and its module name mismatch
         f.write "\n"
 
         method_names = @spec_hash[file]['methods']['name']
@@ -412,8 +441,20 @@ class FruitProcessor
         test_module_name=$1
       end
     }
-
-    ## test_module_name[test_module_name.rindex("/")+1 ..  -1]
     Pathname(test_module_name).basename.to_s
+  end
+
+  def parse_module_name_of_file file_name
+    mods = []
+    File.open(file_name, 'r') do |line|
+      line.grep( /^\s*module\s*(\w+)\s*$/i ) do
+        module_name=$1 
+        if module_name =~ /^(\S+_test)$/i
+          test_name = $1.downcase
+          mods.push(test_name)
+        end
+      end
+    end
+    return mods
   end
 end
