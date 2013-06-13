@@ -6,12 +6,14 @@ load "../rake_base.rb"
 
 # fruit.f90 and fruit_util.f90 must exist in this directry.
 
-# Add this line at the beginning if there are generated code involved
-fp = FruitProcessor.new
-fp.pre_process
-
 $build_dir = ""  #If not set, build will be done in ../build/
 $goal = "fruit_driver_fxx.exe"
+
+# Add this line at the beginning if there are generated code involved
+fp = FruitProcessor.new
+#fp.shuffle = true          #if true order of methods will be random
+fp.pre_process              #It generates fruit_*_gen.f90
+
 
 #--- Either load it
 $main = "fruit_driver_gen.f90"

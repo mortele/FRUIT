@@ -5,7 +5,7 @@ require 'rake'
 require "pathname"
 
 class FruitProcessor
-  attr_accessor :process_only
+  attr_accessor :process_only, :shuffle
 
   def initialize
     @driver_program_name='fruit_driver_gen'
@@ -13,6 +13,8 @@ class FruitProcessor
 
     @extensions = ["f90", "f95", "f03", "f08"]
     @spec_hash={}
+
+    @shuffle = false
   end
 
   def get_spec_hash_filename file_name
@@ -117,7 +119,10 @@ class FruitProcessor
 
       # error if @files is empty
 
-      @files.each do |file|
+      files_order = @files
+      files_order = files_order.sort_by{ rand } if @shuffle
+
+      files_order.each do |file|
         test_module_name = test_module_name_from_file_path file
 
         if_ok, error_msg = module_name_consistent? file
@@ -144,6 +149,8 @@ class FruitProcessor
             f.write "    call setup_before_all\n"
           end
         end
+
+        method_names = method_names.sort_by{ rand } if @shuffle
 
         spec_counter = 0
         method_names.each do |method_name|

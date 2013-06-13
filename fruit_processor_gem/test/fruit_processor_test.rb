@@ -22,26 +22,52 @@ class FruitProcessorTest < Test::Unit::TestCase
 #  end
 
   def test_fruit_picker__dirs
-    basket        = "fruit_basket_gen.f90"
-    if (File.exist?(basket))
-      File.unlink(basket)
-    end
+    [true, false].each{|if_shuffle|
+      basket        = "fruit_basket_gen.f90"
+      if (File.exist?(basket))
+        File.unlink(  basket)
+      end
+  
+      fp = FruitProcessor.new
+      fp.load_files ["subdir", "subdir2"]
+      files = fp.get_files
+      assert(
+        files.include?("subdir/in_subdir_test.f90"),
+        "has subdir/..._test.f90"
+      )
+      assert(
+        files.include?("subdir2/in_subdir2_test.f90"),
+        "has subdir2/..._test.f90"
+      )
 
-    fp = FruitProcessor.new
-    fp.load_files ["subdir", "subdir2"]
-    files = fp.get_files
-    assert(
-      files.include?("subdir/in_subdir_test.f90"),
-      "has subdir/..._test.f90"
-    )
-    assert(
-      files.include?("subdir2/in_subdir2_test.f90"),
-      "has subdir2/..._test.f90"
-    )
+      fp.shuffle = true if if_shuffle
 
-    assert(!File.exist?(basket), "#{basket} absent")
-    fp.fruit_picker ["subdir", "subdir2"]
-    assert( File.exist?(basket), "#{basket} created")
+      assert(!File.exist?(basket), "#{basket} absent")
+      fp.fruit_picker ["subdir", "subdir2"]
+      assert( File.exist?(basket), "#{basket} created")
+   
+      ok_subdir = false
+      ok_subdir2 = false
+      call_test_aaa = 0
+      call_test_bbb = 0
+      call_test_ccc = 0
+      File.open(basket, 'r') do |f|
+        while line = f.gets
+  #p line
+          ok_subdir  = true if line =~ /^ *subroutine +in_subdir_test_all_tests/
+          ok_subdir2 = true if line =~ /^ *subroutine +in_subdir2_test_all_tests/
+  
+          call_test_aaa += 1 if line =~ /call *run_test_case *\( *test_aaa *,/
+          call_test_bbb += 1 if line =~ /call *run_test_case *\( *test_bbb *,/
+          call_test_ccc += 1 if line =~ /call *run_test_case *\( *test_method_ccc *,/
+        end
+      end
+      assert(ok_subdir , "in_subdir_test_all_tests found")
+      assert(ok_subdir2, "in_subdir_test_all_tests found")
+      assert_equal(1, call_test_aaa, "calling test_aaa once")
+      assert_equal(1, call_test_bbb, "calling test_bbb once")
+      assert_equal(1, call_test_ccc, "calling test_ccc once")
+    }
   end
 
   def test_fruit_picker

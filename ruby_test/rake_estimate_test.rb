@@ -107,10 +107,33 @@ class FruitRakeEstimateTest < Test::Unit::TestCase
   def test_set_all_f
     esti = FruitRakeEstimate.new
     esti.set_all_f
-    assert(esti.all_f.include?("sample08.f08"))
-    assert(esti.all_f.include?("test_mod.f03"))
-    assert(esti.all_f.include?("main.f90"))
+    assert(esti.all_f.include?("sample08.f08"), "should include sample08.f08")
+    assert(esti.all_f.include?("test_mod.f03"), "should include test_mod.f03")
+    assert(esti.all_f.include?("main.f90"), "should include main.f90")
     assert(!esti.all_f.include?("ignored.f78"), "ignored.f78 must be ignored")
+  end
+
+  def test_set_all_f__dirs
+    should_include = [
+      "dir only tested/aaa.f90", 
+      "dir_tester_and_tested3/another_test.f90",
+      "dir_tester_and_tested3/some_name.f90",
+      "dir_tester_and_tested3/some_test.f90",
+    ]
+
+    esti = FruitRakeEstimate.new
+    esti.source_dirs = ["dir only tested/", "dir_tester_and_tested3/"]
+    esti.set_all_f
+    should_include.each{|inc|
+      assert(esti.all_f.include?(inc), " should include #{inc}")
+    }
+
+    esti = FruitRakeEstimate.new
+    esti.source_dirs = ["dir only tested", "dir_tester_and_tested3"]
+    esti.set_all_f
+    should_include.each{|inc|
+      assert(esti.all_f.include?(inc), " should include #{inc}")
+    }
   end
 
   def test_set_forward

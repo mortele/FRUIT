@@ -5,7 +5,8 @@ load "../../rake_base.rb"
 
 # Add this line at the beginning if there are generated code involved
 fp = FruitProcessor.new
-fp.pre_process
+# fp.shuffle = true        #if true order of methods will be random
+fp.pre_process             #It generates fruit_*_gen.f90
 
 $goal='calculator_fruit_driver'
 
