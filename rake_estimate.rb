@@ -224,7 +224,7 @@ class FruitRakeEstimate
       next if ordered.index(f)
       if @forward[f].size == 0
         f_add << f
-      elsif (ordered & @forward[f]).sort == (@forward[f]).sort
+      elsif (ordered & @forward[f]).sort.uniq == (@forward[f]).sort.uniq
         f_add << f
       else
       end

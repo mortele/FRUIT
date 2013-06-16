@@ -18,42 +18,37 @@ module RakeBaseDeps
   extensions = ["f90", "f95", "f03", "f08"]
 
 #-------------------------------------------------------
-#-------------------------------------------------------
 
   $goal = '' if !$goal
 
-  $base_dir = FruitProcessor.new.base_dir if ! $base_dir
+  $base_dir  = FruitProcessor.new.base_dir  if ! $base_dir
   $build_dir = FruitProcessor.new.build_dir if ! $build_dir
 
-  $lib_bases = {} if !$lib_bases
-  $inc_dirs = [] if !$inc_dirs
-
+  $lib_bases  = {} if !$lib_bases
+  $inc_dirs   = [] if !$inc_dirs
   $source_dir = "" if !$source_dir
 
-  #---------v
   if not defined?(OBJ)
+    # if rake_estimate.rb was not used, generate SRC and OBJ here
     SRC = FileList[]
     extensions.each{|fxx|
       SRC.concat(FileList['*.' + fxx])
     }
     SRC.sort!
     OBJ = SRC.ext($ext_obj)
-  end
-  #---------^
 
-  if !$source_dirs
-    SRC.each{|f|
-      f_obj = f.ext($ext_obj)
-      next if (f.to_s =~ /fruit_basket_gen\.f90$/)
-      next if (f.to_s =~ /fruit_driver_gen\.f90$/)
-
-      #  puts "rake_base.rb: Assuming " + f_obj.to_s + " => " + f.to_s
-      file f_obj.to_s => f.to_s
-    }
+    # generated files must be built last
+    if OBJ.include?('fruit_basket_gen.' + $ext_obj)
+      file 'fruit_basket_gen.' + $ext_obj =>  OBJ - ['fruit_basket_gen.' + $ext_obj,
+                                                     'fruit_driver_gen.' + $ext_obj]
+      file 'fruit_driver_gen.' + $ext_obj =>  'fruit_basket_gen.' + $ext_obj
+    end
   end
+
+  puts "rake_base_deps.rb: OBJ = " + OBJ.to_s if $show_info
 
   #-------------v
-  # assume a_test.fxx depends on a.fxx if a.fxx exists
+  # A_test.o depends on A.o if A.fxx exists
   OBJ.each{|a_obj|
     a = a_obj.to_s
     b = a.sub(/_test\.#{$ext_obj}$/, "\.#{$ext_obj}")
@@ -61,7 +56,7 @@ module RakeBaseDeps
       extensions.each{|fxx|
         b_src = b.sub(/\.#{$ext_obj}$/, "\.#{fxx}")
         if File.exist?(b_src)
-          # puts "rake_base.rb: Assuming \"" + a + "\" depends on \"" + b + "\""
+          puts "rake_base_deps.rb: \"" + a + "\" depends on \"" + b + "\"" if $show_info
           file a => b
         end
       }
@@ -77,19 +72,6 @@ module RakeBaseDeps
 
   task :default => [:deploy]
 
-  # generated files must be built last
-  objs = FileList[]
-  extensions.each{|fxx|
-    objs.concat(FileList['*.' + fxx])
-  }
-  objs = objs.ext($ext_obj)
-
-  if objs.include?('fruit_basket_gen.' + $ext_obj)
-    file 'fruit_basket_gen.' + $ext_obj =>  objs - ['fruit_basket_gen.' + $ext_obj,
-                                                    'fruit_driver_gen.' + $ext_obj]
-    file 'fruit_driver_gen.' + $ext_obj =>  'fruit_basket_gen.' + $ext_obj
-  end
-
   # final goal link is depending on the libraries
   # file $goal => FruitProcessor.new.lib_base_files($lib_bases)
   # This is to resolve the .so files in LD_LIBRARY_PATH,
@@ -97,6 +79,20 @@ module RakeBaseDeps
   FruitProcessor.new.lib_base_files($lib_bases).each do |lib|
     file $goal => lib if File.exist? lib
   end
+
+
+#  # In single-directry build,  AAA.o depends on AAA.f90 
+#  if !$source_dirs
+#    SRC.each{|f|
+#      f_obj = f.ext($ext_obj)
+#      next if (f.to_s =~ /fruit_basket_gen\.f90$/)
+#      next if (f.to_s =~ /fruit_driver_gen\.f90$/)
+#
+#      puts "rake_base_deps.rb: " + f_obj.to_s + " => " + f.to_s if $show_info
+#
+#      file f_obj.to_s => f.to_s
+#    }
+#  end
 
   if !$source_dirs
     extensions.each{|fxx|
@@ -131,12 +127,20 @@ module RakeBaseDeps
   end
 
   if $source_dirs
+    puts "======\ndependencies given by " + Pathname(__FILE__).basename.to_s + ":" if $show_info 
     $source_dirs.each{|dir|
-      extensions.each{|fxx|
-        FileList[ dir + "*." + fxx ].each do |ff|
-          basename_o = ff.sub(/^(.*\/)?/, "").ext($ext_obj)
 
-          file basename_o => ff do |t|
+      dir2 = Pathname.new(dir).cleanpath.to_s
+      dir2 += "/" if dir2 != ""
+
+      extensions.each{|fxx|
+        FileList[ dir2 + "*." + fxx ].each do |ff|
+          basename_o = Pathname.new(ff).basename(fxx).to_s + $ext_obj
+          source_fxx = Pathname.new(ff).cleanpath.to_s
+
+          puts basename_o.to_s + " => " + source_fxx if $show_info 
+
+          file basename_o => source_fxx do |t|
             Rake::Task[:dirs].invoke if Rake::Task.task_defined?('dirs')
 
             flag = $build_dir
@@ -151,10 +155,10 @@ module RakeBaseDeps
             source = ""
             if ($dosish_path)
               name   = t.name.gsub(%r{/}) { "\\" }
-              source = ff.gsub(%r{/}) { "\\" }
+              source = source_fxx.gsub(%r{/}) { "\\" }
             else
               name   = t.name
-              source = ff
+              source = source_fxx
             end
 
             sh "#{$compiler} #{$option} #{$option_obj} #{name} #{source} #{flag} #{FruitProcessor.new.inc_flag($inc_dirs)}"
@@ -167,6 +171,7 @@ module RakeBaseDeps
         end
       }
     }
+    puts "======" if $show_info 
   end
 
   #`where ...` works on windows vista, 7 and 8. Not works on Windows XP.

@@ -115,7 +115,7 @@ class FruitRakeEstimateTest < Test::Unit::TestCase
 
   def test_set_all_f__dirs
     should_include = [
-      "dir only tested/aaa.f90", 
+      "dir only tested/aaa.f90",
       "dir_tester_and_tested3/another_test.f90",
       "dir_tester_and_tested3/some_name.f90",
       "dir_tester_and_tested3/some_test.f90",
@@ -222,6 +222,34 @@ class FruitRakeEstimateTest < Test::Unit::TestCase
       ["need_itself.f90"],
       esti.get_needed(["need_itself.f90"])
     )
+  end
+
+
+  def test_get_ordered__forward_duplicated
+    esti = FruitRakeEstimate.new
+
+    needed = [
+      "fruit_driver_gen.f90",
+      "fruit_basket_gen.f90",
+      "mystack_test.f90",
+      "mystack.f90",
+      "Z_constants.f90"
+    ]
+
+    esti.forward = {
+      "dummy_main.f90"=>[],
+      "fruit_basket_gen.f90"=>["mystack_test.f90"],
+      "fruit_driver_gen.f90"=>["fruit_basket_gen.f90"],
+      "mystack.f90"=>["Z_constants.f90", "Z_constants.f90"],  # <-- duplicated here
+      "mystack_test.f90"=>["mystack.f90"],
+      "Z_constants.f90"=>[]
+    }
+
+    ordered = esti.get_ordered(needed)
+
+    assert_equal(5, ordered.size)
+    assert_equal("fruit_basket_gen.f90", ordered[3])
+    assert_equal("fruit_driver_gen.f90", ordered[4])
   end
 
   def test_get_ordered
