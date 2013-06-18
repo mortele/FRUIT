@@ -22,6 +22,7 @@ task :default => [
   :ruby_test, :rake_base_deps_test, :rake_estimate_test,
   :in_3_minutes,
   :sample_selective,
+  :sample_selective_main,
   :sample_build_dir,
   :sample_multi_dir,
   :anchor_root, :dirs, :compile, :sample,
@@ -53,6 +54,7 @@ CLEAN.include(FileList[
   '**/fruit_driver_3min',
   'sample_selective/fruit_driver_selective',
   'sample_selective/dummy_main',
+  'sample_selective/dummy_main.exe',
   'sample_build_dir/*/*.exe',
   'self_test/fruit_self_test_driver',
   'self_test/override_stdout.txt',
@@ -186,6 +188,13 @@ task :sample_selective => :fruit_f90 do
     os_install("../src/fruit.f90",      "fruit.f90")
     os_install("../src/fruit_util.f90", "fruit_util.f90")
     sh "rake"
+  end
+end
+
+desc "Compile usual progrram (not unit test) using rake_estimate.rb"
+task :sample_selective_main do
+  Dir.chdir("sample_selective") do
+    sh "rake -f rakefile_main"
   end
 end
 

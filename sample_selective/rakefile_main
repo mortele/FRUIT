@@ -1,0 +1,26 @@
+
+require 'rake/clean'
+include Rake::DSL if defined?(Rake::DSL)
+load "../rake_base.rb"
+
+$build_dir = ""  #If not set, build will be done in ../build/
+$source_dirs = ["."]
+$goal = "dummy_main.exe"
+$main = "dummy_main.f90"
+$show_info = true
+
+load "../rake_estimate.rb"
+load "../rake_base_deps.rb" #It uses SRC and OBJ updated by rake_estimate.rb
+
+
+task :default => :run_main
+
+task :run_main => [ $goal ] do
+  print "Say hello world:\n"
+  sh "./#{$goal}"
+end
+
+
+CLEAN.include($goal)
+
+

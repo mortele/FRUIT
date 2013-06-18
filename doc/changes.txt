@@ -2,6 +2,24 @@
 FRUIT 3.2.1
 -----------
 
+Order of test methods can be made random by setting
+   fp.shuffle = true
+in rakefile. For example, see self_test/rakefile.
+
+Fruit processor checks if test module name and its file name are consistent.
+A method "module_name_consistent?" in fruit_processor_gem/lib/fruit_processor.rb
+does it.
+
+Log output from rake_estimate.rb on file dependencies is reduced.
+To see extra info on dependencies, set 
+   $show_info = true
+in rakefile. See sample_multi_dir/build/rakefile for example.
+
+Unnecessary dependencies given in rake_base_deps.rb are removed.
+
+Sample of rakefile for building main program using rake_estimate.rb is added.
+See sample_selective/rakefile_main.
+It estimates dependencies between modules.
 
 
 -----------
