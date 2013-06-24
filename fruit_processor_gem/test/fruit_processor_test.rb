@@ -150,6 +150,26 @@ class FruitProcessorTest < Test::Unit::TestCase
     )
   end
 
+
+  def test_set_process_only
+    fp = FruitProcessor.new
+    assert_raise(RuntimeError, message = "raise if files set to process_only are not *_test.f??"){
+      fp.process_only = ["in_subdir_test.f90", "in_subdir2_test.f03", "not_tester.f90"]
+    }
+    assert_nothing_raised("no raise if files set to process_only are *_test.f??"){
+      fp.process_only = ["in_subdir_test.f90", "in_subdir2_TEST.F03", "xxx_test.f08"]
+    }
+  end
+
+  def test_process_only__absent
+    fp = FruitProcessor.new
+    fp.process_only = ["in_subdir_test.f90", "in_subdir2_test.f90", "not_existing_test.f90"]
+    assert_raise(RuntimeError, message = "absent file cause exception"){
+      fp.load_files(["subdir/", "subdir2", "subdir2/"])
+    }
+  end
+
+
   def test_process_only__dirs
     fp = FruitProcessor.new
     fp.process_only = ["in_subdir_test.f90", "in_subdir2_test.f90"]

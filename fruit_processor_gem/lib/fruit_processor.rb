@@ -5,7 +5,31 @@ require 'rake'
 require "pathname"
 
 class FruitProcessor
-  attr_accessor :process_only, :shuffle
+  attr_accessor :shuffle
+
+  #------
+  # attr_accessor :process_only
+  #------
+  def process_only
+    @process_only
+  end
+  def process_only=(val)
+    @process_only = val
+
+    val.each{|a_file|
+      match = false
+      @extensions.each{|fxx|
+        if    a_file.match(/_test.#{fxx}/)
+          match = true
+        elsif a_file.match(/_test.#{fxx}/i)
+          puts "Warning: _test.f?? in filename must be lower case while #{a_file} has upper case"
+          match = true
+        end
+      }
+      raise "#{a_file} not match with *_test.(" + @extensions.join("|") + ")" if !match
+    }
+  end
+  #------
 
   def initialize
     @driver_program_name='fruit_driver_gen'
@@ -46,18 +70,22 @@ class FruitProcessor
     @files = []
     if @process_only
       @process_only.each{|f|
+        found = false
         dirs.each{|a_dir|
           candi = (Pathname(a_dir) + f).to_s
           if File.exist?(candi)
             @files.concat(FileList[candi])
+            found = true
           end
         }
+        raise "File #{f} not found" if !found
       }
     else
-      @extensions.each{|f|
+      @extensions.each{|fxx|
+        found = false
         dirs.each{|a_dir|
           @files.concat(
-            FileList["#{a_dir}/*_test." + f] - FileList["#{a_dir}/~*_test." + f]
+            FileList["#{a_dir}/*_test." + fxx] - FileList["#{a_dir}/~*_test." + fxx]
           )
         }
       }
