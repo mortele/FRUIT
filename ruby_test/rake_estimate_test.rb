@@ -81,6 +81,14 @@ class FruitRakeEstimateTest < Test::Unit::TestCase
     assert_equal(true, esti.if_macro_stack(macro_stack))
   end
 
+  def test_set_forward_and_missings
+    esti = FruitRakeEstimate.new
+    esti.source_dirs = ["files_give_same_mod"]
+    esti.set_all_f
+    assert_raise RuntimeError do
+      esti.set_forward_and_missings
+    end
+  end
 
  def test_set_forward_nested_ifdef
    esti = FruitRakeEstimate.new
@@ -200,7 +208,13 @@ class FruitRakeEstimateTest < Test::Unit::TestCase
   end
 
   def test_f_to_o
-    result = FruitRakeEstimate.new.f_to_o("abcdef.f03")
+  #--
+    esti = FruitRakeEstimate.new
+    puts "esti.ext_obj is " + esti.ext_obj
+    result = esti.f_to_o("abcdef.f03")
+  #--
+  #  result = FruitRakeEstimate.new.f_to_o("abcdef.f03")
+  #--
     assert_equal("abcdef.o", result)
   end
 

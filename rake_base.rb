@@ -4,19 +4,21 @@
 # Licensed under the 3-clause BSD license.
 
 module RakeBase
-  # Intel FORTRAN compiler tested on Linux
-  $compiler = 'ifort'
-  $option = "-check all -warn all -fpp"
-  $ext_obj = "o"
-  $dosish_path = false
+  puts "RUBY_PLATFORM=" + RUBY_PLATFORM if $show_info
 
-
-  #-- on Windows
-  # $compiler = 'ifort'
-  # $option = "/check:all /warn:all /fpp"
-  # $ext_obj = "obj"
-  # $dosish_path = true
-  #--
+  if RUBY_PLATFORM =~ /(darwin|linux)/i
+    # Intel FORTRAN compiler tested on Linux
+    $compiler = 'ifort'
+    $option = "-check all -warn all -fpp"
+    $ext_obj = "o"
+    $dosish_path = false
+  else
+    # Intel FORTRAN on Windows
+    $compiler = 'ifort'
+    $option = "/check:all /warn:all /fpp"
+    $ext_obj = "obj"
+    $dosish_path = true
+  end
 
 
   # GCC FORTRAN compiler tested on MacOs (10.6.8 Snow Leopard) and Windows Vista + cygwin
@@ -94,4 +96,5 @@ module RakeBase
   result_which = `which ar 2>&1`
   $ar_ok = false
   $ar_ok = true if $?.to_i == 0
+  $ar_ok = false if $compiler == "ftn95"
 end

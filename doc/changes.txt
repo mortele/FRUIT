@@ -1,4 +1,17 @@
 -----------
+FRUIT 3.2.2
+-----------
+
+FruitProcessor warns if user-specifiled filenames given in
+  fp.process_only = [ (filenames) ]
+line not match with *_test.f(90|95|03|07)
+or any of the corresponding files is absent.
+
+rake_estimate.rb warns if two fortran source files
+define the same module name.
+
+
+-----------
 FRUIT 3.2.1
 -----------
 

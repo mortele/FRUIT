@@ -77,7 +77,7 @@ CLOBBER.include($build_dir)
 
 desc "Complie src/fruit*.f90 and build build/libfruit.a"
 task :compile do
-  if $compiler != "ftn95"
+  if $ar_ok
     Dir.chdir("src") do
       sh 'rake'
     end

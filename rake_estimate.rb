@@ -62,7 +62,7 @@ class FruitRakeEstimate
 
     set_all_f if (!@all_f)
 
-    @all_f.each{|f_full|
+    @all_f.uniq.each{|f_full|
       f_basename = Pathname.new(f_full).basename.to_s
 
       f_uses_mod[ f_basename ] = []
@@ -76,8 +76,18 @@ class FruitRakeEstimate
               f_uses_mod[ f_basename ] << $1
             end
             if line =~ /(?:^|\r|\n)\s*module +(\w+)\b?/i
-              mod = $1
-              mod_in_f[ mod ] = f_basename unless mod =~ /procedure/i
+              mod = $1.downcase
+
+              if mod !~ /procedure/i
+                if mod_in_f[ mod ] and f_basename != mod_in_f[ mod ]
+                  puts "*** Error: module " + mod + " is defined both in " + mod_in_f[mod] + " and " + f_basename
+                  raise
+                end
+
+                mod_in_f[ mod ] = f_basename
+              end
+
+
             end
           end
 
