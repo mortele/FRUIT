@@ -10,6 +10,9 @@ or any of the corresponding files is absent.
 rake_estimate.rb warns if two fortran source files
 define the same module name.
 
+Fixed a problem that fruit_basket_gen.f90 and fruit_driver_gen.f90
+are compiled twice when rake_estimate.rb is used.
+
 
 -----------
 FRUIT 3.2.1

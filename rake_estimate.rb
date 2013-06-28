@@ -275,7 +275,15 @@ if $0 =~ /rake$/ or $0 =~ /rake\.bat$/
   estim = FruitRakeEstimate.new
 
   if $source_dirs
-    estim.source_dirs = $source_dirs.push("").uniq
+    dirs = $source_dirs.push("").uniq
+    cleans = []
+    dirs.each{|dir|
+      cleans.push Pathname.new(dir).cleanpath.to_s
+    }
+    $source_dirs = cleans.uniq
+    estim.source_dirs = $source_dirs
+
+    # estim.source_dirs = $source_dirs.push("").uniq
   elsif $source_dir
     estim.source_dirs = [$source_dir]
   else

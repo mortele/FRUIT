@@ -128,10 +128,13 @@ module RakeBaseDeps
 
   if $source_dirs
     puts "======\ndependencies given by " + Pathname(__FILE__).basename.to_s + ":" if $show_info 
+    puts "directries " + $source_dirs.to_s if $show_info
     $source_dirs.each{|dir|
 
       dir2 = Pathname.new(dir).cleanpath.to_s
       dir2 += "/" if dir2 != ""
+
+      puts "in directry " + dir2 if $show_info
 
       extensions.each{|fxx|
         FileList[ dir2 + "*." + fxx ].each do |ff|

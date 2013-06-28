@@ -8,6 +8,7 @@ $build_dir = "./"
 $source_dirs = ["./", "../src/"]
 $goal='fruit_self_test_driver'
 $main = "fruit_driver_gen.f90"
+$show_info = true
 
 fp = FruitProcessor.new
 fp.shuffle = true            #if true order of methods will be random
