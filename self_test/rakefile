@@ -10,6 +10,8 @@ $goal='fruit_self_test_driver'
 $main = "fruit_driver_gen.f90"
 $show_info = true
 
+$coverage_fruit_f90 = true
+
 fp = FruitProcessor.new
 fp.shuffle = true            #if true order of methods will be random
 fp.pre_process($source_dirs) #It generates fruit_*_gen.f90
@@ -22,6 +24,12 @@ task :default => [:run]
 desc "Compile self-test and run"
 task :run => [$goal] do
   sh ("./#{$goal}")
+end
+
+task :coverage => $for_coverage.clone.push(:run) do
+  if $gcov
+    sh "gcov " + $for_coverage.join(" ")
+  end
 end
 
 desc "Using Valgrind run self-test"

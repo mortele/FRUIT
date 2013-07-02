@@ -22,9 +22,17 @@ task :test => $goal do
   sh "./#{$goal}"
 end
 
+task :coverage => $for_coverage.clone.push(:test) do
+  if $gcov
+    sh "gcov " + $for_coverage.join(" ")
+  end
+end
+
+
 CLEAN.include(FileList[
   'fruit_driver_gen.f90',
   'fruit_basket_gen.f90', 
-  '*.mod', '*.o', $goal
+  '*.mod', '*.o', $goal, 
+  '*.gcda', '*.gcno', '*.gcov'
 ])
 

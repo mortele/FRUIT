@@ -8,6 +8,12 @@ task :test do
   end
 end
 
+task :coverage do
+  Dir.chdir "build_unittest" do
+    sh 'rake coverage'
+  end
+end
+
 task :main do
   Dir.chdir "build_main" do
     sh 'rake'

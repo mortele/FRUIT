@@ -41,6 +41,13 @@ task :test => $goal do
   sh "./#{$goal}"
 end
 
+task :coverage => $for_coverage.clone.push(:test) do
+  if $gcov
+    sh "gcov " + $for_coverage.join(" ")
+  end
+end
+
+
 task :valgrind => $goal do
   sh "valgrind --leak-check=full ./#{$goal}"
 end

@@ -12,12 +12,14 @@ module RakeBase
     $option = "-check all -warn all -fpp"
     $ext_obj = "o"
     $dosish_path = false
+    $gcov = false
   else
     # Intel FORTRAN on Windows
     $compiler = 'ifort'
     $option = "/check:all /warn:all /fpp"
     $ext_obj = "obj"
     $dosish_path = true
+    $gcov = false
   end
 
 
@@ -41,6 +43,7 @@ module RakeBase
 
 
   # #FTN95 Fortran compiler
+  #  $compiler = "ftn95"
   #  $linker = "slink"
   #  $option = "/CFPP /DEFINE FTN95 1 /SILENT "
   #  $linker_option = ""
@@ -64,9 +67,10 @@ module RakeBase
     puts "Fortran compiler " + $compiler + " not exists. Trying gfortran."
     $compiler = "gfortran"
     $option = "-Wall -Wextra -pedantic -fbounds-check " +
-              "-Wuninitialized -O -g -Wno-unused-parameter -cpp"
+              "-Wuninitialized -O -g -Wno-unused-parameter -cpp "
     $ext_obj = "o"
     $dosish_path = false
+    $gcov = "-coverage"
   end
 
   # ----- if absent try FTN95
@@ -76,6 +80,7 @@ module RakeBase
     $compiler = "ftn95"
     result = `where #{$compiler} 2>&1`
     if $?.to_i == 0
+    # $compiler = "ftn95"
       $linker = "slink"
       $option = "/CFPP /DEFINE FTN95 1 /SILENT "
       $linker_option = ""
@@ -83,6 +88,7 @@ module RakeBase
       $ext_obj = "obj"
       $option_exe = "-out:"
       $dosish_path = true
+      $gcov = false
     end
   end
   #---------------------------------------------------

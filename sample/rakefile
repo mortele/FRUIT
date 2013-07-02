@@ -23,6 +23,14 @@ task :test  do
   }
 end
 
+task :coverage do
+  rake_opt = " -f rakefile_mingw " if !$ar_ok
+  Dir.chdir("test") {
+    sh "rake #{rake_opt} coverage"
+  }
+end
+
+
 task :valgrind do
   Dir.chdir("test") {
     sh 'rake'

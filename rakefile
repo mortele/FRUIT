@@ -25,7 +25,8 @@ task :default => [
   :sample_selective_main,
   :sample_build_dir,
   :sample_multi_dir,
-  :anchor_root, :dirs, :compile, :sample,
+  :anchor_root, :dirs, :compile, :sample, 
+  :coverage, 
   :self_test]
 
 # :test is not included because :self_test covers tests done in :test.
@@ -59,6 +60,7 @@ CLEAN.include(FileList[
   'self_test/fruit_self_test_driver',
   'self_test/override_stdout.txt',
   'fruit_processor_gem/pkg/fruit_processor-*/',
+  '**/*.gcda', '**/*.gcno', '**/*.gcov', 
 ])
 
 [
@@ -105,7 +107,7 @@ end
 desc "Self test of fruit.f90 and fruit_util.f90."
 task :self_test => :fruit_f90 do
   Dir.chdir("self_test") do
-    sh 'rake'
+    sh 'rake coverage'
   end
 end
 
@@ -182,6 +184,27 @@ task :sample_multi_dir => :fruit_f90 do
 end
 
 
+desc "coverage (only for gfortran)"
+task :coverage => [:fruit_f90, :compile] do
+  if $gcov
+    dir = "sample_multi_dir/build"
+    Dir.chdir(dir) do
+      sh "rake coverage"
+    end
+
+    Dir.chdir("sample_build_dir") do
+      sh "rake coverage"
+    end
+
+    Dir.chdir("sample_selective") do
+      os_install("../src/fruit.f90",      "fruit.f90")
+      os_install("../src/fruit_util.f90", "fruit_util.f90")
+      sh "rake coverage"
+    end
+  end
+end
+
+
 desc "Compile a sample which complies only specifiled testerss."
 task :sample_selective => :fruit_f90 do
   Dir.chdir("sample_selective") do
@@ -191,7 +214,7 @@ task :sample_selective => :fruit_f90 do
   end
 end
 
-desc "Compile usual progrram (not unit test) using rake_estimate.rb"
+desc "Compile usual program (not unit test) using rake_estimate.rb"
 task :sample_selective_main do
   Dir.chdir("sample_selective") do
     sh "rake -f rakefile_main"

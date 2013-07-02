@@ -17,7 +17,56 @@ module RakeBaseDeps
 
   extensions = ["f90", "f95", "f03", "f08"]
 
+  def opt_of_build_dir(build_dir)
+    flag = build_dir
+    if flag.size == 0 or flag == "./"
+      flag = ""
+    else
+      flag = '"-I' + flag + '"' 
+    end
+    return flag
+  end
+  module_function :opt_of_build_dir
+
+  def conv_dosish(target, source, if_dosish_path)
+    target2 = ""
+    source2 = ""
+    if (if_dosish_path)
+      target2 = target.gsub(%r{/}) { "\\" }
+      source2 = source.gsub(%r{/}) { "\\" }
+    else
+      target2 = target
+      source2 = source
+    end
+    return target2, source2
+  end
+  module_function :conv_dosish
+
+  def copy_mod_to_build_dir(mods)
+    mods.each do |module_file|
+      if $build_dir != "" and $build_dir !~ /^\.\/*$/
+        os_install File.expand_path(module_file), $build_dir
+      end
+    end
+  end
+  module_function :copy_mod_to_build_dir
+
+  def coverage?(basename)
+    if $coverage_fruit_f90 
+      if basename == "fruit\." or basename == "fruit_util\."
+        return true
+      end
+    end
+    return false if basename =~ /_test\.$/
+    return false if basename == "fruit\."
+    return false if basename == "fruit_util\."
+    return false if basename == "fruit_basket_gen\."
+    return false if basename == "fruit_driver_gen\."
+    return true
+  end
+  module_function :coverage?
 #-------------------------------------------------------
+
 
   $goal = '' if !$goal
 
@@ -64,10 +113,31 @@ module RakeBaseDeps
   }
   #-------------^
 
+  #------ coverage ------
+  $for_coverage = []
+  OBJ.each{|a_obj|
+    basename = File.basename(a_obj, ".*") + '.'
+    if coverage?(basename)
+      #for gfortran + gcov
+      if $gcov
+        $for_coverage.push(basename + "gcda")
+      end
+      
+      #Maybe for other compiler
+      #...
+    end
+  }
+  puts "For coverage: " + $for_coverage.to_s if $show_info
+
+  rule ".gcda" => "." + $ext_obj
+  #------ coverage ------
+
   CLEAN.include([
     '*.o', '*.obj', '*.a', '*.mod',
-    '*_gen.f90', '*fruit_driver', 'result*.xml',
-    '*_gen.f90', FruitProcessor.new.module_files(SRC, $build_dir)])
+    '*.gcda', '*.gcno', '*.gcov',
+    'fruit_*_gen.f90', '*fruit_driver', 'result*.xml',
+    FruitProcessor.new.module_files(SRC, $build_dir)
+  ])
   CLOBBER.include("#{$build_dir}/#{$goal}")
 
   task :default => [:deploy]
@@ -81,47 +151,24 @@ module RakeBaseDeps
   end
 
 
-#  # In single-directry build,  AAA.o depends on AAA.f90 
-#  if !$source_dirs
-#    SRC.each{|f|
-#      f_obj = f.ext($ext_obj)
-#      next if (f.to_s =~ /fruit_basket_gen\.f90$/)
-#      next if (f.to_s =~ /fruit_driver_gen\.f90$/)
-#
-#      puts "rake_base_deps.rb: " + f_obj.to_s + " => " + f.to_s if $show_info
-#
-#      file f_obj.to_s => f.to_s
-#    }
-#  end
-
   if !$source_dirs
     extensions.each{|fxx|
       rule '.' + $ext_obj => $source_dir + '%X.' + fxx do |t|
         Rake::Task[:dirs].invoke if Rake::Task.task_defined?('dirs')
 
-        flag = $build_dir
-        if flag.size == 0 or flag == "./"
-          flag = ""
-        else
-          flag = '"-I' + flag + '"' 
+        (name, source) = conv_dosish(t.name, t.source, $dosish_path)
+        flag = opt_of_build_dir($build_dir)
+
+        basename = File.basename(t.source, ".*") + '.'
+        if $gcov and coverage?(basename)
+          flag = flag + " " + $gcov
         end
 
-        name = ""
-        source = ""
-        if ($dosish_path)
-          name   = t.name.gsub(%r{/}) { "\\" }
-          source = t.source.gsub(%r{/}) { "\\" }
-        else
-          name   = t.name
-          source = t.source
-        end
+        sh "#{$compiler} #{$option} #{$option_obj} " + 
+           "#{name} #{source} #{flag} " + 
+           "#{FruitProcessor.new.inc_flag($inc_dirs)}"
 
-        sh "#{$compiler} #{$option} #{$option_obj} #{name} #{source} #{flag} #{FruitProcessor.new.inc_flag($inc_dirs)}"
-        FileList["*.mod"].each do |module_file|
-          if $build_dir != "" and $build_dir !~ /^\.\/*$/
-            os_install File.expand_path(module_file), $build_dir
-          end
-        end
+        copy_mod_to_build_dir(FileList["*.mod"])
       end
     }
   end
@@ -138,38 +185,27 @@ module RakeBaseDeps
 
       extensions.each{|fxx|
         FileList[ dir2 + "*." + fxx ].each do |ff|
-          basename_o = Pathname.new(ff).basename(fxx).to_s + $ext_obj
           source_fxx = Pathname.new(ff).cleanpath.to_s
+          basename   = Pathname.new(ff).basename(fxx).to_s
+          basename_o = basename + $ext_obj
 
           puts basename_o.to_s + " => " + source_fxx if $show_info 
 
           file basename_o => source_fxx do |t|
             Rake::Task[:dirs].invoke if Rake::Task.task_defined?('dirs')
 
-            flag = $build_dir
-            if flag.size == 0 or flag == "./"
-              flag = ""
-            else
-              flag = '"-I' + flag + '"' 
+            flag = opt_of_build_dir($build_dir)
+            (name, source) = conv_dosish(t.name, source_fxx, $dosish_path)
+
+            if $gcov and coverage?(basename)
+              flag = flag + " " + $gcov
             end
 
+            sh "#{$compiler} #{$option} #{$option_obj} " + 
+               "#{name} #{source} #{flag} " + 
+               "#{FruitProcessor.new.inc_flag($inc_dirs)}"
 
-            name = ""
-            source = ""
-            if ($dosish_path)
-              name   = t.name.gsub(%r{/}) { "\\" }
-              source = source_fxx.gsub(%r{/}) { "\\" }
-            else
-              name   = t.name
-              source = source_fxx
-            end
-
-            sh "#{$compiler} #{$option} #{$option_obj} #{name} #{source} #{flag} #{FruitProcessor.new.inc_flag($inc_dirs)}"
-            FileList["*.mod"].each do |module_file|
-              if $build_dir != "" and $build_dir !~ /^\.\/*$/
-                os_install File.expand_path(module_file), $build_dir
-              end
-            end
+            copy_mod_to_build_dir(FileList["*.mod"])
           end
         end
       }
@@ -204,6 +240,10 @@ module RakeBaseDeps
       else
         flag = '"-I' + flag + '"' 
       end
+
+if $gcov
+  flag = flag + " " + $gcov
+end
 
       sh "#{$linker} #{$linker_option} #{flag} #{$option_exe}#{$goal} #{OBJ} #{lib_name_flag} #{lib_dir}"
     end
