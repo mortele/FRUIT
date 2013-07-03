@@ -13,6 +13,7 @@ module RakeBase
     $ext_obj = "o"
     $dosish_path = false
     $gcov = false
+		$prof_genx = "-prof-genx"
   else
     # Intel FORTRAN on Windows
     $compiler = 'ifort'
@@ -20,6 +21,7 @@ module RakeBase
     $ext_obj = "obj"
     $dosish_path = true
     $gcov = false
+		$prof_genx = "/Qprof-genx"
   end
 
 
@@ -71,6 +73,7 @@ module RakeBase
     $ext_obj = "o"
     $dosish_path = false
     $gcov = "-coverage"
+		$prof_genx = false
   end
 
   # ----- if absent try FTN95
@@ -89,6 +92,7 @@ module RakeBase
       $option_exe = "-out:"
       $dosish_path = true
       $gcov = false
+		  $prof_genx = false
     end
   end
   #---------------------------------------------------

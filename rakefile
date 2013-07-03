@@ -61,6 +61,7 @@ CLEAN.include(FileList[
   'self_test/override_stdout.txt',
   'fruit_processor_gem/pkg/fruit_processor-*/',
   '**/*.gcda', '**/*.gcno', '**/*.gcov', 
+  '**/*.dyn',
 ])
 
 [
@@ -186,7 +187,7 @@ end
 
 desc "coverage (only for gfortran)"
 task :coverage => [:fruit_f90, :compile] do
-  if $gcov
+  if $gcov or $prof_genx
     dir = "sample_multi_dir/build"
     Dir.chdir(dir) do
       sh "rake coverage"

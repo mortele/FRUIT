@@ -42,6 +42,10 @@ task :coverage => $for_coverage.clone.push(:test) do
   if $gcov
     sh "gcov " + $for_coverage.join(" ")
   end
+	if $prof_genx
+	  sh "profmerge"
+	  sh "codecov"
+	end
 end
 
 

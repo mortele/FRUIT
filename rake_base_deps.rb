@@ -123,13 +123,16 @@ module RakeBaseDeps
         $for_coverage.push(basename + "gcda")
       end
       
-      #Maybe for other compiler
-      #...
+      #for ifort
+      if $prof_genx
+        $for_coverage.push(basename + "dyn")
+      end
     end
   }
   puts "For coverage: " + $for_coverage.to_s if $show_info
 
   rule ".gcda" => "." + $ext_obj
+  rule ".dyn"  => "." + $ext_obj
   #------ coverage ------
 
   CLEAN.include([
@@ -162,6 +165,9 @@ module RakeBaseDeps
         basename = File.basename(t.source, ".*") + '.'
         if $gcov and coverage?(basename)
           flag = flag + " " + $gcov
+        end
+        if $prof_genx and coverage?(basename)
+          flag = flag + " " + $prof_genx
         end
 
         sh "#{$compiler} #{$option} #{$option_obj} " + 
@@ -199,6 +205,9 @@ module RakeBaseDeps
 
             if $gcov and coverage?(basename)
               flag = flag + " " + $gcov
+            end
+            if $prof_genx and coverage?(basename)
+              flag = flag + " " + $prof_genx
             end
 
             sh "#{$compiler} #{$option} #{$option_obj} " + 

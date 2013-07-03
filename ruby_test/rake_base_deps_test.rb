@@ -43,6 +43,20 @@ class FruitRakeBaseDepsTest < Test::Unit::TestCase
     assert_equal(tgt, "abc/def", "not slash -> backslash")
     assert_equal(src, "ghi/jkl", "not slash -> backslash")
   end
+
+  def test_coverage?
+    $coverage_fruit_f90 = true
+    assert_equal(true , RakeBaseDeps.coverage?("fruit."))
+    assert_equal(true , RakeBaseDeps.coverage?("fruit_util."))
+    $coverage_fruit_f90 = false
+    assert_equal(false, RakeBaseDeps.coverage?("fruit."))
+    assert_equal(false, RakeBaseDeps.coverage?("fruit_util."))
+
+    assert_equal(false, RakeBaseDeps.coverage?("fruit_driver_gen."))
+    assert_equal(false, RakeBaseDeps.coverage?("fruit_basket_gen."))
+    assert_equal(false, RakeBaseDeps.coverage?("abc_test."))
+    assert_equal(true , RakeBaseDeps.coverage?("abc."))
+  end
 end
 
 

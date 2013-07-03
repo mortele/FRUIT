@@ -30,6 +30,10 @@ task :coverage => $for_coverage.clone.push(:run) do
   if $gcov
     sh "gcov " + $for_coverage.join(" ")
   end
+	if $prof_genx
+	  sh "profmerge"
+    sh "codecov"
+	end
 end
 
 desc "Using Valgrind run self-test"
