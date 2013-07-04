@@ -138,6 +138,7 @@ module RakeBaseDeps
   CLEAN.include([
     '*.o', '*.obj', '*.a', '*.mod',
     '*.gcda', '*.gcno', '*.gcov',
+    '*.SPI', '*.SPL', '*.dpi', '*.dyn', 'CODE_COVERAGE.HTML',
     'fruit_*_gen.f90', '*fruit_driver', 'result*.xml',
     FruitProcessor.new.module_files(SRC, $build_dir)
   ])

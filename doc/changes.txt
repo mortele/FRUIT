@@ -2,13 +2,25 @@
 FRUIT 3.2.2
 -----------
 
+On gfortran and ifort, coverage reports can be generated for samples
+  self_test
+  sample_multi_dir
+  sample_build_dir
+  sample_selecive.
+In these directries, do "rake coverage" for generate reports such as
+  *.f90.gcov (gfortran)
+  CODE_COVERAGE.HTML  (ifort)
+
+
 FruitProcessor warns if user-specifiled filenames given in
   fp.process_only = [ (filenames) ]
 line not match with *_test.f(90|95|03|07)
 or any of the corresponding files is absent.
 
+
 rake_estimate.rb warns if two fortran source files
 define the same module name.
+
 
 Fixed a problem that fruit_basket_gen.f90 and fruit_driver_gen.f90
 are compiled twice when rake_estimate.rb is used.
