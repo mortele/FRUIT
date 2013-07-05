@@ -73,7 +73,7 @@ class FruitRakeEstimate
         f.each_line{|line|
           if if_macro_stack(macro_stack)
             if line =~ /(?:^|\r|\n)\s*use +(\w+)\b?/i
-              f_uses_mod[ f_basename ] << $1
+              f_uses_mod[ f_basename ] << $1.downcase
             end
             if line =~ /(?:^|\r|\n)\s*module +(\w+)\b?/i
               mod = $1.downcase

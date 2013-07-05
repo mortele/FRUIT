@@ -1,4 +1,14 @@
 -----------
+FRUIT 3.2.3
+-----------
+
+There was problem in rake_estimate.rb that
+module names with upper case characters are not
+processed correctly.
+Fixed in this version.
+
+
+-----------
 FRUIT 3.2.2
 -----------
 

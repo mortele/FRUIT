@@ -3,8 +3,8 @@
 ! All rights reserved.
 ! Licensed under the 3-clause BSD license.
 
-module def_upper_lower_test
-  use def_upper_lower
+module def_upper_LOWER_tESt
+  use def_upper_LoWeR
   use fruit
   implicit none
 contains
