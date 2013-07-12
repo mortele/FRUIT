@@ -25,15 +25,19 @@ module fruit
   implicit none
   private
 
-  integer, parameter ::  STDOUT_DEFAULT = 6
-  integer :: stdout = STDOUT_DEFAULT
+  integer, parameter :: STDOUT_DEFAULT = 6
+  integer :: stdout   = STDOUT_DEFAULT
 
   integer, parameter :: XML_OPEN = 20
-  integer, parameter :: XML_WORK = 21
-  integer, parameter :: NUMBER_LENGTH = 10
-
+  integer, parameter :: XML_WORK_DEFAULT = 21
+  integer :: xml_work = XML_WORK_DEFAULT
   character (len = *), parameter :: xml_filename     = "result.xml"
-  character (len = *), parameter :: xml_filename_work = "result_tmp.xml"
+  character (len = *), parameter :: XML_FN_WORK_DEF = "result_tmp.xml"
+  character (len = 50) :: xml_filename_work = XML_FN_WORK_DEF
+
+  integer, parameter :: STRLEN_T = 12
+
+  integer, parameter :: NUMBER_LENGTH = 10
 
   integer, parameter :: MSG_LENGTH = 256
   integer, parameter :: MAX_MSG_STACK_SIZE = 2000
@@ -61,6 +65,9 @@ module fruit
   logical, private, save :: case_passed = .false.
   integer, private, save :: case_time_from = 0
   integer, private, save :: linechar_count = 0
+
+  integer, parameter :: FRUIT_PREFIX_LEN_MAX = 50
+  character(len = FRUIT_PREFIX_LEN_MAX) :: prefix = ""
   !---------- save ----------
 
   type ty_stack
@@ -104,6 +111,10 @@ module fruit
   public :: stash_test_suite, restore_test_suite
   public :: get_messages
   public :: fruit_finalize
+  public :: set_prefix
+  public :: get_prefix
+  public :: FRUIT_PREFIX_LEN_MAX
+  public :: override_xml_work, end_override_xml_work
 
   interface initializeFruit
      module procedure obsolete_initializeFruit_
@@ -314,6 +325,14 @@ module fruit
     module procedure end_override_stdout_
   end interface
 
+  interface override_xml_work
+    module procedure override_xml_work_
+  end interface
+
+  interface end_override_xml_work
+    module procedure end_override_xml_work_
+  end interface
+
 
   interface get_messages
     module procedure get_messages_
@@ -335,6 +354,13 @@ module fruit
 
   interface fruit_finalize
     module procedure fruit_finalize_
+  end interface
+
+  interface set_prefix
+    module procedure set_prefix_
+  end interface
+  interface get_prefix
+    module procedure get_prefix_
   end interface
 contains
 
@@ -361,18 +387,11 @@ contains
   end subroutine fruit_finalize_
 
   subroutine init_fruit_xml_
-#ifndef FTN95
-    open (XML_OPEN, file = xml_filename)
-    write(XML_OPEN, '("<?xml version=""1.0"" encoding=""UTF-8""?>")')
-    write(XML_OPEN, '("<testsuites>")')
-    close(XML_OPEN)
-    open (XML_WORK, FILE = xml_filename_work, status='replace')
-    close (XML_WORK)
-#endif
+    open (xml_work, FILE = xml_filename_work, action ="write", status='replace')
+    close(xml_work)
   end subroutine init_fruit_xml_
 
   function  case_delta_t()
-    integer, parameter :: STRLEN_T = 12
     character(len = STRLEN_T) :: case_delta_t
     real :: delta_t
     integer :: case_time_to, time_rate, time_max
@@ -394,70 +413,77 @@ contains
   subroutine case_passed_xml_(tc_name, classname)
     character(*), intent(in) :: tc_name
     character(*), intent(in) :: classname
+    character(len = STRLEN_T) :: case_time
 
-#ifndef FTN95
-    open (XML_WORK, FILE = xml_filename_work, position='append')
-    write(XML_WORK, &
-   &  '("    <testcase name=""", a, """ classname=""", a, """ time=""", a, """/>")') &
-   &  trim(tc_name), trim(classname), trim(case_delta_t())
-    close (XML_WORK)
-#endif
+    case_time = case_delta_t()
+
+    open (xml_work, FILE = xml_filename_work, position='append')
+    write(xml_work, &
+   &  '("    <testcase name=""", a, """ classname=""", a, a, """ time=""", a, """/>")') &
+   &  trim(tc_name), trim(prefix), trim(classname), trim(case_time)
+    close(xml_work)
   end subroutine case_passed_xml_
 
   subroutine case_failed_xml_(tc_name, classname)
     character(*), intent(in) :: tc_name
     character(*), intent(in) :: classname
-#ifndef FTN95
     integer :: i
+    character(len = STRLEN_T) :: case_time
 
-    open (XML_WORK, FILE = xml_filename_work, position='append')
-    write(XML_WORK, &
-   &  '("    <testcase name=""", a, """ classname=""", a, """ time=""", a, """>")') &
-   &  trim(tc_name), trim(classname), trim(case_delta_t())
+    case_time = case_delta_t()
 
-    write(XML_WORK, '("      <failure type=""failure"" message=""")', advance = "no")
+    open (xml_work, FILE = xml_filename_work, position='append')
+    write(xml_work, &
+   &  '("    <testcase name=""", a, """ classname=""", a, a, """ time=""", a, """>")') &
+   &  trim(tc_name), trim(prefix), trim(classname), trim(case_time)
+
+    write(xml_work, '("      <failure type=""failure"" message=""")', advance = "no")
     do i = message_index_from, message_index - 1
-      write(XML_WORK, '(a)', advance = "no") trim(strip(message_array(i)))
+      write(xml_work, '(a)', advance = "no") trim(strip(message_array(i)))
       if (i == message_index - 1) then
         continue
       else
-        write(XML_WORK, '("&#xA;")', advance="no")
+        write(xml_work, '("&#xA;")', advance="no")
       endif
     enddo
-    write(XML_WORK, '("""/>")')
+    write(xml_work, '("""/>")')
 
-    write(XML_WORK, &
+    write(xml_work, &
    &  '("    </testcase>")')
-    close(XML_WORK)
-#endif
+    close(xml_work)
   end subroutine case_failed_xml_
 
   subroutine fruit_summary_xml_
-#ifndef FTN95
     character(len = 1000) :: whole_line
+    character(len = 100) :: full_count
+    character(len = 100) :: fail_count
 
-    open (XML_OPEN, FILE = xml_filename, position='append')
+    full_count = int_to_str(successful_case_count + failed_case_count)
+    fail_count = int_to_str(failed_case_count)
+
+    open (XML_OPEN, file = xml_filename, action ="write", status = "replace")
+    write(XML_OPEN, '("<?xml version=""1.0"" encoding=""UTF-8""?>")')
+    write(XML_OPEN, '("<testsuites>")')
     write(XML_OPEN, '("  <testsuite errors=""0"" ")', advance = "no")
     write(XML_OPEN, '("tests=""", a, """ ")', advance = "no") &
-   &  trim(int_to_str(successful_case_count + failed_case_count))
+    &  trim(full_count)
     write(XML_OPEN, '("failures=""", a, """ ")', advance = "no") &
-   &  trim(int_to_str(failed_case_count))
+    &  trim(fail_count)
     write(XML_OPEN, '("name=""", a, """ ")', advance = "no") &
-   &  "name of test suite"
+    &  "name of test suite"
     write(XML_OPEN, '("id=""1"">")')
 
-    open (XML_WORK, FILE = xml_filename_work)
+    open (xml_work, FILE = xml_filename_work)
     do
-      read(XML_WORK, '(a)', end = 999) whole_line
+      read(xml_work, '(a)', end = 999) whole_line
       write(XML_OPEN, '(a)') trim(whole_line)
     enddo
 999 continue
-    close(XML_WORK)
+    close(xml_work)
 
     write(XML_OPEN, '("  </testsuite>")')
     write(XML_OPEN, '("</testsuites>")')
     close(XML_OPEN)
-#endif
   end subroutine fruit_summary_xml_
 
   function int_to_str(i)
@@ -763,8 +789,17 @@ contains
     character(len = *), intent(in) :: filename
 
     stdout = write_unit
-    open(stdout, file = filename)
+    open(stdout, file = filename, action = "write", status = "replace")
   end subroutine override_stdout_
+
+  subroutine override_xml_work_(new_unit, filename)
+    integer, intent(in) ::    new_unit
+    character(len = *), intent(in) :: filename
+
+    xml_work = new_unit
+    xml_filename_work = filename
+    open(xml_work, file = filename, action = "write", status = "replace")
+  end subroutine override_xml_work_
 
   subroutine stash_test_suite
     stashed_suite%successful_assert_count = successful_assert_count
@@ -834,6 +869,34 @@ contains
     close(stdout)
     stdout = STDOUT_DEFAULT
   end subroutine end_override_stdout_
+
+  subroutine end_override_xml_work_
+    close(xml_work)
+    xml_work = XML_WORK_DEFAULT
+    xml_filename_work = XML_FN_WORK_DEF
+  end subroutine end_override_xml_work_
+
+  subroutine set_prefix_(str)
+    character (len = *), intent(in) :: str
+    character (len = len_trim(str)) :: str2
+
+    str2 = trim(adjustl(str))
+    if (len_trim(str2) <= FRUIT_PREFIX_LEN_MAX) then
+      prefix = str2
+    else
+      prefix = str2(1:FRUIT_PREFIX_LEN_MAX)
+    endif
+  end subroutine set_prefix_
+
+  subroutine get_prefix_(str)
+    character (len = *), intent(out) :: str
+
+    if (len(str) <= len(prefix)) then
+      str = trim(prefix)
+    else
+      str = prefix
+    endif
+  end subroutine get_prefix_
 
   !--------------------------------------------------------------------------------
   ! all assertions

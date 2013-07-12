@@ -1,4 +1,21 @@
 -----------
+FRUIT 3.2.4
+-----------
+
+On FTN95 output to "result.xml" become available.
+
+Prefix for "classname" within result.xml can be 
+specified by writing
+
+      fp.xml_prefix = some_string. 
+
+within rakefile.
+See self_test/rakefile for example.
+When Jenkins ( http://jenkins-ci.org/ ) reads this "result.xml" as JUnit result,
+the prefix until period is treated as paZZckage name.
+
+
+-----------
 FRUIT 3.2.3
 -----------
 

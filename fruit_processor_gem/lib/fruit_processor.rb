@@ -7,6 +7,17 @@ require "pathname"
 class FruitProcessor
   attr_accessor :shuffle
 
+  #----
+  attr_accessor :xml_prefix
+  #----
+  #def xml_prefix  
+  #  @xml_prefix  
+  #end
+  #def xml_prefix  =(val)
+  #  @xml_prefix = val
+  #end
+  #----
+
   #------
   # attr_accessor :process_only
   #------
@@ -178,6 +189,10 @@ class FruitProcessor
           end
         end
 
+        if @xml_prefix
+          f.write "    call set_prefix(\"#{@xml_prefix}\")\n"
+        end
+
         method_names = method_names.sort_by{ rand } if @shuffle
 
         spec_counter = 0
@@ -188,9 +203,9 @@ class FruitProcessor
             end
           end
           f.write "    write (*, *) \"  ..running test: #{method_name}\"\n"
-          f.write "    call set_unit_name ('#{method_name}')\n"
-          f.write "    call run_test_case(#{method_name}, &\n"
-          f.write "                    &\"#{method_name}\")\n"
+          f.write "    call set_unit_name('#{method_name}')\n"
+          f.write "    call run_test_case (#{method_name}, &\n"
+          f.write "                      &\"#{method_name}\")\n"
           f.write "    if (.not. is_case_passed()) then\n"
           f.write "      write(*,*) \n"
           f.write "      write(*,*) '  Un-satisfied spec:'\n"
@@ -198,10 +213,10 @@ class FruitProcessor
           f.write "      write(*,*) \n"
 
           f.write "      call case_failed_xml(\"#{method_name}\", &\n"
-          f.write "     &  \"#{test_module_name}\")\n"
+          f.write "      & \"#{test_module_name}\")\n"
           f.write "    else\n"
           f.write "      call case_passed_xml(\"#{method_name}\", &\n"
-          f.write "     &  \"#{test_module_name}\")\n"
+          f.write "      & \"#{test_module_name}\")\n"
           f.write "    end if\n"
 
           if @spec_hash[file]['teardown'] != nil

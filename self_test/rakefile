@@ -13,6 +13,7 @@ $show_info = true
 $coverage_fruit_f90 = true
 
 fp = FruitProcessor.new
+fp.xml_prefix = "fruit_self_test."
 fp.shuffle = true            #if true order of methods will be random
 fp.pre_process($source_dirs) #It generates fruit_*_gen.f90
 load "../rake_estimate.rb"   #Load this after fruit_*_gen.f90 generated.

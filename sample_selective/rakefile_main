@@ -1,4 +1,5 @@
-
+require 'rubygems'
+require 'fruit_processor'
 require 'rake/clean'
 include Rake::DSL if defined?(Rake::DSL)
 load "../rake_base.rb"

@@ -1,3 +1,4 @@
+require 'rubygems'
 require 'rake/clean'
 include Rake::DSL if defined?(Rake::DSL)
 load "../../rake_base.rb"

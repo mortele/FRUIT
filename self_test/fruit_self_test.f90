@@ -8,6 +8,89 @@ module fruit_self_test
 
   character(len = *), parameter :: STDOUTNAME = "override_stdout.txt"
 contains
+  subroutine test_case_passed_xml
+    character(len = 256) :: a_line
+    character(len = 256) :: a_line_trim
+    character(len = 256) :: orig_prefix
+    character(len = *), parameter :: tmp_file = "tmp.xml"
+    character(len = *), parameter :: tmp_file2 = "tmp2.xml"
+
+    character(len = *), parameter :: expected_1 = &
+    & "<testcase name=""testcase_name"" classname=""class_name"" time="""
+
+    character(len = *), parameter :: expected_2 = &
+    & "<testcase name=""testcase_name"" "//&
+    & "classname=""fruit_self_test.class_name"" time="""
+
+    call get_prefix(orig_prefix)
+    !--------------
+    call override_xml_work(30, tmp_file)
+      call set_prefix("")
+      call case_passed_xml("testcase_name", "class_name")
+    call end_override_xml_work
+
+    open(30, file = tmp_file, action = "read")
+      read(30, '(a)') a_line
+    close(30, status = "delete")
+
+    a_line_trim = adjustl(a_line)
+    a_line_trim = a_line_trim(1:len(expected_1))
+    call assert_equals(expected_1, a_line_trim, "without prefix")
+    !--------------
+
+    !--------------
+    call override_xml_work(30, tmp_file2)
+      call set_prefix("fruit_self_test.")
+      call case_passed_xml("testcase_name", "class_name")
+    call end_override_xml_work
+
+    open(30, file = tmp_file2, action = "read")
+      read(30, '(a)') a_line
+    close(30, status = "delete")
+
+    a_line_trim = adjustl(a_line)
+    a_line_trim = a_line_trim(1:len(expected_2))
+    call assert_equals(expected_2, a_line_trim, "with prefix")
+    !--------------
+    call set_prefix(orig_prefix)
+  end subroutine test_case_passed_xml
+
+
+  subroutine test_set_prefix
+    character(len = 40) :: str40
+    character(len = 90) :: str90
+    character(len = 3) :: str3
+    character(len = FRUIT_PREFIX_LEN_MAX) :: prefix_got
+    integer :: i
+    character(len = 256) :: orig_prefix
+
+    call get_prefix(orig_prefix)
+      !--------------
+      str40 = " abcdef. "
+      call set_prefix(str40)
+      call get_prefix(prefix_got)
+      !--------------
+    call set_prefix(orig_prefix)
+    call assert_equals("abcdef.", prefix_got, "prefix is abcdef.")
+
+    call get_prefix(orig_prefix)
+      !--------------
+      do i = 1, 90
+        str90(i:i) = " "
+      enddo
+      str90( 1:10) = "     head."
+      str90(86:90) = "tail."
+      call set_prefix(str90)
+      call get_prefix(prefix_got)
+      call get_prefix(str3)
+      !--------------
+    call set_prefix(orig_prefix)
+
+    call assert_equals("head.", prefix_got, "prefix is head.")
+    call assert_equals("hea", str3, "prefix(1:3) is hea")
+  end subroutine test_set_prefix
+
+
   subroutine test_linechar_count
     character(len = 100) :: line_read(1:5)
     character(len = 100) :: expected
