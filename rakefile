@@ -19,6 +19,8 @@ $base_dir=Dir.pwd
 $build_dir = "#{$base_dir}/build"
 
 task :default => [
+  :clobber, :sample, 
+
   :ruby_test, :rake_base_deps_test, :rake_estimate_test,
   :in_3_minutes,
   :sample_selective,
@@ -79,7 +81,7 @@ CLOBBER.include(FileList['src/fruit.f90'])
 CLOBBER.include($build_dir)
 
 desc "Complie src/fruit*.f90 and build build/libfruit.a"
-task :compile do
+task :compile => :fruit_f90 do
   if $ar_ok
     Dir.chdir("src") do
       sh 'rake'
@@ -88,7 +90,7 @@ task :compile do
 end
 
 desc "(Obsolete) Test of fruit.f90 and fruit_util.f90."
-task :test => :compile do
+task :test => [:fruit_f90, :compile] do
   Dir.chdir("test") do
     sh 'rake'
   end
@@ -149,7 +151,7 @@ end
 
 
 desc "Compile a sample of multi-directry test."
-task :sample => :compile do
+task :sample => [:fruit_f90, :compile] do
   Dir.chdir("sample") do
     sh 'rake'
   end

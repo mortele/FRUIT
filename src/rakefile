@@ -6,6 +6,14 @@ load "../rake_base.rb"
 
 $goal = 'libfruit.a'
 
+# After rake clobber, fruit.f90 is absent.
+# fruit.f90 must be generated.
+# before the following SRC=.FileList.. statment, 
+
+if ! File.exist?("fruit.f90")
+  sh 'ruby fruit_f90_generator.rb'
+end
+
 SRC = FileList['*.f90']
 OBJ = SRC.ext($ext_obj)  # $ext_obj is either "o" or "obj"
 

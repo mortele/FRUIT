@@ -14,6 +14,8 @@ See self_test/rakefile for example.
 When Jenkins ( http://jenkins-ci.org/ ) reads this "result.xml" as JUnit result,
 the prefix until period is treated as paZZckage name.
 
+rakefile is modified to generate fruit.f90 before running samples.
+
 
 -----------
 FRUIT 3.2.3
