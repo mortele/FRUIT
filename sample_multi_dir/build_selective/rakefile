@@ -9,12 +9,24 @@ $source_dirs = ["../src/", "../test/", "../../src/"]
 $goal = 'fruit_driver.exe'
 $main = 'fruit_driver_gen.f90'
 
+$show_info = true
+
 fp = FruitProcessor.new
-fp.process_only = FileList["def_upper_lower_test.f90"] #only files here are processed.
+
+#--- in this case coverage of ifort fails.
+#    Maybe because no lines in def_upper_lower.f90 are executed.
+# fp.process_only = FileList[
+#   "def_upper_lower_test.f90", 
+# ] #only files here are processed.
+
+fp.process_only = FileList[
+  "atoz_test.f90"
+] #only files here are processed.
+
 ## fp.shuffle = true            #if true order of methods will be random
 fp.pre_process($source_dirs)   #It generates fruit_*_gen.f90
 load "../../rake_estimate.rb"  #Load this after fruit_*_gen.f90 generated.
-load "../../rake_base_deps.rb" #It uses SRC and OBJ updated by rake_estimate.rb
+load '../../rake_base_deps.rb' #It uses SRC and OBJ updated by rake_estimate.rb
 
 
 task :default => :test
@@ -27,10 +39,10 @@ task :coverage => $for_coverage.clone.push(:test) do
   if $gcov
     sh "gcov " + $for_coverage.join(" ")
   end
-	if $prof_genx
-	  sh "profmerge"
-	  sh "codecov"
-	end
+  if $prof_genx
+    sh "profmerge"
+    sh "codecov"
+  end
 end
 
 CLEAN.include(FileList[

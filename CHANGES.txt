@@ -1,20 +1,31 @@
 -----------
+FRUIT 3.2.5
+-----------
+
+Description of samples are added to README.
+
+doc/changes.txt is moved to CHANGES.txt
+
+sample_selective/rakefile directly reads src/fruit.f90, src/fruit_util.f90.
+
+
+-----------
 FRUIT 3.2.4
 -----------
 
 On FTN95 output to "result.xml" become available.
 
-Prefix for "classname" within result.xml can be 
+Prefix for "classname" within result.xml can be
 specified by writing
 
-      fp.xml_prefix = some_string. 
+      fp.xml_prefix = "some_string. "
 
 within rakefile.
 See self_test/rakefile for example.
 When Jenkins ( http://jenkins-ci.org/ ) reads this "result.xml" as JUnit result,
-the prefix until period is treated as paZZckage name.
+the prefix until period is treated as package name.
 
-rakefile is modified to generate ROOT_ANCHOR fruit.f90 before running samples.
+rakefile is modified to generate ROOT_ANCHOR and fruit.f90 before running samples.
 
 
 -----------
@@ -68,7 +79,7 @@ A method "module_name_consistent?" in fruit_processor_gem/lib/fruit_processor.rb
 does it.
 
 Log output from rake_estimate.rb on file dependencies is reduced.
-To see extra info on dependencies, set 
+To see extra info on dependencies, set
    $show_info = true
 in rakefile. See sample_multi_dir/build/rakefile for example.
 
@@ -83,7 +94,7 @@ It estimates dependencies between modules.
 FRUIT 3.2.0
 -----------
 
-+ Works on FTN95. 
++ Works on FTN95.
   FTN95 is Fortran compiler for Windows.
   http://www.silverfrost.com
 
@@ -91,7 +102,7 @@ FRUIT 3.2.0
   http://tdm-gcc.tdragon.net/
 
 + To support extension .obj and backslash path,
-  rake_base.rb is divided into 
+  rake_base.rb is divided into
   compiler definition part (rake_base.rb) and
   dependencies part (rake_base_deps.rb).
 
@@ -106,7 +117,7 @@ FRUIT 3.1.0
 
 + Samples added or changed
 
-  + sample_build_dir 
+  + sample_build_dir
     This sample puts *.o, *.mod, *_gen.f90, and executable to a sub directry.
 
   + sample
@@ -144,7 +155,7 @@ FRUIT 3.0.1
 + setup and teardown
 
   When tester file (*_test.f90 etc.) did not have setup subroutine,
-  its teardown subroutine was not called. 
+  its teardown subroutine was not called.
   Corresponding error in fruit_processor.rb is fixed.
 
 
@@ -157,17 +168,17 @@ FRUIT 3.0
   To use "gui_fruit.rb", other two ruby scripts
   "rake_base.rb" and "rake_estimate.rb" must be in the same directory.
   Before starting GUI, Fortran compiler setting in "rake_base_db"
-  should be edited. 
+  should be edited.
 
   Works both for single directory projects and multiple directry projects.
-  Here multiple directry project means project consist of 
-  one source directry (contains tested fortran files) and 
+  Here multiple directry project means project consist of
+  one source directry (contains tested fortran files) and
   one tester directry (contains tester fortran files *_test.f90).
-  For example, within fruit distribution tests 
-    "self_test", "sample_selective", "sample_single_dir", 
-    "in_3_minutes" and 
+  For example, within fruit distribution tests
+    "self_test", "sample_selective", "sample_single_dir",
+    "in_3_minutes" and
     "sample"
-  can be run using GUI. 
+  can be run using GUI.
 
 
 -----------
@@ -187,7 +198,7 @@ rake_estimate.rb is rewritten as a class FruitRakeEstimate.
 + Not copy but make symbolic links
 
 In the previous version, rakefile copies
-fortran files (fruit.f90, fruit_util.f90) and 
+fortran files (fruit.f90, fruit_util.f90) and
 ruby files (rake_base.rb, rake_estimate.rb) to directries
 "sample_single_dir", "sample_selective" and "in_3_minutes".
 Now symbolic links are made instead of copying files.
@@ -203,7 +214,7 @@ FRUIT 2.9.1
 When there are several *_test.f90 files in a directry,
 all these tester files were compiled to build fruit driver.
 One may want to run only few of the tester files.
-To compile only selected tester files, 
+To compile only selected tester files,
 method "process_only" is added to fruit_processor.
 New sample "sample_selective" demonstrates it.
 File(s) to compile is given in
@@ -213,7 +224,7 @@ File(s) to compile is given in
 line of sample_selective/rakefile.
 
 
-+ When main file exists in directry 
++ When main file exists in directry
 
 Building fruit driver used to be failed when there was a main program
 (.f90 file with "program" ... "end program" statements).
@@ -232,7 +243,7 @@ successfully ignored.
 
 When there was dependency between fortran files,
 it had to be written it in rakefile.
-In this release, a new script "rake_estimate.rb" is added. 
+In this release, a new script "rake_estimate.rb" is added.
 It scans "module ..." lines and "use ..." lines
 and estimates dependencies between Fortran files.
 To use it, include it from rakefile.
@@ -250,16 +261,16 @@ Try "rake -T" to see the list of descriptios.
 
 + Self-tests
 
-A number of self-tests for fruit.f90 are added as 
+A number of self-tests for fruit.f90 are added as
   self_test/various_asserts_test.f90
 
 
-+ Generator of fruit.f90 
++ Generator of fruit.f90
 
 To support various assertions for various types
 (logical, real, double, complex-double, integer),
 dimensions (0d, 1d, 2d) and equals/not-equals,
-fruit.f90 is now generated using 
+fruit.f90 is now generated using
 src/fruit_f90_generator.rb and src/fruit_f90_source.txt.
 
 
@@ -276,12 +287,12 @@ Corresponding memory leak while running self-test is fixed.
 
 There was regression in FRUIT 2.9.
 When Fortran source is updated and older corresponding
-object file exists, rake did not recompile the source. 
+object file exists, rake did not recompile the source.
 To fix it, relation between Fortran files and object files
 are confirmed in rake_base.rb.
 
 
-+ ruby 1.9.3 
++ ruby 1.9.3
 
 In addition to ruby 1.8.7, FRUIT works on ruby 1.9.3.
 
@@ -312,10 +323,10 @@ It is single directory project. Before compiling,
 must be copied to this directory. Fruit_processor generates
 fruit_driver and fruit_basket and builds driver executable.
 File extension .f95 is used for testing code and tested code.
-If your fortran compiler does not recognize .f95 extension, 
+If your fortran compiler does not recognize .f95 extension,
 rename the files to have .f90 extension.
 
- 
+
 + Self-testing
 
 Test of "fruit_processor.rb" is done by
@@ -352,7 +363,7 @@ is available.
 FRUIT 2.8
 ---------
 
-1. FRUIT outputs test report in XML. 
+1. FRUIT outputs test report in XML.
    It can be read by Jenkins( http://jenkins-ci.org/ ).
    A sample report appears as sample/test/result.xml
    in FRUIT 2.8 release.
@@ -368,6 +379,6 @@ FRUIT 2.8
 
 5. Debug option of fortran compiler is turned on by default.
 
-For example of 1. and 2. above, see fruit2.8_with_jenkins.png 
+For example of 1. and 2. above, see fruit2.8_with_jenkins.png
 
 

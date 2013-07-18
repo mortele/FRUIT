@@ -23,18 +23,19 @@ task :default => [
   :clobber, :sample,
 
   :ruby_test, :rake_base_deps_test, :rake_estimate_test,
+
   :in_3_minutes,
+  :sample,
+  :sample_build_dir,
   :sample_selective,
   :sample_selective_main,
-  :sample_build_dir,
   :sample_multi_dir,
-  :dirs, :compile, :sample,
   :coverage,
   :self_test]
 
-# :test is not included because :self_test covers tests done in :test.
 # :sample_single_dir is not included
 #    because fortran compiler must recognize .f95 extension.
+# :test is not included because :self_test covers tests done in :test.
 
 if ENV['DISPLAY']
   begin
@@ -65,21 +66,13 @@ CLEAN.include(FileList[
   'fruit_processor_gem/pkg/fruit_processor-*/',
   '**/*.gcda', '**/*.gcno', '**/*.gcov',
   '**/*.dyn',
+  "in_3_minutes/fruit.f90",
+  "in_3_minutes/fruit_util.f90",
 ])
-
-[
-  "in_3_minutes", "sample/test",
-  "sample", "sample_single_dir", "sample_selective", "sample_build_dir",
-  "self_test"
-].each do |d|
-  CLEAN.include(FileList[d + "/fruit.f90"])
-  CLEAN.include(FileList[d + "/fruit_util.f90"])
-  CLEAN.include(FileList[d + "/rake_base_deps.rb"])
-  CLEAN.include(FileList[d + "/rake_estimate.rb"])
-end
 
 CLOBBER.include(FileList['src/fruit.f90'])
 CLOBBER.include($build_dir)
+CLOBBER.include("ROOT_ANCHOR")
 
 desc "Complie src/fruit*.f90 and build build/libfruit.a"
 task :compile => [:anchor_root, :fruit_f90] do
@@ -167,53 +160,14 @@ end
 
 desc "Compile a sample of single-directry test."
 task :sample_single_dir => [:anchor_root, :fruit_f90] do
-  dir = "sample_single_dir"
-  Dir.chdir(dir) do
-    os_install("../src/fruit.f90",      "fruit.f90")
-    os_install("../src/fruit_util.f90", "fruit_util.f90")
+  Dir.chdir("sample_single_dir") do
     sh "rake"
   end
 end
-
-desc "Compile a sample of multi-directry test."
-task :sample_multi_dir => [:anchor_root, :fruit_f90] do
-  dir = "sample_multi_dir/build"
-  Dir.chdir(dir) do
-    sh "rake"
-  end
-  dir = "sample_multi_dir/build_selective"
-  Dir.chdir(dir) do
-    sh "rake"
-  end
-end
-
-
-desc "coverage (only for gfortran)"
-task :coverage => [:anchor_root, :fruit_f90, :compile] do
-  if $gcov or $prof_genx
-    dir = "sample_multi_dir/build"
-    Dir.chdir(dir) do
-      sh "rake coverage"
-    end
-
-    Dir.chdir("sample_build_dir") do
-      sh "rake coverage"
-    end
-
-    Dir.chdir("sample_selective") do
-      os_install("../src/fruit.f90",      "fruit.f90")
-      os_install("../src/fruit_util.f90", "fruit_util.f90")
-      sh "rake coverage"
-    end
-  end
-end
-
 
 desc "Compile a sample which complies only specifiled testerss."
 task :sample_selective => [:anchor_root, :fruit_f90] do
   Dir.chdir("sample_selective") do
-    os_install("../src/fruit.f90",      "fruit.f90")
-    os_install("../src/fruit_util.f90", "fruit_util.f90")
     sh "rake"
   end
 end
@@ -231,6 +185,36 @@ task :sample_build_dir => [:anchor_root, :fruit_f90] do
     sh "rake"
   end
 end
+
+desc "Compile a sample of multi-directry test."
+task :sample_multi_dir => [:anchor_root, :fruit_f90] do
+  [
+    "sample_multi_dir/build",
+    "sample_multi_dir/build_selective",
+  ].each{|dir|
+    Dir.chdir(dir) do
+      sh "rake"
+    end
+  }
+end
+
+
+desc "coverage (only for gfortran)"
+task :coverage => [:anchor_root, :fruit_f90] do
+  if $gcov or $prof_genx
+    [
+      "sample_selective",
+      "sample_build_dir",
+      "sample_multi_dir/build",
+      "sample_multi_dir/build_selective",
+    ].each{|dir|
+      Dir.chdir(dir) do
+        sh "rake coverage"
+      end
+    }
+  end
+end
+
 
 load 'rake_base_deps.rb'
 include RakeBaseDeps
