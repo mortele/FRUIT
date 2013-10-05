@@ -1,4 +1,16 @@
 -----------
+FRUIT 3.2.6
+-----------
+
+assert_false added.
+
+When execution of test stops before regular exit,
+"result.xml" that reports one failure is generated.
+(So far, "result.xml" of previous run remained
+ that usually reports no error.)
+
+
+-----------
 FRUIT 3.2.5
 -----------
 
