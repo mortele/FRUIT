@@ -31,6 +31,7 @@ task :default => [
   :sample_selective_main,
   :sample_multi_dir,
   :coverage,
+  :self_test_xml,
   :self_test]
 
 # :sample_single_dir is not included
@@ -98,6 +99,17 @@ desc "Update fruit.f90"
 task :fruit_f90 do
   Dir.chdir("src") do
     sh 'rake fruit.f90'
+  end
+end
+
+desc "Self test of fruit.f90 on xml output"
+task :self_test_xml => [:anchor_root, :fruit_f90] do
+  Dir.chdir("self_test_xml") do
+    begin
+      sh 'rake'
+    rescue
+      raise "Test in self_test_xml failed."
+    end
   end
 end
 

@@ -207,6 +207,44 @@ contains
   end subroutine test_assert_true
 
 
+  ! Test assert_false with message
+  ! ----------------------------
+  subroutine test_assert_false_message
+    character(len = 500) :: line_read
+    integer :: failed_count, total_count
+
+    integer :: try
+
+    do try = 1, 2
+      call override_stdout(20, STDOUTNAME)
+        call stash_test_suite
+          if (try == 1) call init_fruit
+          call assert_false (.true. , 'message in assert_false_message_test true test')
+          call assert_false (.false., 'message in assert_false_message_test false test')
+          call get_failed_count(failed_count)
+          call get_total_count(total_count)
+          if (try == 1) call fruit_summary
+        call restore_test_suite
+      call end_override_stdout
+
+      call assert_equals(1, failed_count, "Number of failed assertions")
+      call assert_equals(2, total_count, "Number of total assertions")
+
+      open (20, file = STDOUTNAME)
+        read (20, '(a)') line_read
+
+        if (try == 1) then
+          call read_until_string(20, 'User message:', line_read)
+          call assert_string_has_string(line_read, &
+          & "message in assert_false_message_test true test")
+        else
+          call assert_equals ("F.", line_read, "Should see F. here")
+        endif
+      close (20)
+    enddo
+  end subroutine test_assert_false_message
+
+
   ! Test assert_true with message
   ! ----------------------------
   subroutine test_assert_true_message

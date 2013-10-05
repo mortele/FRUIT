@@ -94,7 +94,7 @@ module fruit
 
   public :: &
     init_fruit, initializeFruit, fruit_summary, getTestSummary, get_last_message, &
-    is_last_passed, assert_true, assertTrue, assert_equals, assertEquals, &
+    is_last_passed, assert_equals, assertEquals, &
     is_case_passed, &
     init_fruit_xml, &
     fruit_summary_xml, &
@@ -107,6 +107,8 @@ module fruit
     failed_assert_action, get_total_count, getTotalCount, &
     get_failed_count, getFailedCount, is_all_successful, isAllSuccessful, &
     run_test_case, runTestCase
+  public :: assert_true, assertTrue
+  public :: assert_false
   public :: override_stdout, end_override_stdout
   public :: stash_test_suite, restore_test_suite
   public :: get_messages
@@ -128,6 +130,10 @@ module fruit
      module procedure obsolete_assert_true_logical_
   end interface
 
+  interface assert_false
+    module procedure assert_false_
+  end interface
+
   interface assert_equals
 !#INTERFACE_GENERATED_COMES_HERE
   end interface
@@ -139,18 +145,11 @@ module fruit
   interface assert_not_equals
 !#NEQ_INTERFACE_GENERATED_COMES_HERE
 
-!     module procedure assert_not_equals_int_
-!     module procedure assert_not_equals_real_
-!     module procedure assert_not_equals_1d_real_
-!     module procedure assert_not_equals_double_
   end interface
 
   interface assertNotEquals
 !#NEQ_INTERFACE_GENERATED_COMES_HERE
 
-!     module procedure assert_not_equals_real_
-!     module procedure assert_not_equals_1d_real_
-!     module procedure assert_not_equals_double_
   end interface
 
   interface addSuccess
@@ -275,6 +274,30 @@ contains
   end subroutine fruit_finalize_
 
   subroutine init_fruit_xml_
+    open (XML_OPEN, file = xml_filename, action ="write", status = "replace")
+      write(XML_OPEN, '("<?xml version=""1.0"" encoding=""UTF-8""?>")')
+      write(XML_OPEN, '("<testsuites>")')
+      write(XML_OPEN, '("  <testsuite ")', advance = "no")
+      write(XML_OPEN, '(      "errors=""0"" "   )', advance = "no")
+      write(XML_OPEN, '(      "tests=""1"" "    )', advance = "no")
+      write(XML_OPEN, '(      "failures=""1"" " )', advance = "no")
+      write(XML_OPEN, '(      "name=""", a, """ ")', advance = "no") "name of test suite"
+      write(XML_OPEN, '(      "id=""1"">")')
+
+      write(XML_OPEN, &
+      &  '("    <testcase name=""", a, """ classname=""", a, """ time=""", a, """>")') &
+      &  "dummy_testcase", "dummy_classname", "0"
+
+      write(XML_OPEN, '(a)', advance = "no") "      <failure type=""failure"" message="""
+      write(XML_OPEN, '(a)', advance = "no") "FRUIT did not generate regular content of result.xml."
+      write(XML_OPEN, '(a)')                 """/>"
+      write(XML_OPEN, '("    </testcase>")')
+
+      write(XML_OPEN, '("  </testsuite>")')
+      write(XML_OPEN, '("</testsuites>")')
+    close(XML_OPEN)
+
+
     open (xml_work, FILE = xml_filename_work, action ="write", status='replace')
     close(xml_work)
   end subroutine init_fruit_xml_
@@ -724,7 +747,7 @@ contains
                   case_passed = .false.
     stashed_suite%case_time_from = case_time_from
                   case_time_from = 0
-    stashed_suite%linechar_count = linechar_count     
+    stashed_suite%linechar_count = linechar_count
                   linechar_count = 0
   end subroutine stash_test_suite
 
@@ -807,6 +830,18 @@ contains
        call failed_assert_action(to_s(.true.), to_s(var1), message)
     end if
   end subroutine assert_true
+
+
+  subroutine assert_false_(var1, message)
+    logical, intent(in) :: var1
+    character(len = *), intent(in), optional :: message
+
+    if (var1 .eqv. .false.) then
+      call add_success
+    else
+      call failed_assert_action(to_s(.false.), to_s(var1), message)
+    endif
+  end subroutine assert_false_
 
 !#CODE_GENERATED_COMES_HERE
 
