@@ -9,6 +9,37 @@ module various_asserts_test
   character(len = *), parameter :: STDOUTNAME = "override_stdout.txt"
   integer, parameter :: MSG_LEN = 256
 contains
+  subroutine test_assert_not_equals_0d
+    character(len = MSG_LEN) :: line_read
+    character(len = MSG_LEN) :: msgs(10)
+    integer :: failed_count
+    integer :: total_count
+
+    call override_stdout(20, STDOUTNAME)
+      call stash_test_suite
+        call assert_not_equals(.false., .true. ,  "0d logical, neq, A")
+        call assert_not_equals(.true.,  .true. , "0d logical, neq, B")
+        call assert_not_equals(.false., .false.,  "0d logical, neq, C")
+        call assert_not_equals(3, 4, "0d integer, neq, D")
+        call assert_not_equals(3, 3, "0d integer, neq, E")
+
+        call get_failed_count(failed_count)
+        call get_total_count( total_count )
+        call get_messages(msgs)
+      call restore_test_suite
+    call end_override_stdout
+
+    call assert_string_has_string_tmp(msgs(1), "Expected Not [T], Got [T]")
+    call assert_string_has_string_tmp(msgs(2), "Expected Not [F], Got [F]")
+    call assert_string_has_string_tmp(msgs(3), "Expected Not [3], Got [3]")
+
+    open (20, file = STDOUTNAME)
+      read (20, '(a)') line_read
+      call assert_equals(".FF.F", line_read)
+    close(20)
+  end subroutine test_assert_not_equals_0d
+
+
   subroutine test_assert_equals_0d
     character(len = MSG_LEN) :: line_read
     character(len = MSG_LEN) :: msgs(10)

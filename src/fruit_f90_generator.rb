@@ -117,7 +117,7 @@ def generate_assertation(t, dim, has_range, equals = "1")
         if (#{condition}) then
           call failed_assert_action(&
           & to_s(var1#{ij}), &
-          & to_s(var2#{ij}), #{pre_message}message)
+          & to_s(var2#{ij}), #{pre_message}message, if_is = .true.)
           return
         endif
     END
@@ -136,7 +136,7 @@ def generate_assertation(t, dim, has_range, equals = "1")
     if (same_so_far) then
       call failed_assert_action(&
       & to_s(var1#{ij_1st}), &
-      & to_s(var2#{ij_1st}), #{pre_message}message)
+      & to_s(var2#{ij_1st}), #{pre_message}message, if_is = .false.)
       return
     endif
     END
