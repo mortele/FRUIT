@@ -1,7 +1,7 @@
 module mpi_hello_world_test
   use fruit
+  use mpi
   implicit none
-  include 'mpif.h'
 contains
   subroutine test_hello_world
     use mpi_hello_world, only : hello_world
@@ -11,8 +11,8 @@ contains
     character(len = len_host) :: host
     character(len = len_host), allocatable :: host_rank(:)
     integer :: i
+    character(len = 100) :: message
 
-    call MPI_INIT(ierror)
     call MPI_COMM_SIZE (MPI_COMM_WORLD, size, ierror)
     call MPI_COMM_RANK (MPI_COMM_WORLD, rank, ierror)
   
@@ -30,12 +30,11 @@ contains
       do i = 0, size - 1
         write(*, '("rank:", i3, " hostname:", a)') i, trim(host_rank(i))
       enddo
-
-      call assert_not_equals(host_rank(0), host_rank(1))
-    else
-      call assert_false(.true.)
     endif
 
-    call MPI_FINALIZE(ierror)
+    ! call assert_not_equals(host_rank(0), host_rank(1))
+
+    write(message, '("rank=", i3)') rank
+    call assert_false(.true., trim(message))
   end subroutine test_hello_world
 end module mpi_hello_world_test

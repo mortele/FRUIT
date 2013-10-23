@@ -3,8 +3,9 @@ require '../lib/fruit_processor'
 require 'pathname'
 
 class FruitProcessorTest < Test::Unit::TestCase
-  @@driver = "fruit_driver_gen.f90"
-  @@basket = "fruit_basket_gen.f90"
+  @@driver     = "fruit_driver_gen.f90"
+  @@driver_mpi = "fruit_driver_mpi_gen.f90"
+  @@basket     = "fruit_basket_gen.f90"
   @@generated = [@@basket, @@driver]
 
   def setup
@@ -12,9 +13,8 @@ class FruitProcessorTest < Test::Unit::TestCase
   end
 
   def test_init
-    @fixture.load_files "."
-    @fixture.fruit_picker
-    @fixture.create_driver
+    @fixture.pre_process
+    @fixture.pre_process_mpi
   end
 
 #  def test_get_spec_hash
@@ -346,6 +346,34 @@ class FruitProcessorTest < Test::Unit::TestCase
       assert_equal(0, /^\s*use\s+fruit\s*$/ =~ f.gets.chomp!)
       assert_equal(0, /^\s*use\s+fruit_basket_gen\s*$/ =~ f.gets.chomp!)
       assert_equal(0, /^\s*call\s+init_fruit\s*$/ =~ f.gets.chomp!)
+      assert_equal(0, /^\s*call\s+init_fruit_xml\s*$/ =~ f.gets.chomp!)
+      assert_equal(0, /^\s*call\s+fruit_basket\s*$/ =~ f.gets.chomp!)
+    }
+  end
+
+  def test_create_driver_mpi
+    if File.exists?(@@driver_mpi)
+      File.delete(@@driver_mpi)
+    end
+    @fixture.create_driver_mpi
+    assert_equal(true, File.exists?(@@driver_mpi))
+    File::open(@@driver_mpi){|f|
+      assert_equal("program fruit_driver_mpi_gen", f.gets.strip!)
+      assert_equal(0, /^use mpi$/              =~ f.gets.strip!)
+      assert_equal(0, /^use fruit$/            =~ f.gets.strip!)
+      assert_equal(0, /^use fruit_mpi$/        =~ f.gets.strip!)
+      assert_equal(0, /^use fruit_basket_gen$/ =~ f.gets.strip!)
+      assert_equal(0, /^integer :: ierror, size, rank$/  =~ f.gets.strip!)
+      assert_equal(0, /^call MPI_INIT\(ierror\)$/    =~ f.gets.strip!)
+      assert_equal(0, /^call MPI_COMM_SIZE\(MPI_COMM_WORLD, size, ierror\)$/ =~ f.gets.strip!)
+      assert_equal(0, /^call MPI_COMM_RANK\(MPI_COMM_WORLD, rank, ierror\)$/ =~ f.gets.strip!)
+      assert_equal(0, /^call init_fruit$/      =~ f.gets.strip!)
+      assert_equal(0, /^call init_fruit_xml$/  =~ f.gets.strip!)
+      assert_equal(0, /^call fruit_basket$/    =~ f.gets.strip!)
+      assert_equal(0, /^call fruit_summary_mpi\s*\(size, rank\)$/ =~ f.gets.strip!)
+      assert_equal(0, /^call fruit_summary_mpi_xml\s*\(size, rank\)$/ =~ f.gets.strip!)
+      assert_equal(0, /^call fruit_finalize_mpi\s*\(size, rank\)$/ =~ f.gets.strip!)
+      assert_equal(0, /^call MPI_FINALIZE\(ierror\)$/    =~ f.gets.strip!)
     }
   end
 
@@ -359,7 +387,7 @@ class FruitProcessorTest < Test::Unit::TestCase
     test_init
 
     @@generated.each{|f|
-      assert_equal(true, File.exists?(f))
+      assert_equal(true, File.exists?(f), "#{f} should exist")
     }
   end
 

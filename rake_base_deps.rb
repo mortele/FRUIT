@@ -62,6 +62,7 @@ module RakeBaseDeps
     return false if basename == "fruit_util\."
     return false if basename == "fruit_basket_gen\."
     return false if basename == "fruit_driver_gen\."
+    return false if basename == "fruit_driver_mpi_gen\."
     return true
   end
   module_function :coverage?
@@ -89,8 +90,10 @@ module RakeBaseDeps
     # generated files must be built last
     if OBJ.include?('fruit_basket_gen.' + $ext_obj)
       file 'fruit_basket_gen.' + $ext_obj =>  OBJ - ['fruit_basket_gen.' + $ext_obj,
-                                                     'fruit_driver_gen.' + $ext_obj]
-      file 'fruit_driver_gen.' + $ext_obj =>  'fruit_basket_gen.' + $ext_obj
+                                                     'fruit_driver_gen.' + $ext_obj, 
+                                                     'fruit_driver_mpi_gen.' + $ext_obj, ]
+      file 'fruit_driver_gen.'     + $ext_obj =>  'fruit_basket_gen.' + $ext_obj
+      file 'fruit_driver_mpi_gen.' + $ext_obj =>  'fruit_basket_gen.' + $ext_obj
     end
   end
 

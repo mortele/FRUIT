@@ -44,6 +44,7 @@ class FruitProcessor
 
   def initialize
     @driver_program_name='fruit_driver_gen'
+    @driver_program_mpi_name='fruit_driver_mpi_gen'
     @fruit_basket_module_name = 'fruit_basket_gen'
 
     @extensions = ["f90", "f95", "f03", "f08"]
@@ -114,6 +115,13 @@ class FruitProcessor
     load_files dir
     fruit_picker dir
     create_driver dir
+  end
+
+  def pre_process_mpi dir="."
+    load_files dir
+    fruit_picker dir
+    create_driver dir
+    create_driver_mpi dir
   end
 
 
@@ -317,6 +325,31 @@ class FruitProcessor
       f.write "  call fruit_summary_xml\n"
       f.write "  call fruit_finalize\n"
       f.write "end program #{@driver_program_name}\n"
+    end
+  end
+
+  def create_driver_mpi dir = "."
+    dir = "." if dir.instance_of?(Array)
+
+    filename = (Pathname(dir) + "#{@driver_program_mpi_name}.f90")
+    File.open(filename, 'w') do |f|
+      f.write "program #{@driver_program_mpi_name}\n"
+      f.write "  use mpi\n"
+      f.write "  use fruit\n"
+      f.write "  use fruit_mpi\n"
+      f.write "  use #{@fruit_basket_module_name}\n"
+      f.write "  integer :: ierror, size, rank\n"
+      f.write "  call MPI_INIT(ierror)\n"
+      f.write "  call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)\n"
+      f.write "  call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierror)\n"
+      f.write "  call init_fruit\n"
+      f.write "  call init_fruit_xml\n"
+      f.write "  call fruit_basket\n"
+      f.write "  call fruit_summary_mpi    (size, rank)\n"
+      f.write "  call fruit_summary_mpi_xml(size, rank)\n"
+      f.write "  call fruit_finalize_mpi   (size, rank)\n"
+      f.write "  call MPI_FINALIZE(ierror)\n"
+      f.write "end program #{@driver_program_mpi_name}\n"
     end
   end
 

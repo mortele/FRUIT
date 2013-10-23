@@ -5,17 +5,18 @@ include Rake::DSL if defined?(Rake::DSL)
 load "../rake_base_mpi.rb"
 
 $build_dir = ""  #If not set, build will be done in ../build/
-$source_dirs = ["../src", "./"]  # "../src" is for fruit.f90 and fruit_util.f90
+$source_dirs = ["../src", "./"]  
+               #"../src" is for fruit.f90, fruit_mpi.f90, and fruit_util.f90
 $goal = "fruit_driver_mpi.exe"
 
 # Add this line at the beginning if there are generated code involved
 fp = FruitProcessor.new
 #fp.shuffle = true          #if true order of methods will be random
-fp.pre_process              #It generates fruit_*_gen.f90
+fp.pre_process_mpi      #It generates fruit_*_gen.f90, fruit_basket_mpi_gen.f90
 
 
 #--- Either load it
-$main = "fruit_driver_gen.f90"
+$main = "fruit_driver_mpi_gen.f90"
 load "../rake_estimate.rb"  #Load this after fruit_*_gen.f90 generated.
 load '../rake_base_deps.rb' #It uses SRC and OBJ updated by rake_estimate.rb
 #--- or explicitly give dependencies
@@ -30,15 +31,26 @@ task :default => [
 
 task :run => [ $goal, "mpi_machine_file" ] do
   sleep 3
-  sh "mpirun -np 2 -machinefile mpi_machine_file #{$goal}"
+  sh "mpiexec -np 2 -machinefile mpi_machine_file #{$goal}"
 end
+
 
 #dummy mpi_machine_file
 file "mpi_machine_file" =>[] do
-  puts `hostname`.chop
-  open("mpi_machine_file", "w"){|f|
-    f.write(`hostname`.chop)
-  }
+  if (
+    system("ping -c 1 -W 1 ubuntu2") and
+    system("ping -c 1 -W 1 ubuntu3")
+  )
+    open("mpi_machine_file", "w"){|f|
+      f.write("ubuntu2\n")
+      f.write("ubuntu3\n")
+    }
+  else
+    open("mpi_machine_file", "w"){|f|
+      f.write(`hostname`.chop)
+    }
+  end
 end
 
 CLEAN.include($goal)
+

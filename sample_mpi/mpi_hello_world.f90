@@ -1,6 +1,6 @@
 module mpi_hello_world
+  use mpi
   implicit none
-  include 'mpif.h'
 contains
   subroutine hello_world(size, rank, myhostname)
     integer, intent(in) :: size, rank
