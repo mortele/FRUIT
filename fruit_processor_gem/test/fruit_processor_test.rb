@@ -345,8 +345,8 @@ class FruitProcessorTest < Test::Unit::TestCase
       assert_equal("program fruit_driver_gen", f.gets.chomp!)
       assert_equal(0, /^\s*use\s+fruit\s*$/ =~ f.gets.chomp!)
       assert_equal(0, /^\s*use\s+fruit_basket_gen\s*$/ =~ f.gets.chomp!)
-      assert_equal(0, /^\s*call\s+init_fruit\s*$/ =~ f.gets.chomp!)
-      assert_equal(0, /^\s*call\s+init_fruit_xml\s*$/ =~ f.gets.chomp!)
+      assert_equal(0, /^\s*call\s+init_fruit/ =~ f.gets.chomp!)
+      assert_equal(0, /^\s*call\s+init_fruit_xml/ =~ f.gets.chomp!)
       assert_equal(0, /^\s*call\s+fruit_basket\s*$/ =~ f.gets.chomp!)
     }
   end
@@ -367,8 +367,8 @@ class FruitProcessorTest < Test::Unit::TestCase
       assert_equal(0, /^call MPI_INIT\(ierror\)$/    =~ f.gets.strip!)
       assert_equal(0, /^call MPI_COMM_SIZE\(MPI_COMM_WORLD, size, ierror\)$/ =~ f.gets.strip!)
       assert_equal(0, /^call MPI_COMM_RANK\(MPI_COMM_WORLD, rank, ierror\)$/ =~ f.gets.strip!)
-      assert_equal(0, /^call init_fruit$/      =~ f.gets.strip!)
-      assert_equal(0, /^call init_fruit_xml$/  =~ f.gets.strip!)
+      assert_equal(0, /^call init_fruit/      =~ f.gets.strip!)
+      assert_equal(0, /^call fruit_init_mpi_xml/  =~ f.gets.strip!)
       assert_equal(0, /^call fruit_basket$/    =~ f.gets.strip!)
       assert_equal(0, /^call fruit_summary_mpi\s*\(size, rank\)$/ =~ f.gets.strip!)
       assert_equal(0, /^call fruit_summary_mpi_xml\s*\(size, rank\)$/ =~ f.gets.strip!)

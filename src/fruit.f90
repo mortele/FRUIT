@@ -93,21 +93,12 @@ module fruit
   type(ty_stack), save :: stashed_suite
 
   public :: &
-    initializeFruit, &
-    init_fruit, &
-    init_fruit_xml
-  public :: &
-    getTestSummary, &
-    fruit_summary, &
-    fruit_summary_xml
+    init_fruit
   public :: &
     get_last_message, &
     is_last_passed, &
     is_case_passed, &
-    case_passed_xml, &
-    case_failed_xml, &
     add_success, addSuccess, &
-    addFail, add_fail, &
     set_unit_name, get_unit_name, &
     set_case_name, get_case_name, &
     failed_assert_action, get_total_count, getTotalCount, &
@@ -116,21 +107,18 @@ module fruit
   public :: assert_equals,     assertEquals
   public :: assert_not_equals, assertNotEquals
   public :: assert_true,       assertTrue
-  public :: assert_false
-  public :: override_stdout, end_override_stdout
   public :: stash_test_suite, restore_test_suite
-  public :: fruit_finalize, fruit_finalize_mpi
-  public :: set_prefix
-  public :: get_prefix
   public :: FRUIT_PREFIX_LEN_MAX
   public :: override_xml_work, end_override_xml_work
   public :: get_assert_and_case_count
   public :: fruit_summary_table
 
+  public :: initializeFruit
   interface initializeFruit
      module procedure obsolete_initializeFruit_
   end interface
 
+  public :: getTestSummary
   interface getTestSummary
      module procedure obsolete_getTestSummary_
   end interface
@@ -139,7 +127,8 @@ module fruit
      module procedure obsolete_assert_true_logical_
   end interface
 
-  interface assert_false
+  public ::          assert_false
+  interface          assert_false
     module procedure assert_false_
   end interface
 
@@ -277,12 +266,14 @@ module fruit
      module procedure obsolete_addSuccess_
   end interface
 
-  interface add_fail
+  public ::           add_fail
+  interface           add_fail
      module procedure add_fail_
      module procedure add_fail_unit_
   end interface
-
-  interface addFail
+ 
+  public ::           addFail
+  interface           addFail
      module procedure add_fail_
      module procedure add_fail_unit_
   end interface
@@ -309,40 +300,57 @@ module fruit
      module procedure run_test_case_named_
   end interface
 
-  interface init_fruit_xml
+  public ::          init_fruit_xml
+  interface          init_fruit_xml
     module procedure init_fruit_xml_
   end interface
 
-  interface fruit_summary
+  public ::          fruit_summary
+  interface          fruit_summary
     module procedure fruit_summary_
   end interface
 
-  interface fruit_summary_xml
+  public ::          fruit_summary_xml
+  interface          fruit_summary_xml
     module procedure fruit_summary_xml_
   end interface
 
-  interface case_passed_xml
+  public ::          case_passed_xml
+  interface          case_passed_xml
     module procedure case_passed_xml_
   end interface
 
-  interface case_failed_xml
+  public ::          case_failed_xml
+  interface          case_failed_xml
     module procedure case_failed_xml_
   end interface
 
-  interface override_stdout
+  public ::          override_stdout
+  interface          override_stdout
     module procedure override_stdout_
   end interface
 
-  interface end_override_stdout
+  public ::          end_override_stdout
+  interface          end_override_stdout
     module procedure end_override_stdout_
   end interface
 
-  interface override_xml_work
+  interface          override_xml_work
     module procedure override_xml_work_
   end interface
 
-  interface end_override_xml_work
+  interface          end_override_xml_work
     module procedure end_override_xml_work_
+  end interface
+
+  public ::          get_xml_filename_work
+  interface          get_xml_filename_work
+    module procedure get_xml_filename_work_
+  end interface
+
+  public ::          set_xml_filename_work
+  interface          set_xml_filename_work
+    module procedure set_xml_filename_work_
   end interface
 
   public ::          get_message_index
@@ -360,31 +368,31 @@ module fruit
     module procedure get_message_array_
   end interface
 
-  interface set_unit_name
+  interface          set_unit_name
     module procedure set_case_name_
   end interface
-  interface set_case_name
+  interface          set_case_name
     module procedure set_case_name_
   end interface
 
-  interface get_unit_name
+  interface          get_unit_name
     module procedure get_case_name_
   end interface
-  interface get_case_name
+  interface          get_case_name
     module procedure get_case_name_
   end interface
 
-  interface fruit_finalize
+  public ::          fruit_finalize
+  interface          fruit_finalize
     module procedure fruit_finalize_
   end interface
 
-  interface          fruit_finalize_mpi
-    module procedure fruit_finalize_mpi_
-  end interface
-
+  public ::          set_prefix
   interface          set_prefix
     module procedure set_prefix_
   end interface
+
+  public ::          get_prefix
   interface          get_prefix
     module procedure get_prefix_
   end interface
@@ -398,26 +406,31 @@ module fruit
   end interface
 contains
 
-  subroutine init_fruit
+  subroutine init_fruit(rank)
+    integer, intent(in), optional :: rank
+    logical :: if_write
+
     successful_assert_count = 0
     failed_assert_count = 0
     message_index = 1
     message_index_from = 1
-    write (stdout,*)
-    write (stdout,*) "Test module initialized"
-    write (stdout,*)
-    write (stdout,*) "   . : successful assert,   F : failed assert "
-    write (stdout,*)
+
+    if_write = .true.
+    if (present(rank)) then
+      if (rank /= 0) if_write = .false.
+    endif
+
+    if (if_write) then
+      write (stdout,*)
+      write (stdout,*) "Test module initialized"
+      write (stdout,*)
+      write (stdout,*) "   . : successful assert,   F : failed assert "
+      write (stdout,*)
+    endif
     if ( .not. allocated(message_array) ) then
       allocate(message_array(MSG_ARRAY_INCREMENT))
     end if
   end subroutine init_fruit
-
-  subroutine     fruit_finalize_mpi_(size, rank)
-    integer, intent(in) :: size, rank
-    print *, "fruit_finalize_mpi mpi size:", size, " rank:", rank
-    call         fruit_finalize_
-  end subroutine fruit_finalize_mpi_
 
   subroutine fruit_finalize_
     if (allocated(message_array)) then
@@ -425,30 +438,42 @@ contains
     endif
   end subroutine fruit_finalize_
 
-  subroutine init_fruit_xml_
-    open (XML_OPEN, file = xml_filename, action ="write", status = "replace")
-      write(XML_OPEN, '("<?xml version=""1.0"" encoding=""UTF-8""?>")')
-      write(XML_OPEN, '("<testsuites>")')
-      write(XML_OPEN, '("  <testsuite ")', advance = "no")
-      write(XML_OPEN, '(      "errors=""0"" "   )', advance = "no")
-      write(XML_OPEN, '(      "tests=""1"" "    )', advance = "no")
-      write(XML_OPEN, '(      "failures=""1"" " )', advance = "no")
-      write(XML_OPEN, '(      "name=""", a, """ ")', advance = "no") "name of test suite"
-      write(XML_OPEN, '(      "id=""1"">")')
+  subroutine init_fruit_xml_(rank)
+    integer, optional, intent(in) :: rank
+    logical :: rank_zero_or_single
 
-      write(XML_OPEN, &
-      &  '("    <testcase name=""", a, """ classname=""", a, """ time=""", a, """>")') &
-      &  "dummy_testcase", "dummy_classname", "0"
+    rank_zero_or_single = .true.
+    if (present(rank)) then
+      if (rank /= 0) then
+        rank_zero_or_single = .false.
+      endif
+    endif
 
-      write(XML_OPEN, '(a)', advance = "no") "      <failure type=""failure"" message="""
-      write(XML_OPEN, '(a)', advance = "no") "FRUIT did not generate regular content of result.xml."
-      write(XML_OPEN, '(a)')                 """/>"
-      write(XML_OPEN, '("    </testcase>")')
 
-      write(XML_OPEN, '("  </testsuite>")')
-      write(XML_OPEN, '("</testsuites>")')
-    close(XML_OPEN)
-
+    if (rank_zero_or_single) then
+      open (XML_OPEN, file = xml_filename, action ="write", status = "replace")
+        write(XML_OPEN, '("<?xml version=""1.0"" encoding=""UTF-8""?>")')
+        write(XML_OPEN, '("<testsuites>")')
+        write(XML_OPEN, '("  <testsuite ")', advance = "no")
+        write(XML_OPEN, '(      "errors=""0"" "   )', advance = "no")
+        write(XML_OPEN, '(      "tests=""1"" "    )', advance = "no")
+        write(XML_OPEN, '(      "failures=""1"" " )', advance = "no")
+        write(XML_OPEN, '(      "name=""", a, """ ")', advance = "no") "name of test suite"
+        write(XML_OPEN, '(      "id=""1"">")')
+  
+        write(XML_OPEN, &
+        &  '("    <testcase name=""", a, """ classname=""", a, """ time=""", a, """>")') &
+        &  "dummy_testcase", "dummy_classname", "0"
+  
+        write(XML_OPEN, '(a)', advance = "no") "      <failure type=""failure"" message="""
+        write(XML_OPEN, '(a)', advance = "no") "FRUIT did not generate regular content of result.xml."
+        write(XML_OPEN, '(a)')                 """/>"
+        write(XML_OPEN, '("    </testcase>")')
+  
+        write(XML_OPEN, '("  </testsuite>")')
+        write(XML_OPEN, '("</testsuites>")')
+      close(XML_OPEN)
+    endif
 
     open (xml_work, FILE = xml_filename_work, action ="write", status='replace')
     close(xml_work)
@@ -750,6 +775,18 @@ contains
     message_index = message_index + 1
   end subroutine increase_message_stack_
 
+
+  subroutine get_xml_filename_work_(string)
+    character(len = *), intent(out) :: string
+    string = trim(xml_filename_work)
+  end subroutine get_xml_filename_work_
+
+  subroutine set_xml_filename_work_(string)
+    character(len = *), intent(in) :: string
+    xml_filename_work = trim(string)
+  end subroutine set_xml_filename_work_
+
+
   function get_last_message()
     character(len=MSG_LENGTH) :: get_last_message
     if (message_index > 1) then
@@ -1045,7 +1082,7 @@ contains
     if (var1 .eqv. .false.) then
       call add_success
     else
-      call failed_assert_action(to_s(.false.), to_s(var1), message, if_is = .false.)
+      call failed_assert_action(to_s(.true.), to_s(var1), message, if_is = .false.)
     endif
   end subroutine assert_false_
 

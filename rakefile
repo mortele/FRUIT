@@ -31,12 +31,16 @@ task :default => [
   :sample_selective_main,
   :sample_multi_dir,
   :coverage,
-  :self_test_xml,
-  :self_test]
+  :self_test_xml
+]
 
 # :sample_single_dir is not included
 #    because fortran compiler must recognize .f95 extension.
 # :test is not included because :self_test covers tests done in :test.
+
+if $mpiexec
+    task :default => [ :self_test_mpi, :sample_mpi ]
+end
 
 if ENV['DISPLAY']
   begin
@@ -46,6 +50,10 @@ if ENV['DISPLAY']
     puts "failed to require 'tk'"
   end
 end
+
+task :default => [ :self_test ]
+
+
 
 CLEAN.include(FileList[
   '**/*.o', '**/*.obj', '**/*.mod', '**/*.a', '**/*_gen.f90', '**/*fruit_driver',
@@ -97,7 +105,8 @@ task :test => [:anchor_root, :fruit_f90, :compile] do
 end
 
 desc "Update fruit.f90"
-task :fruit_f90 do
+task   :fruit_f90 do
+  puts "fruit_f90"
   Dir.chdir("src") do
     sh 'rake fruit.f90'
   end
@@ -105,6 +114,7 @@ end
 
 desc "Self test of fruit.f90 on xml output"
 task :self_test_xml => [:anchor_root, :fruit_f90] do
+  puts      "self_test_xml"
   Dir.chdir("self_test_xml") do
     begin
       sh 'rake'
@@ -116,6 +126,7 @@ end
 
 desc "Self test of fruit.f90 and fruit_util.f90."
 task :self_test => [:anchor_root, :fruit_f90] do
+  puts      "self_test"
   Dir.chdir("self_test") do
     sh 'rake coverage'
   end
@@ -123,34 +134,39 @@ end
 
 desc "Using valgrind do Self test of fruit.f90 and fruit_util.f90."
 task :self_test_valgrind => [:anchor_root, :fruit_f90] do
+  puts      "self_test_valgrind"
   Dir.chdir("self_test") do
     sh 'rake valgrind'
   end
 end
 
 desc "Test of fruit_processor.rb."
-task :ruby_test do
+task   :ruby_test do
+  puts "ruby_test"
   Dir.chdir("fruit_processor_gem") do
     sh 'rake test'
   end
 end
 
 desc "Test of rake_base_deps.rb"
-task :rake_base_deps_test do
+task   :rake_base_deps_test do
+  puts "rake_base_deps_test"
   Dir.chdir("ruby_test") do
     sh 'ruby rake_base_deps_test.rb'
   end
 end
 
 desc "Test of rake_estimate.rb"
-task :rake_estimate_test do
+task   :rake_estimate_test do
+  puts "rake_estimate_test"
   Dir.chdir("ruby_test") do
     sh 'ruby rake_estimate_test.rb'
   end
 end
 
 desc "Test of gui_fruit.rb"
-task :gui_fruit_test do
+task   :gui_fruit_test do
+  puts "gui_fruit_test"
   Dir.chdir("ruby_test") do
     sh 'ruby gui_fruit_test.rb'
   end
@@ -158,49 +174,56 @@ end
 
 
 desc "Compile a sample of multi-directry test."
-task :sample => [:anchor_root, :fruit_f90, :compile] do
+task   :sample => [:anchor_root, :fruit_f90, :compile] do
+  puts "sample"
   Dir.chdir("sample") do
     sh 'rake'
   end
 end
 
 desc "Compile a sample of manually written test."
-task :in_3_minutes => [:anchor_root, :fruit_f90] do
+task   :in_3_minutes => [:anchor_root, :fruit_f90] do
+  puts "in_3_minutes"
   Dir.chdir("in_3_minutes") do
     sh 'rake'
   end
 end
 
 desc "Compile a sample of single-directry test."
-task :sample_single_dir => [:anchor_root, :fruit_f90] do
+task   :sample_single_dir => [:anchor_root, :fruit_f90] do
+  puts "sample_single_dir"
   Dir.chdir("sample_single_dir") do
     sh "rake"
   end
 end
 
 desc "Compile a sample which complies only specifiled testerss."
-task :sample_selective => [:anchor_root, :fruit_f90] do
+task   :sample_selective => [:anchor_root, :fruit_f90] do
+  puts "sample_selective"
   Dir.chdir("sample_selective") do
     sh "rake"
   end
 end
 
 desc "Compile usual program (not unit test) using rake_estimate.rb"
-task :sample_selective_main do
+task   :sample_selective_main do
+  puts "sample_selective_main"
   Dir.chdir("sample_selective") do
     sh "rake -f rakefile_main"
   end
 end
 
 desc "Compile a sample whose build directry is a subdirectry"
-task :sample_build_dir => [:anchor_root, :fruit_f90] do
+task   :sample_build_dir => [:anchor_root, :fruit_f90] do
+  puts "sample_build_dir"
   Dir.chdir("sample_build_dir") do
     sh "rake"
   end
 end
 
 desc "Compile a sample of multi-directry test."
-task :sample_multi_dir => [:anchor_root, :fruit_f90] do
+task   :sample_multi_dir => [:anchor_root, :fruit_f90] do
+  puts "sample_multi_dir"
   [
     "sample_multi_dir/build",
     "sample_multi_dir/build_selective",
@@ -213,7 +236,8 @@ end
 
 
 desc "coverage (only for gfortran)"
-task :coverage => [:anchor_root, :fruit_f90] do
+task   :coverage => [:anchor_root, :fruit_f90] do
+  puts "coverage"
   if $gcov or $prof_genx
     [
       "sample_selective",
@@ -225,6 +249,24 @@ task :coverage => [:anchor_root, :fruit_f90] do
         sh "rake coverage"
       end
     }
+  end
+end
+
+if $mpiexec
+  desc   "self_test_mpi"
+  task   :self_test_mpi  do
+    puts "self_test_mpi"
+    Dir.chdir("self_test_mpi") do
+      sh "rake"
+    end
+  end
+
+  desc   "sample_mpi"
+  task   :sample_mpi  do
+    puts "sample_mpi"
+    Dir.chdir("sample_mpi") do
+      sh "rake"
+    end
   end
 end
 

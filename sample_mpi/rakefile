@@ -52,5 +52,5 @@ file "mpi_machine_file" =>[] do
   end
 end
 
-CLEAN.include($goal)
+CLEAN.include($goal, "stdout", "mpi_machine_file")
 

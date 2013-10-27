@@ -36,6 +36,7 @@ end
 
 task :verify => [ :run ] do
   sh "ruby verify_stdout.rb"
+  sh "ruby verify_xml.rb"
 end
 
 #dummy mpi_machine_file
@@ -47,4 +48,7 @@ file "mpi_machine_file" =>[] do
 end
 
 CLEAN.include($goal)
+CLEAN.include("stdout")
+CLEAN.include("mpi_machine_file")
+CLEAN.include("result*.xml")
 

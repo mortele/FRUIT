@@ -14,6 +14,7 @@ module RakeBase
     $dosish_path = false
     $gcov = false
 		$prof_genx = "-prof-genx"
+    $mpiexec = nil
   else
     # Intel FORTRAN on Windows
     $compiler = 'ifort'
@@ -22,6 +23,7 @@ module RakeBase
     $dosish_path = true
     $gcov = false
 		$prof_genx = "/Qprof-genx"
+    $mpiexec = nil
   end
 
 
@@ -74,6 +76,11 @@ module RakeBase
     $dosish_path = false
     $gcov = "-coverage"
 		$prof_genx = false
+
+    result_mpi = `#{where_or_which} mpiexec 2>&1`
+    if $?.to_i == 0
+      $mpiexec = "mpiexec"
+    end
   end
 
   # ----- if absent try FTN95

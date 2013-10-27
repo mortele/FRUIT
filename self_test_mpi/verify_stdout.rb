@@ -1,4 +1,5 @@
 
+num_init = 0
 num_summary = 0
 num_rank_zero = 0
 num_rank_one  = 0
@@ -9,6 +10,10 @@ rank_one_ok = 0
 flag = 0
 open("stdout", "r"){|f|
   f.each{|line|
+    if line =~ /Test module initialized/i
+      num_init += 1
+    end
+
     if line =~ /Start of FRUIT summary:/
       num_summary += 1
     end
@@ -43,6 +48,12 @@ open("stdout", "r"){|f|
     end
   }
 }
+if num_init == 1
+  print "OK, line [Test module initialized] once as expected\n"
+else
+  raise "line [Test module initialized] not appeared or appeared more than once"
+end
+
 if num_summary == 1
   print "OK, [Start of FRUIT summary] appeared once as expected.\n"
 else
