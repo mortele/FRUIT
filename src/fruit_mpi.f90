@@ -186,10 +186,14 @@ contains
 
     allocate(xml_filename_work_all(size))
 
+    if (rank /= 0) then
     call MPI_Send(    xml_filename_work, &
     &     FN_LENGTH, MPI_CHARACTER,     0, 8, MPI_COMM_WORLD, ierr)
+    endif
     if (rank == 0) then
-      do i = 1, size
+      xml_filename_work_all(1) = xml_filename_work
+
+      do i = 1+1, size
         call MPI_RECV(xml_filename_work_all(i), &
         & FN_LENGTH, MPI_CHARACTER, i - 1, 8, MPI_COMM_WORLD, status, ierr)
       enddo

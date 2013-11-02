@@ -38,7 +38,7 @@ task :default => [
 #    because fortran compiler must recognize .f95 extension.
 # :test is not included because :self_test covers tests done in :test.
 
-if $mpiexec
+if $mpiexec_exist
     task :default => [ :self_test_mpi, :sample_mpi ]
 end
 
@@ -252,7 +252,7 @@ task   :coverage => [:anchor_root, :fruit_f90] do
   end
 end
 
-if $mpiexec
+if $mpiexec_exist
   desc   "self_test_mpi"
   task   :self_test_mpi  do
     puts "self_test_mpi"

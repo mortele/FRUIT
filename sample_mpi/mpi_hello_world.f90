@@ -8,8 +8,13 @@ contains
 
     integer :: stat
     
+    myhostname = "(no host name)"
+#ifdef __INTEL_COMPILER
+    call get_environment_variable("COMPUTERNAME", myhostname)
+#else
     stat = hostnm(myhostname)
-    
+#endif    
+
     write(*, *) "Hello world FORTRAN rank:", rank, " size:", size, &
     & "hostname:", trim(myhostname)
   

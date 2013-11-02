@@ -76,11 +76,6 @@ module RakeBase
     $dosish_path = false
     $gcov = "-coverage"
 		$prof_genx = false
-
-    result_mpi = `#{where_or_which} mpiexec 2>&1`
-    if $?.to_i == 0
-      $mpiexec = "mpiexec"
-    end
   end
 
   # ----- if absent try FTN95
@@ -103,6 +98,14 @@ module RakeBase
     end
   end
   #---------------------------------------------------
+
+  $mpiexec_exist = false
+  result_mpi = `#{where_or_which} mpiexec 2>&1`
+  if $?.to_i == 0
+    $mpiexec = "mpiexec"
+    $mpiexec_exist = true
+  end
+
 
   $linker = $compiler if !$linker
   $linker_option = $option if !$linker_option

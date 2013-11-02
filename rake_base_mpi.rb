@@ -6,21 +6,52 @@
 module RakeBase
   puts "RUBY_PLATFORM=" + RUBY_PLATFORM if $show_info
 
+  #`where ...` works on windows vista, 7 and 8. Not works on Windows XP.
+  test_where = `where where 2>&1`
+  if $?.to_i == 0
+    where_or_which = "where"
+  else
+    where_or_which = "which"
+  end
+
+  ifort_exist = false
+  result = `#{where_or_which} ifort 2>&1`
+  ifort_exist = true if $?.to_i == 0
+
+  mpif90_exist = false
+  result = `#{where_or_which} mpif90 2>&1`
+  mpif90_exist = true if $?.to_i == 0
+
   if RUBY_PLATFORM =~ /linux/i or 
      RUBY_PLATFORM =~ /cygwin/i or 
-     RUBY_PLATFORM =~/darwin/i
+     RUBY_PLATFORM =~ /darwin/i
 
-    # gfortran + Open MPI on Linux
-    $compiler = 'mpif90'
-    $option = "-Wall -Wextra -pedantic -fbounds-check " +
-              "-Wuninitialized -O -g -Wno-unused-parameter -cpp "
-    $ext_obj = "o"
-    $dosish_path = false
-    $gcov = "-coverage"
-    $prof_genx = false
+    if mpif90_exist
+      # gfortran + Open MPI on Linux
+      $compiler = 'mpif90'
+      $option = "-Wall -Wextra -pedantic -fbounds-check " +
+                "-Wuninitialized -O -g -Wno-unused-parameter -cpp "
+      $ext_obj = "o"
+      $dosish_path = false
+      $gcov = "-coverage"
+      $prof_genx = false
+    end
   else
     print "RUBY_PLATFORM = ", RUBY_PLATFORM, "\n"
-    raise "Only Linux + Open MPI tested"
+
+    if ifort_exist
+      $compiler = "ifort"
+      $option = "/check:all /warn:all /fpp"
+      $option += ' /include:"C:\Program Files\MPICH2\include" '
+      $option += ' "C:\Program Files\MPICH2\lib\fmpich2.lib" '
+      $option += ' "C:\Program Files\MPICH2\lib\fmpich2s.lib" '
+      $option += ' "C:\Program Files\MPICH2\lib\fmpich2g.lib" '
+
+      $ext_obj = "obj"
+      $dosish_path = true
+      $gcov = false
+  		$prof_genx = "/Qprof-genx"
+    end
   end
 
   #---------------------------------------------------

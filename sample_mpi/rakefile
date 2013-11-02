@@ -23,6 +23,21 @@ load '../rake_base_deps.rb' #It uses SRC and OBJ updated by rake_estimate.rb
 #
 #---
 
+#dummy mpi_machine_file
+#  if (
+#    system("ping -c 1 -W 1 ubuntu2") and
+#    system("ping -c 1 -W 1 ubuntu3")
+#  )
+#    open("mpi_machine_file", "w"){|f|
+#      f.write("ubuntu2\n")
+#      f.write("ubuntu3\n")
+#    }
+#  else
+    open("mpi_machine_file", "w"){|f|
+      f.write(`hostname`.chop)
+    }
+#  end
+
 
 task :default => [
   :run
@@ -35,22 +50,6 @@ task :run => [ $goal, "mpi_machine_file" ] do
 end
 
 
-#dummy mpi_machine_file
-file "mpi_machine_file" =>[] do
-  if (
-    system("ping -c 1 -W 1 ubuntu2") and
-    system("ping -c 1 -W 1 ubuntu3")
-  )
-    open("mpi_machine_file", "w"){|f|
-      f.write("ubuntu2\n")
-      f.write("ubuntu3\n")
-    }
-  else
-    open("mpi_machine_file", "w"){|f|
-      f.write(`hostname`.chop)
-    }
-  end
-end
 
 CLEAN.include($goal, "stdout", "mpi_machine_file")
 
