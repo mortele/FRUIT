@@ -1,4 +1,17 @@
 -----------
+FRUIT 3.3.0
+-----------
+
+FRUIT 3.3.0 can test codes using MPI.
+Sample is in directry sample_mpi.
+Test code is in self_test_mpi.
+  
+Tested on
+  Ubuntu 12.04 + OpenMPI
+  Windows 7 + MPICH2 (mpich2-1.4.1p1-win-ia32)
+
+
+-----------
 FRUIT 3.2.6
 -----------
 
