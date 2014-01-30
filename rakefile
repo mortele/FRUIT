@@ -81,6 +81,7 @@ CLEAN.include(FileList[
   "self_test_mpi/mpi_machine_file",
   "sample_mpi/mpi_machine_file",
   "**/stdout",
+  "**/fruit_basket_gen.f90",
 ])
 
 

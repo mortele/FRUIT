@@ -1,4 +1,12 @@
 -----------
+FRUIT 3.3.1
+-----------
+
+Unnecessary mpi_machine_file were included in fruit_3.3.0.zip.
+Removed them.
+
+
+-----------
 FRUIT 3.3.0
 -----------
 
