@@ -78,7 +78,13 @@ CLEAN.include(FileList[
   "in_3_minutes/fruit.f90",
   "in_3_minutes/fruit_util.f90",
   "sample/test/calculator_fruit_driver.exe",
+  "self_test_mpi/mpi_machine_file",
+  "sample_mpi/mpi_machine_file",
+  "**/stdout",
 ])
+
+
+
 
 CLOBBER.include(FileList['src/fruit.f90'])
 CLOBBER.include($build_dir)
