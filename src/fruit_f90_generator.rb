@@ -76,7 +76,19 @@ def generate_assertation(t, dim, has_range, equals = "1")
   if t == "string"
     condition = "trim(strip(var1#{ij})) #{t_ne[t]} trim(strip(var2#{ij}))"
   elsif has_range == 0
-    condition = "var1#{ij} #{t_ne[t]} var2#{ij}"
+    if t == "int" or t == "logical"
+      condition = "var1#{ij} #{t_ne[t]} var2#{ij}"
+    elsif t == "real" or t == "double"
+      condition = "(var1#{ij} < var2#{ij}) .or. " +
+                  "(var1#{ij} > var2#{ij})"
+    elsif t == "complex"
+      condition =  "(real (var1#{ij}) < real (var2#{ij})) .or. &\n" +
+                  "&(real (var1#{ij}) > real (var2#{ij})) .or. &\n" +
+                  "&(aimag(var1#{ij}) < aimag(var2#{ij})) .or. &\n" +
+                  "&(aimag(var1#{ij}) > aimag(var2#{ij}))"
+    else
+      condition = "var1#{ij} #{t_ne[t]} var2#{ij}"
+    end
   else
     name = name + "in_range_"
     delta = "delta, "

@@ -64,4 +64,5 @@ end
 
 CLEAN.include($goal)
 CLEAN.include("dummy_main")
+CLEAN.include("*/*.gcno")
 

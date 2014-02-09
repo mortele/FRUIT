@@ -41,6 +41,50 @@ contains
       call assert_equals("..F", line_read)
     close (20)
   end subroutine test_assert_equals_float
+
+  subroutine test_assert_equals_double
+    implicit none
+    
+    double precision :: variable = 2.3d0
+    double precision :: result   = 2.3d0
+    character(len = 500) :: line_read
+
+    call override_stdout(20, STDOUTNAME)
+      call stash_test_suite
+        call assert_equals (variable, result)
+        call assert_not_equals (variable + 0.1d0, result)
+        call assert_equals     (variable + 0.1d0, result)
+      call restore_test_suite
+    call end_override_stdout
+
+    open (20, file = STDOUTNAME)
+      read(20, '(a)') line_read
+      call assert_equals("..F", line_read)
+    close (20)
+  end subroutine test_assert_equals_double
+
+  subroutine test_assert_equals_complex
+    implicit none
+
+    complex(kind=kind(1.0D0)) :: variable = (2.3d0, 1.0d0)
+    complex(kind=kind(1.0D0)) :: result   = (2.3d0, 1.0d0)
+    character(len = 500) :: line_read
+
+    call override_stdout(20, STDOUTNAME)
+      call stash_test_suite
+        call assert_equals (variable, result)
+        call assert_not_equals (variable + (0.0d0, 0.1d0), result)
+        call assert_equals     (variable + (0.0d0, 0.1d0), result)
+        call assert_not_equals (variable + (0.1d0, 0.0d0), result)
+        call assert_equals     (variable + (0.1d0, 0.0d0), result)
+      call restore_test_suite
+    call end_override_stdout
+
+    open (20, file = STDOUTNAME)
+      read(20, '(a)') line_read
+      call assert_equals("..F.F", line_read)
+    close (20)
+  end subroutine test_assert_equals_complex
   
   subroutine test_unit_name
     implicit none

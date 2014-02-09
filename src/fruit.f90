@@ -1259,7 +1259,7 @@ contains
     
     character(len = *), intent (in), optional :: message
 
-        if (var1 /= var2) then
+        if ((var1 < var2) .or. (var1 > var2)) then
           call failed_assert_action(&
           & to_s(var1), &
           & to_s(var2), message, if_is = .true.)
@@ -1294,7 +1294,7 @@ contains
     
     character(len = *), intent (in), optional :: message
     do i = 1, n
-        if (var1(i) /= var2(i)) then
+        if ((var1(i) < var2(i)) .or. (var1(i) > var2(i))) then
           call failed_assert_action(&
           & to_s(var1(i)), &
           & to_s(var2(i)), '1d array has difference, ' // message, if_is = .true.)
@@ -1331,7 +1331,7 @@ contains
     character(len = *), intent (in), optional :: message
     do j = 1, m
       do i = 1, n
-        if (var1(i, j) /= var2(i, j)) then
+        if ((var1(i, j) < var2(i, j)) .or. (var1(i, j) > var2(i, j))) then
           call failed_assert_action(&
           & to_s(var1(i, j)), &
           & to_s(var2(i, j)), '2d array has difference, ' // message, if_is = .true.)
@@ -1369,7 +1369,7 @@ contains
     
     character(len = *), intent (in), optional :: message
 
-        if (var1 /= var2) then
+        if ((var1 < var2) .or. (var1 > var2)) then
           call failed_assert_action(&
           & to_s(var1), &
           & to_s(var2), message, if_is = .true.)
@@ -1404,7 +1404,7 @@ contains
     
     character(len = *), intent (in), optional :: message
     do i = 1, n
-        if (var1(i) /= var2(i)) then
+        if ((var1(i) < var2(i)) .or. (var1(i) > var2(i))) then
           call failed_assert_action(&
           & to_s(var1(i)), &
           & to_s(var2(i)), '1d array has difference, ' // message, if_is = .true.)
@@ -1441,7 +1441,7 @@ contains
     character(len = *), intent (in), optional :: message
     do j = 1, m
       do i = 1, n
-        if (var1(i, j) /= var2(i, j)) then
+        if ((var1(i, j) < var2(i, j)) .or. (var1(i, j) > var2(i, j))) then
           call failed_assert_action(&
           & to_s(var1(i, j)), &
           & to_s(var2(i, j)), '2d array has difference, ' // message, if_is = .true.)
@@ -1479,7 +1479,10 @@ contains
     
     character(len = *), intent (in), optional :: message
 
-        if (var1 /= var2) then
+        if ((real (var1) < real (var2)) .or. &
+&(real (var1) > real (var2)) .or. &
+&(aimag(var1) < aimag(var2)) .or. &
+&(aimag(var1) > aimag(var2))) then
           call failed_assert_action(&
           & to_s(var1), &
           & to_s(var2), message, if_is = .true.)
@@ -1514,7 +1517,10 @@ contains
     
     character(len = *), intent (in), optional :: message
     do i = 1, n
-        if (var1(i) /= var2(i)) then
+        if ((real (var1(i)) < real (var2(i))) .or. &
+&(real (var1(i)) > real (var2(i))) .or. &
+&(aimag(var1(i)) < aimag(var2(i))) .or. &
+&(aimag(var1(i)) > aimag(var2(i)))) then
           call failed_assert_action(&
           & to_s(var1(i)), &
           & to_s(var2(i)), '1d array has difference, ' // message, if_is = .true.)
@@ -1551,7 +1557,10 @@ contains
     character(len = *), intent (in), optional :: message
     do j = 1, m
       do i = 1, n
-        if (var1(i, j) /= var2(i, j)) then
+        if ((real (var1(i, j)) < real (var2(i, j))) .or. &
+&(real (var1(i, j)) > real (var2(i, j))) .or. &
+&(aimag(var1(i, j)) < aimag(var2(i, j))) .or. &
+&(aimag(var1(i, j)) > aimag(var2(i, j)))) then
           call failed_assert_action(&
           & to_s(var1(i, j)), &
           & to_s(var2(i, j)), '2d array has difference, ' // message, if_is = .true.)
@@ -1811,7 +1820,7 @@ contains
 
     same_so_far = .true.
 
-        if (var1 /= var2) then
+        if ((var1 < var2) .or. (var1 > var2)) then
           same_so_far = .false.
         endif
 
@@ -1858,7 +1867,7 @@ contains
 
     same_so_far = .true.
     do i = 1, n
-        if (var1(i) /= var2(i)) then
+        if ((var1(i) < var2(i)) .or. (var1(i) > var2(i))) then
           same_so_far = .false.
         endif
     enddo
@@ -1907,7 +1916,7 @@ contains
     same_so_far = .true.
     do j = 1, m
       do i = 1, n
-        if (var1(i, j) /= var2(i, j)) then
+        if ((var1(i, j) < var2(i, j)) .or. (var1(i, j) > var2(i, j))) then
           same_so_far = .false.
         endif
       enddo
@@ -1957,7 +1966,7 @@ contains
 
     same_so_far = .true.
 
-        if (var1 /= var2) then
+        if ((var1 < var2) .or. (var1 > var2)) then
           same_so_far = .false.
         endif
 
@@ -2004,7 +2013,7 @@ contains
 
     same_so_far = .true.
     do i = 1, n
-        if (var1(i) /= var2(i)) then
+        if ((var1(i) < var2(i)) .or. (var1(i) > var2(i))) then
           same_so_far = .false.
         endif
     enddo
@@ -2053,7 +2062,7 @@ contains
     same_so_far = .true.
     do j = 1, m
       do i = 1, n
-        if (var1(i, j) /= var2(i, j)) then
+        if ((var1(i, j) < var2(i, j)) .or. (var1(i, j) > var2(i, j))) then
           same_so_far = .false.
         endif
       enddo
@@ -2103,7 +2112,10 @@ contains
 
     same_so_far = .true.
 
-        if (var1 /= var2) then
+        if ((real (var1) < real (var2)) .or. &
+&(real (var1) > real (var2)) .or. &
+&(aimag(var1) < aimag(var2)) .or. &
+&(aimag(var1) > aimag(var2))) then
           same_so_far = .false.
         endif
 
@@ -2150,7 +2162,10 @@ contains
 
     same_so_far = .true.
     do i = 1, n
-        if (var1(i) /= var2(i)) then
+        if ((real (var1(i)) < real (var2(i))) .or. &
+&(real (var1(i)) > real (var2(i))) .or. &
+&(aimag(var1(i)) < aimag(var2(i))) .or. &
+&(aimag(var1(i)) > aimag(var2(i)))) then
           same_so_far = .false.
         endif
     enddo
@@ -2199,7 +2214,10 @@ contains
     same_so_far = .true.
     do j = 1, m
       do i = 1, n
-        if (var1(i, j) /= var2(i, j)) then
+        if ((real (var1(i, j)) < real (var2(i, j))) .or. &
+&(real (var1(i, j)) > real (var2(i, j))) .or. &
+&(aimag(var1(i, j)) < aimag(var2(i, j))) .or. &
+&(aimag(var1(i, j)) > aimag(var2(i, j)))) then
           same_so_far = .false.
         endif
       enddo

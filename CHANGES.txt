@@ -1,4 +1,17 @@
 -----------
+FRUIT 3.3.2
+-----------
+
+In assert_not_equals subroutines,
+inequality comparison for real numbers
+  if (real_number_1 /= real_number_2) then ...
+was used. 
+(gfortran 4.8.2 with -Wextra option warns about it.)
+The inequality is replaced by inequalities
+  if (real_1 < real_2 .or. real_1 > real_2) then...
+
+
+-----------
 FRUIT 3.3.1
 -----------
 
