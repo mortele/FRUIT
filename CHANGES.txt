@@ -1,4 +1,13 @@
 -----------
+FRUIT 3.3.3
+-----------
+
+Time stamp of fruit_basket_gen.f90 is kept
+when its content is same as before.
+This behavior surpresses unnecessary compile.
+
+
+-----------
 FRUIT 3.3.2
 -----------
 

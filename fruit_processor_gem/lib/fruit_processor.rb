@@ -4,6 +4,8 @@ require 'rubygems'
 require 'rake'
 require "pathname"
 
+# require 'misc'
+
 class FruitProcessor
   attr_accessor :shuffle
 
@@ -156,6 +158,16 @@ class FruitProcessor
 
     fruit_basket_file = (Pathname(dir) + "#{@fruit_basket_module_name}.f90").to_s
 
+    fruit_basket_file_old = fruit_basket_file.gsub(/\.f90$/, "\.f90_old")
+
+    if (File.exist?( fruit_basket_file_old ))
+        FileUtils.rm(fruit_basket_file_old )
+    end
+
+    if (File.exist?( fruit_basket_file ))
+      File.rename(fruit_basket_file, fruit_basket_file_old)
+    end
+
     File.open(fruit_basket_file, 'w') do |f|
       f.write "module #{@fruit_basket_module_name}\n"
       f.write "  use fruit\n"
@@ -257,7 +269,27 @@ class FruitProcessor
       f.write "\n"
       f.write "end module #{@fruit_basket_module_name}"
     end
+
+    if (File.exist?( fruit_basket_file_old ))
+      #### compare fruit_basket_file and fruit_basket_file_old.
+
+      lines_now = []
+        open(fruit_basket_file    ){|f|
+          lines_now = f.readlines
+        }
+        lines_old = []
+        open(fruit_basket_file_old){|f| 
+          lines_old = f.readlines
+        }
+        diff = lines_now - lines_old
+
+        if diff.length == 0
+          File.rename(fruit_basket_file_old, fruit_basket_file)
+        end
+      end
+    #end
   end
+
 
   def parse_method_names file_name
     File.open(file_name, 'r') do |source_file|

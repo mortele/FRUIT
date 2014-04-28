@@ -21,13 +21,48 @@ class FruitProcessorTest < Test::Unit::TestCase
 #    got_hash = @fixture.get_spec_hash("calculator_test.f90")
 #  end
 
+  def test_fruit_picker__timestamp
+    basket        = "for_test_picker/fruit_basket_gen.f90"
+
+    if (File.exist?(basket))
+        File.unlink(basket)
+    end
+
+    fp = FruitProcessor.new
+    fp.load_files "for_test_picker"
+
+    fp.fruit_picker "for_test_picker"
+    # puts "modify time of " + basket + ": " + File.mtime(basket).to_s
+    timestamp_basket = File.mtime(basket).to_i
+
+    sleep(1)
+
+    time_now = Time.now.to_i
+
+    assert(timestamp_basket < time_now)
+
+    # Basket file is overwritten with the same content.
+    # Modification time intended to be that of the older basket file.
+    fp.fruit_picker "for_test_picker"
+    p File.mtime(basket)
+    timestamp_basket_2 = File.mtime(basket).to_i
+
+
+    assert_equal(timestamp_basket_2,
+                 timestamp_basket,
+      "Modification time is that of the older basket file.")
+    assert(timestamp_basket_2 < time_now)
+  end
+
+
+
   def test_fruit_picker__dirs
     [true, false].each{|if_shuffle|
       basket        = "fruit_basket_gen.f90"
       if (File.exist?(basket))
-        File.unlink(  basket)
+          File.unlink(  basket)
       end
-  
+
       fp = FruitProcessor.new
       fp.load_files ["subdir", "subdir2"]
       files = fp.get_files
@@ -45,7 +80,7 @@ class FruitProcessorTest < Test::Unit::TestCase
       assert(!File.exist?(basket), "#{basket} absent")
       fp.fruit_picker ["subdir", "subdir2"]
       assert( File.exist?(basket), "#{basket} created")
-   
+
       ok_subdir = false
       ok_subdir2 = false
       call_test_aaa = 0
@@ -56,7 +91,7 @@ class FruitProcessorTest < Test::Unit::TestCase
   #p line
           ok_subdir  = true if line =~ /^ *subroutine +in_subdir_test_all_tests/
           ok_subdir2 = true if line =~ /^ *subroutine +in_subdir2_test_all_tests/
-  
+
           call_test_aaa += 1 if line =~ /call *run_test_case *\( *test_aaa *,/
           call_test_bbb += 1 if line =~ /call *run_test_case *\( *test_bbb *,/
           call_test_ccc += 1 if line =~ /call *run_test_case *\( *test_method_ccc *,/
@@ -75,7 +110,7 @@ class FruitProcessorTest < Test::Unit::TestCase
     with_setup    = "for_test_picker/a_setup_test.f90"
     with_teardown = "for_test_picker/a_teardown_test.f90"
     if (File.exist?(basket))
-      File.unlink(basket)
+        File.unlink(basket)
     end
     fp = FruitProcessor.new
     fp.load_files "for_test_picker"
