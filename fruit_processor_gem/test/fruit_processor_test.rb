@@ -374,6 +374,7 @@ class FruitProcessorTest < Test::Unit::TestCase
     if File.exists?(@@driver)
       File.delete(@@driver)
     end
+
     @fixture.create_driver
     assert_equal(true, File.exists?(@@driver))
     File::open(@@driver){|f|
@@ -384,6 +385,17 @@ class FruitProcessorTest < Test::Unit::TestCase
       assert_equal(0, /^\s*call\s+init_fruit_xml/ =~ f.gets.chomp!)
       assert_equal(0, /^\s*call\s+fruit_basket\s*$/ =~ f.gets.chomp!)
     }
+    timestamp_driver = File.mtime(@@driver).to_i
+    sleep(1.1)
+    time_now = Time.now.to_i
+    assert(timestamp_driver < time_now)
+
+    #create driver again. its timestamp should be same as older driver.
+    @fixture.create_driver
+    timestamp_driver_2 = File.mtime(@@driver).to_i
+
+    assert_equal(timestamp_driver_2, timestamp_driver, 
+      "modification time is that of the older driver file.")
   end
 
   def test_create_driver_mpi

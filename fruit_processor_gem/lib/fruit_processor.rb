@@ -158,6 +158,7 @@ class FruitProcessor
 
     fruit_basket_file = (Pathname(dir) + "#{@fruit_basket_module_name}.f90").to_s
 
+    #------ move existing file to _old
     fruit_basket_file_old = fruit_basket_file.gsub(/\.f90$/, "\.f90_old")
 
     if (File.exist?( fruit_basket_file_old ))
@@ -167,6 +168,7 @@ class FruitProcessor
     if (File.exist?( fruit_basket_file ))
       File.rename(fruit_basket_file, fruit_basket_file_old)
     end
+    #------ move existing file to _old
 
     File.open(fruit_basket_file, 'w') do |f|
       f.write "module #{@fruit_basket_module_name}\n"
@@ -270,24 +272,20 @@ class FruitProcessor
       f.write "end module #{@fruit_basket_module_name}"
     end
 
+    #--- move fruit_basket_file_old to fruit_basket_file if their content are the same.
     if (File.exist?( fruit_basket_file_old ))
-      #### compare fruit_basket_file and fruit_basket_file_old.
-
       lines_now = []
-        open(fruit_basket_file    ){|f|
-          lines_now = f.readlines
-        }
-        lines_old = []
-        open(fruit_basket_file_old){|f| 
-          lines_old = f.readlines
-        }
-        diff = lines_now - lines_old
+      open(fruit_basket_file    ){|f| lines_now = f.readlines }
+      lines_old = []
+      open(fruit_basket_file_old){|f| lines_old = f.readlines }
+      diff = lines_now - lines_old
 
-        if diff.length == 0
-          File.rename(fruit_basket_file_old, fruit_basket_file)
-        end
+      if diff.length == 0
+        File.rename(fruit_basket_file_old, fruit_basket_file)
+      else
+        FileUtils.rm(fruit_basket_file_old )
       end
-    #end
+    end
   end
 
 
@@ -345,8 +343,21 @@ class FruitProcessor
   def create_driver dir="."
     dir = "." if dir.instance_of?(Array)
 
-    filename = (Pathname(dir) + "#{@driver_program_name}.f90")
-    File.open(filename, 'w') do |f|
+    driver_new = (Pathname(dir) + "#{@driver_program_name}.f90").to_s
+
+    #------ rename older driver
+    driver_old = driver_new.gsub(/\.f90$/, "\.f90_old")
+
+    if (File.exist?( driver_old))
+        FileUtils.rm(driver_old)
+    end
+
+    if (File.exist?(driver_new))
+      File.rename(  driver_new, driver_old)
+    end
+    #------ rename older driver
+
+    File.open(driver_new, 'w') do |f|
       f.write "program #{@driver_program_name}\n"
       f.write "  use fruit\n"
       f.write "  use #{@fruit_basket_module_name}\n"
@@ -357,6 +368,27 @@ class FruitProcessor
       f.write "  call fruit_summary_xml\n"
       f.write "  call fruit_finalize\n"
       f.write "end program #{@driver_program_name}\n"
+    end
+
+    #------ restore older driver if newer driver has the same content.
+    if (File.exist?( driver_old ))
+      #### compare fruit_basket_file and fruit_basket_file_old.
+
+      lines_now = []
+      open(driver_new){|f|
+        lines_now = f.readlines
+      }
+      lines_old = []
+      open(driver_old){|f| 
+        lines_old = f.readlines
+      }
+      diff = lines_now - lines_old
+
+      if diff.length == 0
+        File.rename(driver_old, driver_new)
+      else
+        FileUtils.rm(driver_old)
+      end
     end
   end
 
