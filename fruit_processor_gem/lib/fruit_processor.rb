@@ -279,8 +279,9 @@ class FruitProcessor
       lines_old = []
       open(fruit_basket_file_old){|f| lines_old = f.readlines }
       diff = lines_now - lines_old
+      diff2 = lines_old - lines_now
 
-      if diff.length == 0
+      if diff.length == 0 and diff2.length == 0
         File.rename(fruit_basket_file_old, fruit_basket_file)
       else
         FileUtils.rm(fruit_basket_file_old )

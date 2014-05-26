@@ -21,6 +21,16 @@ class FruitProcessorTest < Test::Unit::TestCase
 #    got_hash = @fixture.get_spec_hash("calculator_test.f90")
 #  end
 
+###  def test_fruit_picker__when_removed
+###    basket        = "for_test_picker_when_removed/fruit_basket_gen.f90"
+###    if (File.exist?(basket))
+###        File.unlink(basket)
+###    end
+###    fp = FruitProcessor.new
+###    fp.load_files "for_test_picker"
+###  end
+
+
   def test_fruit_picker__timestamp
     basket        = "for_test_picker/fruit_basket_gen.f90"
 
