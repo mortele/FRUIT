@@ -21,14 +21,66 @@ class FruitProcessorTest < Test::Unit::TestCase
 #    got_hash = @fixture.get_spec_hash("calculator_test.f90")
 #  end
 
-###  def test_fruit_picker__when_removed
-###    basket        = "for_test_picker_when_removed/fruit_basket_gen.f90"
-###    if (File.exist?(basket))
-###        File.unlink(basket)
-###    end
-###    fp = FruitProcessor.new
-###    fp.load_files "for_test_picker"
-###  end
+  def test_fruit_picker__when_removed
+    dir = "for_test_picker_when_removed"
+    basket        = dir + "/fruit_basket_gen.f90"
+    tester        = dir + "/when_removed_test.f90"
+
+    if (File.exist?(basket))
+        File.unlink(basket)
+    end
+
+    (1..2).each{|iloop|
+      File.open( tester, "w"){|f|
+        f.write <<-END
+          module when_removed_test
+            implicit none
+          contains
+            subroutine test_first
+              assert_equals(1, 1, "asserts 1 is 1")
+            end subroutine test_first
+        END
+        if iloop == 1
+          f.write <<-END
+          subroutine test_second
+            assert_equals(3, 4, "asserts 3 is 4")
+          end subroutine test_second
+          END
+        end
+        f.write <<-END
+          end module when_removed_test
+        END
+      }
+  
+      fp = FruitProcessor.new
+      fp.load_files   dir
+      fp.fruit_picker dir
+  
+      # puts "-------"
+      if_test_first = false
+      if_test_second = false
+      File.open(basket, 'r') do |f|
+        f.each{|line|
+          # puts line
+          if /call +run_test_case *\( *test_first *,/ =~ line
+            if_test_first = true
+          end
+          if /call +run_test_case *\( *test_second *,/ =~ line
+            if_test_second = true
+          end
+        }
+      end
+
+      assert(if_test_first, "routine test_first called")
+      if iloop == 1
+        assert(if_test_second, "routine test_second should called")
+      else
+        assert(! if_test_second, "routine test_second should not called")
+      end
+      # puts "-------"
+    }
+    File.unlink tester
+  end
 
 
   def test_fruit_picker__timestamp

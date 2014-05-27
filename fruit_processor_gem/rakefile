@@ -23,7 +23,7 @@ CLOBBER.include(FileList['pkg/*.gem'])
 spec = Gem::Specification.new do |s|
   s.platform  =   Gem::Platform::RUBY
   s.name      =   "fruit_processor"
-  s.version   =   "3.3.3"
+  s.version   =   "3.3.4"
   s.author    =   "Andrew Chen"
   s.email     =   "meihome meihome.com"
   s.summary   =   "A package for fortranxunit (fruit)."
