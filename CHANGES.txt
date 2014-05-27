@@ -2,9 +2,9 @@
 FRUIT 3.3.4
 -----------
 
-When tester routines are added to *_test.f90,, 
+When tester routines are added to *_test.f90,
 fruit_basket_gen.f90 is updated.
-But when tester routine(s) are removed,
+But when tester routine(s) were removed,
 fruit_basket_gen.f90 was not updated.
 This problem is fixed in FRUIT 3.3.4.
 

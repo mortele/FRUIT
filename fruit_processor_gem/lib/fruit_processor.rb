@@ -278,10 +278,8 @@ class FruitProcessor
       open(fruit_basket_file    ){|f| lines_now = f.readlines }
       lines_old = []
       open(fruit_basket_file_old){|f| lines_old = f.readlines }
-      diff = lines_now - lines_old
-      diff2 = lines_old - lines_now
 
-      if diff.length == 0 and diff2.length == 0
+      if lines_old == lines_now
         File.rename(fruit_basket_file_old, fruit_basket_file)
       else
         FileUtils.rm(fruit_basket_file_old )
@@ -383,10 +381,8 @@ class FruitProcessor
       open(driver_old){|f| 
         lines_old = f.readlines
       }
-      diff = lines_now - lines_old
-      diff2 = lines_old - lines_now
 
-      if diff.length == 0 and diff2.length == 0
+      if lines_old == lines_now
         File.rename(driver_old, driver_new)
       else
         FileUtils.rm(driver_old)
