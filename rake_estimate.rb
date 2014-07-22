@@ -58,7 +58,9 @@ class FruitRakeEstimate
 
   def set_forward_and_missings
     mod_in_f = {}
+    sub_in_this_f = {}
     f_uses_mod = {}
+    f_uses_sub = {}
 
     set_all_f if (!@all_f)
 
@@ -66,8 +68,10 @@ class FruitRakeEstimate
       f_basename = Pathname.new(f_full).basename.to_s
 
       f_uses_mod[ f_basename ] = []
+      f_uses_sub[ f_basename ] = []
 
       macro_stack = []
+      mod = ""
 
       open(f_full, 'r'){|f|
         f.each_line{|line|
@@ -75,6 +79,11 @@ class FruitRakeEstimate
             if line =~ /(?:^|\r|\n)\s*use +(\w+)\b?/i
               f_uses_mod[ f_basename ] << $1.downcase
             end
+
+            if line =~ /(?:^|\r|\n)\s*call +(\w+)\b?/i
+              f_uses_sub[ f_basename ] << $1.downcase
+            end
+
             if line =~ /(?:^|\r|\n)\s*module +(\w+)\b?/i
               mod = $1.downcase
 
@@ -89,6 +98,18 @@ class FruitRakeEstimate
 
 
             end
+
+            if line =~ /(?:^|\r|\n)\s*end +module +(\w+)\b?/i
+              mod = ""
+            end
+
+            if mod == ""
+              if line =~ /(?:^|\r|\n)\s*subroutine +(\w+)\b?/i
+                sub = $1.downcase
+                sub_in_this_f[ sub ] = f_basename
+              end
+            end
+
           end
 
           if line =~ /(?:^|\r|\n)\s*#/
@@ -109,11 +130,24 @@ class FruitRakeEstimate
         if mod_in_f[a_mod]
           if mod_in_f[a_mod] != f_basename
             @forward[ f_basename ] << mod_in_f[ a_mod ]
+            @forward[ f_basename ].uniq!
           end
         else
           missings.push(a_mod)
         end
       }
+
+      f_uses_sub[ f_basename ].uniq.each{|a_sub|
+        if sub_in_this_f[ a_sub ]
+          if sub_in_this_f[ a_sub ] != f_basename
+            @forward[ f_basename ] << sub_in_this_f[ a_sub ]
+            @forward[ f_basename ].uniq!
+          end
+        else
+          missings.push(a_sub)
+        end
+      }
+
     }
     return @forward, missings.uniq
   end

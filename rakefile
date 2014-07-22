@@ -30,6 +30,7 @@ task :default => [
   :sample_selective,
   :sample_selective_main,
   :sample_multi_dir,
+  :sample_external_sub, 
   :coverage,
   :self_test_xml
 ]
@@ -204,10 +205,19 @@ task   :sample_single_dir => [:anchor_root, :fruit_f90] do
   end
 end
 
-desc "Compile a sample which complies only specifiled testerss."
+desc "Compile a sample which complies only specifiled testers."
 task   :sample_selective => [:anchor_root, :fruit_f90] do
   puts "sample_selective"
   Dir.chdir("sample_selective") do
+    sh "rake"
+  end
+end
+
+
+desc "Complie a sample of tester for external subroutine"
+task   :sample_external_sub => [:anchor_root, :fruit_f90] do
+  puts "sample_external_sub"
+  Dir.chdir("sample_external_sub") do
     sh "rake"
   end
 end

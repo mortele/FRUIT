@@ -1,3 +1,10 @@
+(Candidate of feature for FRUIT 3.3.5)
+
+Sample of testing external subroutine is at 
+  sample_exteranl_sub/
+
+
+
 -----------
 FRUIT 3.3.4
 -----------
