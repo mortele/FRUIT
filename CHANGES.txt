@@ -1,8 +1,17 @@
-(Candidate of feature for FRUIT 3.3.5)
+-----------
+FRUIT 3.3.5
+-----------
 
-Sample of testing external subroutine is at 
+Samples of testing external subroutine and
+external functions are is at 
   sample_exteranl_sub/
+  sample_exteranl_func/
 
+External functions tested must be 
+specified in interface block or external statement of
+tester code.
+Otherwise FRUIT cannot estimate dependencies
+for compile.
 
 
 -----------
