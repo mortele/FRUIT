@@ -72,6 +72,7 @@ class FruitRakeEstimate
 
       macro_stack = []
       mod = ""
+      interface = false
 
       open(f_full, 'r'){|f|
         f.each_line{|line|
@@ -107,6 +108,35 @@ class FruitRakeEstimate
               if line =~ /(?:^|\r|\n)\s*subroutine +(\w+)\b?/i
                 sub = $1.downcase
                 sub_in_this_f[ sub ] = f_basename
+              end
+            end
+
+            if line =~ /(?:^|\r|\n)\s*interface\b(?:\!|\r|\n)/i
+              interface = true
+            end
+            if line =~ /(?:^|\r|\n)\s*end +interface\b(?:\!|\r|\n)/i
+              interface = false
+            end
+
+            if line =~ /(?:^|\r|\n)\s*external +(\w+)\b?/i
+              func_name = $1
+              f_uses_sub[ f_basename ] << func_name
+            end
+
+
+            if line =~ /(?:^|\r|\n)\s*(?:\w+\s)?\s*function\s+([\w_]+)\b?/i
+              func_name = $1
+
+#puts "Function found in " + f_full + "(interface? " + interface.to_s + ")"
+#puts "in line          <#{line}>"
+#puts "Function name is <#{func_name}>"
+
+              if interface
+                f_uses_sub[ f_basename ] << func_name
+              else
+                if mod == ""
+                  sub_in_this_f[ func_name ] = f_basename
+                end
               end
             end
 

@@ -90,27 +90,64 @@ class FruitRakeEstimateTest < Test::Unit::TestCase
     end
   end
 
- def test_set_forward_nested_ifdef
-   esti = FruitRakeEstimate.new
-   esti.identifiers = ["OUTER", "INNER"]
-   forward = esti.set_forward
-   assert_equal(["mod_1.f90", "mod_2.f90"].sort, forward["nested_ifdef.f90"].sort)
+  def test_set_forward_nested_ifdef
+    esti = FruitRakeEstimate.new
+    esti.identifiers = ["OUTER", "INNER"]
+    forward = esti.set_forward
+    assert_equal(["mod_1.f90", "mod_2.f90"].sort, forward["nested_ifdef.f90"].sort)
 
-   esti = FruitRakeEstimate.new
-   esti.identifiers = ["OUTER"]
-   forward = esti.set_forward
-   assert_equal(["mod_1.f90"], forward["nested_ifdef.f90"])
+    esti = FruitRakeEstimate.new
+    esti.identifiers = ["OUTER"]
+    forward = esti.set_forward
+    assert_equal(["mod_1.f90"], forward["nested_ifdef.f90"])
 
-   esti = FruitRakeEstimate.new
-   esti.identifiers = ["INNER"]
-   forward = esti.set_forward
-   assert_equal([], forward["nested_ifdef.f90"])
+    esti = FruitRakeEstimate.new
+    esti.identifiers = ["INNER"]
+    forward = esti.set_forward
+    assert_equal([], forward["nested_ifdef.f90"])
 
-   esti = FruitRakeEstimate.new
-   esti.identifiers = []
-   forward = esti.set_forward
-   assert_equal([], forward["nested_ifdef.f90"])
- end
+    esti = FruitRakeEstimate.new
+    esti.identifiers = []
+    forward = esti.set_forward
+    assert_equal([], forward["nested_ifdef.f90"])
+  end
+
+
+##  def test_estim_external_func
+##    dir = "external_func/"
+##    esti = FruitRakeEstimate.new
+##    esti.source_dirs = [dir, ]
+##    esti.set_all_f
+##
+##    assert(esti.all_f.include?(dir + "ext_func_test.f90"), 
+##      "should include #{dir}ext_func_test.f90")
+##    assert(esti.all_f.include?(dir + "src_with_ext_func.f90"), 
+##      "should include src_with_ext_func.f90")
+##
+##    forward = esti.set_forward
+##    assert_equal(
+##             ["src_with_ext_func.f90"], 
+##      forward["ext_func_test.f90"], 
+##      "ext_func_test.f90 needs src_with_ext_func.f90"
+##    )
+##  end
+
+
+##  def test_estim_external_func2
+##    dir = "external_func/"
+##    esti = FruitRakeEstimate.new
+##    esti.source_dirs = [dir, ]
+##    esti.set_all_f
+##
+##    assert_equal(
+##      [
+##        "src_with_ext_func.f90", 
+##        "ext_func_test.f90", 
+##      ].sort,
+##      esti.get_needed(["ext_func_test.f90"]).sort
+##    )
+##  end
+
 
   def test_estim_external
     dir = "rake_estim_external/"

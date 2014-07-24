@@ -31,6 +31,7 @@ task :default => [
   :sample_selective_main,
   :sample_multi_dir,
   :sample_external_sub, 
+  :sample_external_func, 
   :coverage,
   :self_test_xml
 ]
@@ -81,6 +82,8 @@ CLEAN.include(FileList[
   "sample/test/calculator_fruit_driver.exe",
   "self_test_mpi/mpi_machine_file",
   "sample_mpi/mpi_machine_file",
+  "sample_external_sub/*.exe",
+  "sample_external_func/*.exe",
   "**/stdout",
   "**/fruit_basket_gen.f90",
 ])
@@ -169,6 +172,7 @@ task   :rake_estimate_test do
   puts "rake_estimate_test"
   Dir.chdir("ruby_test") do
     sh 'ruby rake_estimate_test.rb'
+    sh 'ruby rake_estimate_ext_test.rb'
   end
 end
 
@@ -218,6 +222,14 @@ desc "Complie a sample of tester for external subroutine"
 task   :sample_external_sub => [:anchor_root, :fruit_f90] do
   puts "sample_external_sub"
   Dir.chdir("sample_external_sub") do
+    sh "rake"
+  end
+end
+
+desc "Complie a sample of tester for external function"
+task   :sample_external_func => [:anchor_root, :fruit_f90] do
+  puts "sample_external_func"
+  Dir.chdir("sample_external_func") do
     sh "rake"
   end
 end
