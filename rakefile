@@ -32,6 +32,7 @@ task :default => [
   :sample_multi_dir,
   :sample_external_sub, 
   :sample_external_func, 
+  :sample_circular_dep, 
   :coverage,
   :self_test_xml
 ]
@@ -84,6 +85,7 @@ CLEAN.include(FileList[
   "sample_mpi/mpi_machine_file",
   "sample_external_sub/*.exe",
   "sample_external_func/*.exe",
+  "sample_circular_dep/*.exe",
   "**/stdout",
   "**/fruit_basket_gen.f90",
 ])
@@ -225,6 +227,15 @@ task   :sample_external_sub => [:anchor_root, :fruit_f90] do
     sh "rake"
   end
 end
+
+desc "A sample for external subroutines having circular dependency"
+task   :sample_circular_dep => [:anchor_root, :fruit_f90] do
+  puts "sample_circular_dep"
+  Dir.chdir("sample_circular_dep") do
+    sh "rake"
+  end
+end
+
 
 desc "Complie a sample of tester for external function"
 task   :sample_external_func => [:anchor_root, :fruit_f90] do

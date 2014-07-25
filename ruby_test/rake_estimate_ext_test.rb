@@ -85,5 +85,29 @@ class FruitRakeEstimateTest < Test::Unit::TestCase
 
   end
 
+
+  def test_get_ordered__circular
+    esti = FruitRakeEstimate.new
+
+    needed = [
+      "ext_subs_test.f90",
+      "ext_sub_1.f90",
+      "ext_sub_2.f90",
+    ]
+
+    esti.forward = {
+      'ext_subs_test.f90' => ['ext_sub_1.f90'], 
+      'ext_sub_2.f90' => ['ext_sub_1.f90'], 
+      'ext_sub_1.f90' => ['ext_sub_2.f90'], 
+    }
+
+    ordered = esti.get_ordered(needed)
+
+    assert_equal(3, ordered.size)
+    assert(ordered.include?("ext_subs_test.f90"))
+    assert(ordered.include?("ext_sub_1.f90"))
+    assert(ordered.include?("ext_sub_2.f90"))
+  end
+
 end
 

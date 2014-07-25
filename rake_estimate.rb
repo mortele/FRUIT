@@ -7,7 +7,9 @@
 require "pathname"
 
 class FruitRakeEstimate
-  attr_accessor :extensions, :forward, :all_f, :identifiers, :source_dirs
+  attr_accessor :extensions
+  attr_accessor :forward, :forward_mod, :forward_ext
+  attr_accessor :all_f, :identifiers, :source_dirs
   attr_accessor :ext_obj, :show_info
 
   EXT_DEFAULT = ["f90", "f95", "f03", "f08"]
@@ -149,18 +151,25 @@ class FruitRakeEstimate
       }
     }
     @forward = {}
+    @forward_mod = {}
+    @forward_ext = {}
     missings = []
     @all_f.each{|f|
       f_basename = Pathname.new(f).basename.to_s
       # f_basename = f.sub(/^.*\//, "")
 
-      @forward[ f_basename ] = []
+      @forward    [ f_basename ] = []
+      @forward_mod[ f_basename ] = []
+      @forward_ext[ f_basename ] = []
 
       f_uses_mod[ f_basename ].uniq.each{|a_mod|
         if mod_in_f[a_mod]
           if mod_in_f[a_mod] != f_basename
-            @forward[ f_basename ] << mod_in_f[ a_mod ]
-            @forward[ f_basename ].uniq!
+            @forward    [ f_basename ] << mod_in_f[ a_mod ]
+            @forward    [ f_basename ].uniq!
+
+            @forward_mod[ f_basename ] << mod_in_f[ a_mod ]
+            @forward_mod[ f_basename ].uniq!
           end
         else
           missings.push(a_mod)
@@ -170,8 +179,11 @@ class FruitRakeEstimate
       f_uses_sub[ f_basename ].uniq.each{|a_sub|
         if sub_in_this_f[ a_sub ]
           if sub_in_this_f[ a_sub ] != f_basename
-            @forward[ f_basename ] << sub_in_this_f[ a_sub ]
-            @forward[ f_basename ].uniq!
+            @forward    [ f_basename ] << sub_in_this_f[ a_sub ]
+            @forward    [ f_basename ].uniq!
+
+            @forward_ext[ f_basename ] << sub_in_this_f[ a_sub ]
+            @forward_ext[ f_basename ].uniq!
           end
         else
           missings.push(a_sub)
@@ -241,13 +253,15 @@ class FruitRakeEstimate
 
     @all_f.each{|f|
       f_basename = Pathname.new(f).basename.to_s
-      # f_basename = f.sub(/^.*\//, "")
-      next if @forward[ f_basename ].size == 0
+
+      ### next if @forward[ f_basename ].size == 0
+      next if @forward_mod[ f_basename ].size == 0
 
       needs = f_to_o( f_basename )
       needed = []
 
-      @forward[ f_basename ].each{|f_needed|
+      ### @forward[ f_basename ].each{|f_needed|
+      @forward_mod[ f_basename ].each{|f_needed|
         needed << f_to_o(f_needed)
       }
       file needs => needed if defined?(Rake)
@@ -294,18 +308,35 @@ class FruitRakeEstimate
     f_add = []
 
     (needed - ordered).each{|f|
-
       next if ordered.index(f)
-      if @forward[f].size == 0
+      if @forward[f].size == 0  #i.e. f needs nothing
         f_add << f
       elsif (ordered & @forward[f]).sort.uniq == (@forward[f]).sort.uniq
+                                #i.e. what f needs is already ordered
         f_add << f
       else
       end
     }
     if f_add.size == 0
-      return ordered.uniq
+      if needed.uniq.size == ordered.uniq.size
+        return ordered.uniq
+      end
+
+      puts "Message from " + __FILE__
+      puts "  Within needed sources"
+      puts "    " + needed.join(" ").to_s
+      puts "  could not ordder dependencies of "
+      puts "    " + (needed - ordered).join(" ").to_s
+      ordered_fallback = ordered       
+      (needed - ordered).each{|f|
+        ordered_fallback << f
+      }
+      puts "  Falling back to"
+      puts "    " + ordered_fallback.uniq.join(" ").to_s
+
+      return ordered_fallback.uniq
     end
+
     get_ordered(needed, ordered + f_add)
   end
 
@@ -316,7 +347,18 @@ class FruitRakeEstimate
         raise
       end
       needed = get_needed( [main] )
+
+      if @show_info
+        p "needed:"
+        p needed
+      end
+
       ordered_f = get_ordered(needed)
+
+      if @show_info
+        p "ordered_f:"
+        p ordered_f
+      end
 
       #replacing OBJ with ordered_o
       if defined?(FileList)

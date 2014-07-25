@@ -1,4 +1,18 @@
 -----------
+FRUIT 3.3.6
+-----------
+
+Previous version (3.3.5) could not compile
+external subroutines having circular dependencies.
+See  
+  sample_circular_dep
+.
+Fruit 3.3.6 tries to compile it 
+partially ignoring dependencies of external subroutines.
+
+
+
+-----------
 FRUIT 3.3.5
 -----------
 

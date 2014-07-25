@@ -333,6 +333,14 @@ class FruitRakeEstimateTest < Test::Unit::TestCase
       "mystack_test.f90"=>["mystack.f90"],
       "Z_constants.f90"=>[]
     }
+    #esti.forward_external = {
+    #  "dummy_main.f90"=>[],
+    #  "fruit_basket_gen.f90"=>[],
+    #  "fruit_driver_gen.f90"=>[],
+    #  "mystack.f90"=>[],
+    #  "mystack_test.f90"=>[],
+    #  "Z_constants.f90"=>[]
+    #}
 
     ordered = esti.get_ordered(needed)
 

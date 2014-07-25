@@ -1,0 +1,43 @@
+require 'rubygems'
+require 'fruit_processor'
+require 'rake/clean'
+include Rake::DSL if defined?(Rake::DSL)
+load "../rake_base.rb"
+
+$build_dir = "./"
+$source_dirs = ["./", "../src/"]
+$goal = 'fruit_driver.exe'
+$main = 'fruit_driver_gen.f90'
+$show_info = true
+
+fp = FruitProcessor.new
+## fp.process_only = FileList[""] #only files here are processed.
+#fp.shuffle = true            #if true order of methods will be random
+fp.pre_process($source_dirs)    #It generates fruit_*_gen.f90
+load "../rake_estimate.rb"   #Load this after fruit_*_gen.f90 generated.
+load "../rake_base_deps.rb"  #It uses SRC and OBJ updated by rake_estimate.rb
+
+task :default => :test
+
+task :test => $goal do
+  sh "./#{$goal}"
+end
+
+task :coverage => $for_coverage.clone.push(:test) do
+  if $gcov
+    sh "gcov " + $for_coverage.join(" ")
+  end
+	if $prof_genx
+	  sh "profmerge"
+    sh "codecov"
+	end
+end
+
+
+CLEAN.include(FileList[
+  'fruit_driver_gen.f90',
+  'fruit_basket_gen.f90', 
+  '*.mod', '*.o', $goal, 
+  '*.gcda', '*.gcno', '*.gcov'
+])
+
