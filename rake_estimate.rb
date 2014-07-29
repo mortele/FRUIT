@@ -102,7 +102,7 @@ class FruitRakeEstimate
 
             end
 
-            if line =~ /(?:^|\r|\n)\s*end +module +(\w+)\b?/i
+            if line =~ /(?:^|\r|\n)\s*end +module\b/i
               mod = ""
             end
 
@@ -254,13 +254,19 @@ class FruitRakeEstimate
     @all_f.each{|f|
       f_basename = Pathname.new(f).basename.to_s
 
-      ### next if @forward[ f_basename ].size == 0
+      if @show_info
+        if @forward    [ f_basename ].size > 0
+          puts "#{f_basename} needs " 
+          puts "  modules: " + @forward_mod[ f_basename ].join(" ")
+          puts "  external:" + @forward_ext[ f_basename ].join(" ")
+        end
+      end
+
       next if @forward_mod[ f_basename ].size == 0
 
       needs = f_to_o( f_basename )
       needed = []
 
-      ### @forward[ f_basename ].each{|f_needed|
       @forward_mod[ f_basename ].each{|f_needed|
         needed << f_to_o(f_needed)
       }
@@ -325,7 +331,7 @@ class FruitRakeEstimate
       puts "Message from " + __FILE__
       puts "  Within needed sources"
       puts "    " + needed.join(" ").to_s
-      puts "  could not ordder dependencies of "
+      puts "  could not order dependencies of "
       puts "    " + (needed - ordered).join(" ").to_s
       ordered_fallback = ordered       
       (needed - ordered).each{|f|
@@ -349,14 +355,14 @@ class FruitRakeEstimate
       needed = get_needed( [main] )
 
       if @show_info
-        p "needed:"
+        puts "Source files needed:"
         p needed
       end
 
       ordered_f = get_ordered(needed)
 
       if @show_info
-        p "ordered_f:"
+        p "Source files ordered:"
         p ordered_f
       end
 
