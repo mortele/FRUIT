@@ -7,8 +7,9 @@ external subroutines having circular dependencies.
 See  
   sample_circular_dep
 .
-Fruit 3.3.6 tries to compile it 
-partially ignoring dependencies of external subroutines.
+Fruit 3.3.6 tries to build it
+through considering some dependencies
+not while compiling but while linking.
 
 
 
