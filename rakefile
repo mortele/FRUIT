@@ -33,9 +33,16 @@ task :default => [
   :sample_external_sub, 
   :sample_external_func, 
   :sample_circular_dep, 
+  :sample_exit_at_fail,
   :coverage,
   :self_test_xml
 ]
+
+if RUBY_PLATFORM =~ /linux/i
+  task :default => [
+    :sample_using_make
+  ]
+end
 
 # :sample_single_dir is not included
 #    because fortran compiler must recognize .f95 extension.
@@ -89,7 +96,6 @@ CLEAN.include(FileList[
   "**/stdout",
   "**/fruit_basket_gen.f90",
 ])
-
 
 
 
@@ -203,6 +209,15 @@ task   :in_3_minutes => [:anchor_root, :fruit_f90] do
   end
 end
 
+desc "Build using not rake but make"
+task     :sample_using_make => [:anchor_root, :fruit_f90] do
+  puts   "sample_using_make"
+  Dir.chdir("sample_using_make") do
+    sh 'make'
+  end
+end
+
+
 desc "Compile a sample of single-directry test."
 task   :sample_single_dir => [:anchor_root, :fruit_f90] do
   puts "sample_single_dir"
@@ -210,6 +225,15 @@ task   :sample_single_dir => [:anchor_root, :fruit_f90] do
     sh "rake"
   end
 end
+
+desc "Compile a sample of exitting case if assertion fails."
+task        :sample_exit_at_fail => [:anchor_root, :fruit_f90] do
+  puts      "sample_exit_at_fail"
+  Dir.chdir("sample_exit_at_fail") do
+    sh "rake"
+  end
+end
+
 
 desc "Compile a sample which complies only specifiled testers."
 task   :sample_selective => [:anchor_root, :fruit_f90] do

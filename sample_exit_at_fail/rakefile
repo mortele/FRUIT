@@ -1,0 +1,60 @@
+require 'rubygems'
+require 'fruit_processor'
+require 'rake/clean'
+include Rake::DSL if defined?(Rake::DSL)
+load "../rake_base.rb"
+
+# fruit.f90 and fruit_util.f90 must exist in this directry.
+
+$build_dir = ""  #If not set, build will be done in ../build/
+$source_dirs = ["../src", "./"]  # "../src" is for fruit.f90 and fruit_util.f90
+$goal = "fruit_driver_fxx.exe"
+
+# Add this line at the beginning if there are generated code involved
+fp = FruitProcessor.new
+#fp.shuffle = true          #if true order of methods will be random
+fp.pre_process              #It generates fruit_*_gen.f90
+
+
+#--- Either load it
+$main = "fruit_driver_gen.f90"
+load "../rake_estimate.rb"  #Load this after fruit_*_gen.f90 generated.
+load '../rake_base_deps.rb' #It uses SRC and OBJ updated by rake_estimate.rb
+
+#--- or explicitly give dependencies
+# #File dependencies
+# file 'fruit.o' => ['fruit.f90', 'fruit_util.o']
+# 
+# #dependencies of your file
+# file 'mystack.o' => ['Z_constants.o']
+# 
+# #In this way you must delete dummy_main.f90,
+# #because only one fortran file with "program" statement 
+# #is allowed in this directry.
+#
+# load '../rake_base_deps.rb'
+#----
+
+
+task :default => [:test]
+
+task :test => $goal do
+  sh "./#{$goal}"
+end
+
+task :coverage => $for_coverage.clone.push(:test) do
+  if $gcov
+    sh "gcov " + $for_coverage.join(" ")
+  end
+	if $prof_genx
+	  sh "profmerge"
+	end
+end
+
+
+task :valgrind => $goal do
+  sh "valgrind --leak-check=full ./#{$goal}"
+end
+
+CLEAN.include($goal)
+

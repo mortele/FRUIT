@@ -1,4 +1,20 @@
 -----------
+FRUIT 3.3.7
+-----------
+
+Samples added:
+  sample_using_make
+    This sample uses not rake but make.
+    Works only for gfortran + make.
+
+  sample_exit_at_fail
+    Sample of exitting a test case when assertion fails.
+    User has to add a line
+      if (fruit_if_case_failed()) return
+    in the tester code.
+  
+
+-----------
 FRUIT 3.3.6
 -----------
 

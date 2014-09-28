@@ -45,6 +45,7 @@ module fruit
   integer, parameter :: MAX_MARKS_PER_LINE = 78
 
   character(*), parameter :: DEFAULT_CASE_NAME = '_not_set_'
+  logical, private, parameter :: DEFAULT_CASE_PASSED = .true.
 
   !---------- save ----------
   integer, private, save :: successful_assert_count = 0
@@ -62,7 +63,7 @@ module fruit
   integer, private, save :: failed_case_count = 0
   integer, private, save :: testCaseIndex = 1
   logical, private, save :: last_passed = .false.
-  logical, private, save :: case_passed = .false.
+  logical, private, save :: case_passed = DEFAULT_CASE_PASSED
   integer, private, save :: case_time_from = 0
   integer, private, save :: linechar_count = 0
 
@@ -85,7 +86,7 @@ module fruit
     integer :: failed_case_count
     integer :: testCaseIndex
     logical :: last_passed
-    logical :: case_passed
+    logical :: case_passed = DEFAULT_CASE_PASSED
     integer :: case_time_from
     integer :: linechar_count
   end type ty_stack
@@ -111,7 +112,6 @@ module fruit
   public :: FRUIT_PREFIX_LEN_MAX
   public :: override_xml_work, end_override_xml_work
   public :: get_assert_and_case_count
-  public :: fruit_summary_table
 
   public :: initializeFruit
   interface initializeFruit
@@ -401,8 +401,14 @@ module fruit
     module procedure get_assert_and_case_count_
   end interface
 
+  public          :: fruit_summary_table
   interface          fruit_summary_table
     module procedure fruit_summary_table_
+  end interface
+
+  public ::           fruit_if_case_failed
+  interface           fruit_if_case_failed
+    module procedure  fruit_if_case_failed_
   end interface
 contains
 
@@ -592,6 +598,20 @@ contains
     call fruit_summary_
   end subroutine obsolete_getTestSummary_
 
+
+  logical function fruit_if_case_failed_()
+    if (failed_assert_count == 0) then
+      fruit_if_case_failed_ = .false.
+      return
+    endif
+
+    if (case_passed) then
+      fruit_if_case_failed_ = .false.
+    else
+      fruit_if_case_failed_ = .true.
+    endif
+  end function fruit_if_case_failed_
+
   ! Run a named test case
   subroutine run_test_case_named_( tc, tc_name )
     interface
@@ -613,6 +633,8 @@ contains
     message_index_from = message_index
     call system_clock(case_time_from)
 
+    !!! "case_passed" is true here.
+    !!! "case_passed" becomes .false. at the first fail of assertion
     call tc()
 
     if ( initial_failed_assert_count .eq. failed_assert_count ) then
@@ -621,7 +643,6 @@ contains
        successful_case_count = successful_case_count+1
     else
        failed_case_count = failed_case_count+1
-       case_passed = .false.
     end if
 
     testCaseIndex = testCaseIndex+1
@@ -868,7 +889,6 @@ contains
   subroutine add_success
     successful_assert_count = successful_assert_count + 1
     last_passed = .true.
-    case_passed = .true.
     call success_mark_
   end subroutine add_success
 
@@ -978,7 +998,7 @@ contains
     stashed_suite%last_passed = last_passed
                   last_passed = .false.
     stashed_suite%case_passed = case_passed
-                  case_passed = .false.
+                  case_passed = DEFAULT_CASE_PASSED
     stashed_suite%case_time_from = case_time_from
                   case_time_from = 0
     stashed_suite%linechar_count = linechar_count
@@ -1051,6 +1071,7 @@ contains
     fail_case   =     failed_case_count
      suc_case   = successful_case_count
   end subroutine get_assert_and_case_count_
+
 
   !--------------------------------------------------------------------------------
   ! all assertions

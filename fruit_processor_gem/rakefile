@@ -61,6 +61,8 @@ task :default => [:clean, :test, "pkg/#{spec.name}-#{spec.version}.gem"] do
 end
 
 task :install => :default do
+  str = "gem install pkg/#{spec.name}-#{spec.version}.gem"
+  p str
   sh "gem install pkg/#{spec.name}-#{spec.version}.gem"
 end
 
