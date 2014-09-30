@@ -122,6 +122,37 @@ contains
     call assert_equals(expected(1:44), line_read(3))
   end subroutine test_linechar_count
 
+  subroutine test_fruit_hide_dots
+    character(len = 500) :: line_read
+    integer :: failed_count
+    integer :: total_count
+
+    call override_stdout(20, STDOUTNAME)
+      call stash_test_suite
+        call fruit_hide_dots
+        call assert_equals(.true., .true.)
+        call assert_equals(.true., .false.)
+        call assert_equals(-5, -5)
+        call assert_equals(-5, -6)
+        call fruit_show_dots
+        call assert_equals(1.000, 1.001, 0.002)
+        call assert_equals(1.000, 1.003, 0.002)
+
+        call get_failed_count(failed_count)
+        call get_total_count(total_count)
+      call restore_test_suite
+    call end_override_stdout
+
+    call assert_equals(3, failed_count, "Number of failed assertions")
+    call assert_equals(6, total_count, "Number of total assertions")
+
+    open (20, file = STDOUTNAME)
+      read (20, '(a)') line_read
+      call assert_equals("FF.F", line_read)
+    close(20)
+  end subroutine test_fruit_hide_dots
+
+
   subroutine test_assert_equals
     character(len = 500) :: line_read
     integer :: failed_count

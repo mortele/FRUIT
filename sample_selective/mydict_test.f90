@@ -11,12 +11,16 @@ contains
   subroutine test_new_mydict
     type(ty_mydict), pointer :: new_dict
 
+    call fruit_hide_dots
+
     nullify(new_dict)
     call new_mydict(new_dict)
     call assert_equals(.true., associated(new_dict))
     call assert_equals(.true., associated(new_dict%keys), "keys")
     call assert_equals(.true., associated(new_dict%values), "values")
     call mydict_final(new_dict)
+
+    call fruit_show_dots
   end subroutine test_new_mydict
 
   subroutine test_mydict_add

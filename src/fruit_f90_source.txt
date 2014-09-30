@@ -66,6 +66,7 @@ module fruit
   logical, private, save :: case_passed = DEFAULT_CASE_PASSED
   integer, private, save :: case_time_from = 0
   integer, private, save :: linechar_count = 0
+  logical, private, save :: if_show_dots = .true.
 
   integer, parameter :: FRUIT_PREFIX_LEN_MAX = 50
   character(len = FRUIT_PREFIX_LEN_MAX) :: prefix = ""
@@ -89,6 +90,7 @@ module fruit
     logical :: case_passed = DEFAULT_CASE_PASSED
     integer :: case_time_from
     integer :: linechar_count
+    logical :: if_show_dots
   end type ty_stack
 
   type(ty_stack), save :: stashed_suite
@@ -298,6 +300,16 @@ module fruit
   interface           fruit_if_case_failed
     module procedure  fruit_if_case_failed_
   end interface
+ 
+  public ::           fruit_hide_dots
+  interface           fruit_hide_dots
+    module procedure  fruit_hide_dots_
+  end interface
+ 
+  public ::           fruit_show_dots
+  interface           fruit_show_dots
+    module procedure  fruit_show_dots_
+  end interface
 contains
 
   subroutine init_fruit(rank)
@@ -499,6 +511,17 @@ contains
       fruit_if_case_failed_ = .true.
     endif
   end function fruit_if_case_failed_
+
+
+  subroutine fruit_show_dots_
+    if_show_dots = .true.
+  end subroutine fruit_show_dots_
+
+
+  subroutine fruit_hide_dots_
+    if_show_dots = .false.
+  end subroutine fruit_hide_dots_
+
 
   ! Run a named test case
   subroutine run_test_case_named_( tc, tc_name )
@@ -777,7 +800,10 @@ contains
   subroutine add_success
     successful_assert_count = successful_assert_count + 1
     last_passed = .true.
-    call success_mark_
+
+    if (if_show_dots) then
+      call success_mark_
+    endif
   end subroutine add_success
 
   subroutine failed_assert_action (expected, got, message, if_is)
@@ -891,6 +917,8 @@ contains
                   case_time_from = 0
     stashed_suite%linechar_count = linechar_count
                   linechar_count = 0
+    stashed_suite%if_show_dots = if_show_dots
+                  if_show_dots = .true.
   end subroutine stash_test_suite
 
   subroutine restore_test_suite
@@ -916,6 +944,7 @@ contains
     case_passed        = stashed_suite%case_passed
     case_time_from     = stashed_suite%case_time_from
     linechar_count     = stashed_suite%linechar_count
+    if_show_dots       = stashed_suite%if_show_dots
   end subroutine restore_test_suite
 
   subroutine end_override_stdout_

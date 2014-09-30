@@ -12,7 +12,19 @@ Samples added:
     User has to add a line
       if (fruit_if_case_failed()) return
     in the tester code.
+
+Subroutines to surppress output of "." added.
+  After 
+    call fruit_hide_dots
+  dots are not written.
+  To output dots again, 
+    call fruit_show_dots
+  can be used.
+  These calls are tested in a sample "sample_selective".
   
+No changes in fruit_processor in this version.
+Version number of fruit_processor remains 3.3.6.
+
 
 -----------
 FRUIT 3.3.6
