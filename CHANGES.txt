@@ -1,4 +1,20 @@
 -----------
+FRUIT 3.3.8
+-----------
+
+When "!" appears on the line subroutine name defined,
+the tester subroutine had been ignored.
+
+For example, on this code
+   subroutine test_some_routine !comment
+     ...
+   end subroutine
+tester subroutine was ignored.
+
+This behavior of fruit_processor is fixed.
+
+
+-----------
 FRUIT 3.3.7
 -----------
 

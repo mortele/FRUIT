@@ -8,17 +8,7 @@ require "pathname"
 
 class FruitProcessor
   attr_accessor :shuffle
-
-  #----
   attr_accessor :xml_prefix
-  #----
-  #def xml_prefix  
-  #  @xml_prefix  
-  #end
-  #def xml_prefix  =(val)
-  #  @xml_prefix = val
-  #end
-  #----
 
   #------
   # attr_accessor :process_only
@@ -187,7 +177,8 @@ class FruitProcessor
         test_module_name = test_module_name_from_file_path file
 
         if_ok, error_msg = module_name_consistent? file
-        warn error_msg if (!if_ok) 
+        #warn error_msg if (!if_ok) 
+        raise error_msg if (!if_ok) 
 
         subroutine_name="#{test_module_name}_all_tests"
         test_subroutine_names << subroutine_name
@@ -241,7 +232,7 @@ class FruitProcessor
           f.write "      & \"#{test_module_name}\")\n"
           f.write "    end if\n"
 
-          if @spec_hash[file]['teardown'] != nil
+          if   @spec_hash[file]['teardown'] != nil
             if @spec_hash[file]['teardown']=='each'
               f.write "    call teardown\n"
             end
@@ -250,7 +241,7 @@ class FruitProcessor
           spec_counter += 1
         end
 
-        if @spec_hash[file]['teardown'] != nil
+        if   @spec_hash[file]['teardown'] != nil
           if @spec_hash[file]['teardown']=='all'
             f.write "    call teardown_after_all\n"
           end
@@ -289,14 +280,13 @@ class FruitProcessor
 
 
   def parse_method_names file_name
-    File.open(file_name, 'r') do |source_file|
+    FruitFortranFile.open(file_name, 'r') do |f|
       @spec_hash[file_name]={}
       @spec_hash[file_name]['methods'] = {}
       @spec_hash[file_name]['methods']['name'] =[]
       @spec_hash[file_name]['methods']['spec'] =[]
 
-      source_file.grep( /^\s*subroutine\s*(\w+)\s*$/i ) do |dummy|
-        subroutine_name=$1
+      while subroutine_name = f.read_noarg_sub_name
         if subroutine_name.downcase == "setup"
           @spec_hash[file_name]['setup']='each'
           next
@@ -325,9 +315,8 @@ class FruitProcessor
 
   def warn_method_names file_name
     warned = []
-    File.open(file_name, 'r') do |source_file|
-      source_file.grep( /^\s*subroutine\s*(test\w+)\s*\(/i ) do
-        subroutine_name = $1
+    FruitFortranFile.open(file_name, 'r') do |f|
+      while subroutine_name = f.read_tester_name_with_arg
         warned << subroutine_name
       end
     end
@@ -417,51 +406,44 @@ class FruitProcessor
 
   def gather_specs file
     spec=''
-    File.open(file, 'r') do |infile|
-      while (line = infile.gets)
-        if line =~ /^\s*subroutine\s+(\w+)\s*$/i
-          subroutine_name=$1
+    FruitFortranFile.open(file, 'r') do |f|
+      while subroutine_name = f.read_noarg_sub_name
+        next if subroutine_name !~ /^test_/
+        spec_var=nil
 
-          #The same condition must be used for storing
-          #both subroutine name and spec string.
-          #Otherwise number of subroutine names and specs mismatch.
-          next if subroutine_name !~ /^test_/
-          spec_var=nil
+        while (inside_subroutine = f.gets)
+          break if inside_subroutine =~ /^\s*end\s+subroutine/i
+          break if inside_subroutine =~ /^\s*end *(!.*)?$/i
 
-          while (inside_subroutine = infile.gets)
-            break if inside_subroutine =~ /end\s+subroutine/i
-            break if inside_subroutine =~ /end *(!.*)?$/i
-
-            if inside_subroutine =~ /^\s*\!FRUIT_SPEC\s*(.*)$/i
-              spec_var = $1.chomp
-              next
-            end
-
-            next if inside_subroutine !~ /^\s*character.*::\s*spec\s*=(.*)$/i
-            spec_var = $1
-            spec_var =~ /\s*(["'])(.*)(\1|\&)\s*(!.*)?$/
-            spec_var = $2
-            last_character = $3
-
-            if last_character == '&'
-              while (next_line = infile.gets)
-                next_line.strip!
-                next_line.sub!(/^\&/, '')
-                spec_var += "\n#{next_line.chop}"
-                break if ! end_match(next_line, '&')
-              end
-            end
-          end # end of inside subroutine lines
-
-          if spec_var == nil
-            spec=subroutine_name.gsub('test_', '').gsub('_', ' ')
-          else
-            spec = spec_var
+          if inside_subroutine =~ /^\s*\!FRUIT_SPEC\s*(.*)$/i
+            spec_var = $1.chomp
+            next
           end
 
-          @spec_hash[file]['methods']['spec'] << spec
-        end # end of test match
-      end # end of each line in file
+          next if inside_subroutine !~ /^\s*character.*::\s*spec\s*=(.*)$/i
+          spec_var = $1
+          spec_var =~ /\s*(["'])(.*)(\1|\&)\s*(!.*)?$/
+          spec_var = $2
+          last_character = $3
+
+          if last_character == '&'
+            while (next_line = f.gets)
+              next_line.strip!
+              next_line.sub!(/^\&/, '')
+              spec_var += "\n#{next_line.chop}"
+              break if ! end_match(next_line, '&')
+            end
+          end
+        end # end of inside subroutine lines
+
+        if spec_var == nil
+          spec=subroutine_name.gsub('test_', '').gsub('_', ' ')
+        else
+          spec = spec_var
+        end
+
+        @spec_hash[file]['methods']['spec'] << spec
+      end # end of each subroutine name
     end # end of file open
   end
 
@@ -591,9 +573,8 @@ class FruitProcessor
 
   def parse_module_name_of_file file_name
     mods = []
-    File.open(file_name, 'r') do |line|
-      line.grep( /^\s*module\s*(\w+)\s*$/i ) do
-        module_name=$1 
+    FruitFortranFile.open(file_name, 'r') do |f|
+      while module_name = f.read_mod_name
         if module_name =~ /^(\S+_test)$/i
           test_name = $1.downcase
           mods.push(test_name)
@@ -603,3 +584,64 @@ class FruitProcessor
     return mods
   end
 end
+
+class FruitFortranFile < File
+  def read_noarg_sub_name
+    while fortran_line = read_fortran_line do
+      if fortran_line.match( /^\s*subroutine\s*(\w+)\s*(\!.*)?$/i )
+        sub_name = $1
+        return sub_name
+      end
+    end
+    return nil
+  end
+
+
+  def read_tester_name_with_arg
+    while fortran_line = read_fortran_line do
+      if fortran_line.match( /^\s*subroutine\s*(test\w+)\s*\(/i )
+        tester_with_arg = $1
+        return tester_with_arg
+      end
+    end
+  end
+#--
+#      f.grep( /^\s*subroutine\s*(test\w+)\s*\(/i ) do
+#        subroutine_name = $1
+#--
+
+
+  def read_mod_name
+    while fortran_line = read_fortran_line do
+      if fortran_line.match( /^\s*module\s*(\w+)\s*(\!.*)?$/i )
+        sub_name = $1
+        return $1
+      end
+    end
+    return nil
+  end
+
+  def read_fortran_line
+    conti_line =   /\&\s*(\!.*)?[\n\r]*$/
+    empty_line    = /^\s*(\!.*)?[\n\r]*$/
+
+    #Skip empty lines
+    line = ""
+    while (line.match(empty_line))
+      line = self.gets
+      return line if (not line)
+    end
+
+    #Join FORTRAN's coitinuous lines ingoring comments (!) and empty lines.
+    while (line.match(conti_line))
+      line2 = self.gets
+      break if (not line2)
+      next  if line2.match( empty_line )
+      line.sub!(conti_line, "")
+      line2.sub!(/^\s*\&/, "")
+      line = line + line2
+    end
+    return line
+  end
+end
+

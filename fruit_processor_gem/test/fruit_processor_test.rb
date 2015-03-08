@@ -83,6 +83,69 @@ class FruitProcessorTest < Test::Unit::TestCase
   end
 
 
+
+  def test_fruit_picker__comment
+    dir = "for_test_picker__comment"
+    basket        = dir + "/fruit_basket_gen.f90"
+    tester        = dir + "/comment_test.f90"
+
+    if (File.exist?(basket))
+        File.unlink(basket)
+    end
+
+    File.open( tester, "w"){|f|
+      f.write <<-END
+        module comment_test !comment here
+          implicit none
+        contains
+          subroutine test_first!comment
+            assert_equals(1, 1, "asserts 1 is 1")
+          end subroutine test_first
+
+          subroutine test_second  !comment
+            assert_equals(3, 4, "asserts 3 is 4")
+          end subroutine test_second
+
+          subroutine & !
+   &test_thi&
+     &rd
+            assert_equals(3, 4, "asserts 3 is 4")
+          end subroutine test_third
+        end module comment_test
+      END
+    }
+
+    fp = FruitProcessor.new
+    fp.load_files   dir
+    fp.fruit_picker dir
+
+    if_test_first  = false
+    if_test_second = false
+    if_test_third  = false
+    File.open(basket, 'r') do |f|
+      f.each{|line|
+        # puts line
+        if /call +run_test_case *\( *test_first *,/ =~ line
+          if_test_first = true
+        end
+        if /call +run_test_case *\( *test_second *,/ =~ line
+          if_test_second = true
+        end
+        if /call +run_test_case *\( *test_third *,/ =~ line
+          if_test_third = true
+        end
+      }
+    end
+
+    assert(if_test_first , "routine test_first called")
+    assert(if_test_second, "routine test_second should called")
+    assert(if_test_third , "routine test_third  should called")
+
+    File.unlink tester
+  end
+
+
+
   def test_fruit_picker__timestamp
     basket        = "for_test_picker/fruit_basket_gen.f90"
 
@@ -542,3 +605,54 @@ class FruitProcessorTest < Test::Unit::TestCase
 #  end
 
 end
+
+class FruitFortranFileTest < Test::Unit::TestCase
+  def test_read_fortran_line
+    fortran_code = "fortran_cont_and_comment.f90"
+    if (File.exist?(fortran_code))
+        File.unlink(fortran_code)
+    end
+    File.open( fortran_code, "w"){|f|
+      f.write <<-END
+subroutine &
+test_abcd !
+
+   subrou&
+   &tine test_ef&
+gh
+
+subroutine &
+test_& !
+ !comment line and a blank line may occur
+
+&ijkl
+
+subroutine test_mnop !
+
+subroutine test_qrst
+
+      END
+    }
+    array = []
+    FruitFortranFile.open(fortran_code, 'r') do |f|
+      while line = f.read_fortran_line do
+        if line.match("^\s*subroutine")
+          line.sub!(/^\s+/, "")
+          line.sub!(/\s*(\!.*)?[\n\r]*$/, "")
+          array.push( line )
+        end
+      end
+    end
+    assert_equal( "subroutine test_abcd", array[ 0 ] )
+    assert_equal( "subroutine test_efgh", array[ 1 ] )
+    assert_equal( "subroutine test_ijkl", array[ 2 ] )
+    assert_equal( "subroutine test_mnop", array[ 3 ] )
+    assert_equal( "subroutine test_qrst", array[ 4 ] )
+    assert_equal( 5, array.size )
+
+    if (File.exist?(fortran_code))
+        File.unlink(fortran_code)
+    end
+  end
+end
+
