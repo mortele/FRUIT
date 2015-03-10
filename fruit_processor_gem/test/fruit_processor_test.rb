@@ -607,7 +607,7 @@ class FruitProcessorTest < Test::Unit::TestCase
 end
 
 class FruitFortranFileTest < Test::Unit::TestCase
-  def test_read_fortran_line
+  def test_read_noarg_sub_name
     fortran_code = "fortran_cont_and_comment.f90"
     if (File.exist?(fortran_code))
         File.unlink(fortran_code)
@@ -633,13 +633,65 @@ subroutine test_qrst
 
       END
     }
+    sub_names = []
+    FruitFortranFile.open(fortran_code, 'r') do |f|
+      while sub_name = f.read_noarg_sub_name do
+        sub_names.push( sub_name )
+      end
+    end
+    assert_equal( "test_abcd", sub_names[ 0 ] )
+    assert_equal( "test_efgh", sub_names[ 1 ] )
+    assert_equal( "test_ijkl", sub_names[ 2 ] )
+    assert_equal( "test_mnop", sub_names[ 3 ] )
+    assert_equal( "test_qrst", sub_names[ 4 ] )
+    assert_equal( 5, sub_names.size )
+
+    if (File.exist?(fortran_code))
+        File.unlink(fortran_code)
+    end
+  end
+
+  def test_read_fortran_line
+    fortran_code = "fortran_cont_and_comment.f90"
+    if (File.exist?(fortran_code))
+        File.unlink(fortran_code)
+    end
+    File.open( fortran_code, "w"){|f|
+      f.write <<-END
+subroutine &
+test_abcd !
+
+   subrou&
+   &tine test_ef&
+gh
+
+subroutine &
+test_& !
+ !comment line and a blank line may occur
+
+&ijkl
+
+subroutine test_mnop !
+
+subroutine test_qrst
+
+string = "abc"
+string = "ab& c"
+string = "d!ef"
+string = "abc!def&!" // & !comment
+ &"ghi!"
+      END
+    }
     array = []
+    string_lines = []
     FruitFortranFile.open(fortran_code, 'r') do |f|
       while line = f.read_fortran_line do
         if line.match("^\s*subroutine")
           line.sub!(/^\s+/, "")
           line.sub!(/\s*(\!.*)?[\n\r]*$/, "")
           array.push( line )
+        elsif line.match("^\s*string ")
+          string_lines.push line
         end
       end
     end
@@ -650,9 +702,15 @@ subroutine test_qrst
     assert_equal( "subroutine test_qrst", array[ 4 ] )
     assert_equal( 5, array.size )
 
+    assert_equal( "string = \"abc\"\n", string_lines[0] )
+    assert_equal( "string = \"ab& c\"\n", string_lines[1] )
+    assert_equal( "string = \"d!ef\"\n", string_lines[2] )
+#fail#  assert_equal( "string = \"abc!def&!\" // \"ghi!\"\n", string_lines[3] )
+
     if (File.exist?(fortran_code))
         File.unlink(fortran_code)
     end
   end
+
 end
 

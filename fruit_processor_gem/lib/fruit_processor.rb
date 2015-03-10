@@ -596,7 +596,6 @@ class FruitFortranFile < File
     return nil
   end
 
-
   def read_tester_name_with_arg
     while fortran_line = read_fortran_line do
       if fortran_line.match( /^\s*subroutine\s*(test\w+)\s*\(/i )
@@ -605,11 +604,6 @@ class FruitFortranFile < File
       end
     end
   end
-#--
-#      f.grep( /^\s*subroutine\s*(test\w+)\s*\(/i ) do
-#        subroutine_name = $1
-#--
-
 
   def read_mod_name
     while fortran_line = read_fortran_line do
@@ -622,7 +616,7 @@ class FruitFortranFile < File
   end
 
   def read_fortran_line
-    conti_line =   /\&\s*(\!.*)?[\n\r]*$/
+    conti_line_end =   /\&\s*(\!.*)?[\n\r]*$/
     empty_line    = /^\s*(\!.*)?[\n\r]*$/
 
     #Skip empty lines
@@ -633,11 +627,11 @@ class FruitFortranFile < File
     end
 
     #Join FORTRAN's coitinuous lines ingoring comments (!) and empty lines.
-    while (line.match(conti_line))
+    while (line.match(conti_line_end))
       line2 = self.gets
       break if (not line2)
       next  if line2.match( empty_line )
-      line.sub!(conti_line, "")
+      line.sub!(conti_line_end, "")
       line2.sub!(/^\s*\&/, "")
       line = line + line2
     end
