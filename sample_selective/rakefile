@@ -6,7 +6,7 @@ load "../rake_base.rb"
 
 
 $build_dir = ""  #If not set, build will be done in ../build/
-$source_dirs = ["../src/", "./"] # "../src/" is for fruit.f90 and fruit_util.f90
+$source_dirs = ["../src/", "./"] # "../src/" is for fruit.f90
 $goal = "fruit_driver_selective"
 $main = "fruit_driver_gen.f90"
 

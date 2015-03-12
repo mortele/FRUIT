@@ -14,8 +14,6 @@ task :default => [:test]
 task :test => [:clean] do
   #following the procedure in "Add Fruit to Your Diet in 3 Minutes"
   os_install("../src/fruit.f90", "fruit.f90")
-  os_install("../src/fruit_util.f90", "fruit_util.f90")
-  sh "#{$compiler} #{$option} -c fruit_util.f90"
   sh "#{$compiler} #{$option} -c fruit.f90"
   sh "#{$compiler} #{$option} -c calculator.f90"
   sh "#{$compiler} #{$option} -c calculator_test.f90"

@@ -442,26 +442,24 @@ class GuiCore
     return @ready_fruitf90 if @ready_fruitf90
 
     if (@tester_dir and
-        File.exist?(@tester_dir + "/fruit.f90") and 
-        File.exist?(@tester_dir + "/fruit_util.f90")
+        File.exist?(@tester_dir + "/fruit.f90") 
     )
       @window.add_text(
-        "#{@tester_dir}/fruit.f90 and \n#{@tester_dir}/fruit_util.f90 are used.\n")
+        "#{@tester_dir}/fruit.f90 is used.\n")
       @ready_fruitf90 = @tester_dir
     elsif (
       @dir_fruit_f90 and 
-      File.exist?(@dir_fruit_f90 + "/fruit.f90") and
-      File.exist?(@dir_fruit_f90 + "/fruit_util.f90")
+      File.exist?(@dir_fruit_f90 + "/fruit.f90") 
     )
       @window.add_text(
-        "#{@dir_fruit_f90}/fruit.f90 and \n#{@dir_fruit_f90}/fruit_util.f90 are used.\n")
+        "#{@dir_fruit_f90}/fruit.f90 is used.\n")
       @ready_fruitf90 = @dir_fruit_f90
     else
       @window.add_text(
-        "At #{@tester_dir}, fruit.f90 or fruit_util.f90 is not found.\n")
+        "At #{@tester_dir}, fruit.f90 is not found.\n")
       if @dir_fruit_f90
         @window.add_text(
-          "At #{@dir_fruit_f90}, fruit.f90 or fruit_util.f90 is not found.\n")
+          "At #{@dir_fruit_f90}, fruit.f90 is not found.\n")
         @ready_fruitf90 = false
       end
     end
@@ -545,9 +543,9 @@ class GuiCore
       if !File.exist?("fruit.f90")
         File.symlink(dir_fruit_f90 + "/fruit.f90", "fruit.f90")
       end
-      if !File.exist?("fruit_util.f90")
-        File.symlink(dir_fruit_f90 + "/fruit_util.f90", "fruit_util.f90")
-      end
+      # if !File.exist?("fruit_util.f90")
+      #   File.symlink(dir_fruit_f90 + "/fruit_util.f90", "fruit_util.f90")
+      # end
     end
   
     which_rake_estimate = "rake_estimate.rb"
@@ -558,7 +556,7 @@ class GuiCore
       which_rake_base_deps = dir_rake_base + "/rake_base_deps.rb"
     end
   
-    files_needed = [which_rake_base, which_rake_estimate, which_rake_base_deps, "fruit.f90", "fruit_util.f90"]
+    files_needed = [which_rake_base, which_rake_estimate, which_rake_base_deps, "fruit.f90"]
     files_needed.each{|f|
       if !File.exist?(f)
         @window.add_text_warn(f + " not found.\n")

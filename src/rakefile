@@ -14,14 +14,14 @@ if ! File.exist?("fruit.f90")
   sh 'ruby fruit_f90_generator.rb'
 end
 
-SRC = FileList['fruit_util.f90', 'fruit.f90']
+SRC = FileList['fruit.f90']
 OBJ = SRC.ext($ext_obj)  # $ext_obj is either "o" or "obj"
 
 load "../rake_base_deps.rb"  #It use SRC and OBJ
 
 # File dependencies go here ...
 #file 'libfruit.a' => ['fruit.o', 'fruit_utility.o']
-file 'fruit.' + $ext_obj => ['fruit.f90', 'fruit_util.' + $ext_obj]
+file 'fruit.' + $ext_obj => ['fruit.f90']
 
 desc "build #{$goal}"
 file $goal => 'fruit.f90'

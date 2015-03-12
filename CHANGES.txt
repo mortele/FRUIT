@@ -1,4 +1,13 @@
 -----------
+FRUIT 3.3.9
+-----------
+
+Content of fruit_util.f90 is added into fruit.f90.
+No changes in fruit_processor in this version.
+Version number of fruit_processor remains 3.3.8.
+
+
+-----------
 FRUIT 3.3.8
 -----------
 

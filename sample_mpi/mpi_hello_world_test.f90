@@ -34,7 +34,7 @@ contains
 
     ! call assert_not_equals(host_rank(0), host_rank(1))
 
-    write(message, '("rank=", i3)') rank
-    call assert_false(.true., "assert_false, " // trim(message))
+    write(message, '("rank=", i3, " in size=", i3)') rank, size
+    call assert_false(.true., "expected to fail on each rank, " // trim(message))
   end subroutine test_hello_world
 end module mpi_hello_world_test

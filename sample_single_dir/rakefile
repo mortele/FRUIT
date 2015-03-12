@@ -4,10 +4,10 @@ require 'rake/clean'
 include Rake::DSL if defined?(Rake::DSL)
 load "../rake_base.rb"
 
-# fruit.f90 and fruit_util.f90 must exist in this directry.
+# fruit.f90 must exist in this directry.
 
 $build_dir = ""  #If not set, build will be done in ../build/
-$source_dirs = ["../src", "./"]  # "../src" is for fruit.f90 and fruit_util.f90
+$source_dirs = ["../src", "./"]  # "../src" is for fruit.f90
 $goal = "fruit_driver_fxx.exe"
 
 # Add this line at the beginning if there are generated code involved
@@ -23,7 +23,7 @@ load '../rake_base_deps.rb' #It uses SRC and OBJ updated by rake_estimate.rb
 
 #--- or explicitly give dependencies
 # #File dependencies
-# file 'fruit.o' => ['fruit.f90', 'fruit_util.o']
+# file 'fruit.o' => ['fruit.f90']
 # 
 # #dependencies of your file
 # file 'mystack.o' => ['Z_constants.o']

@@ -112,7 +112,7 @@ task :compile => [:anchor_root, :fruit_f90] do
   end
 end
 
-desc "(Obsolete) Test of fruit.f90 and fruit_util.f90."
+desc "(Obsolete) Test of fruit.f90."
 task :test => [:anchor_root, :fruit_f90, :compile] do
   Dir.chdir("test") do
     sh 'rake'
@@ -143,7 +143,7 @@ task :self_test_xml => [:anchor_root, :fruit_f90] do
   end
 end
 
-desc "Self test of fruit.f90 and fruit_util.f90."
+desc "Self test of fruit.f90."
 task :self_test => [:anchor_root, :fruit_f90] do
   puts      "self_test"
   Dir.chdir("self_test") do
@@ -151,7 +151,7 @@ task :self_test => [:anchor_root, :fruit_f90] do
   end
 end
 
-desc "Using valgrind do Self test of fruit.f90 and fruit_util.f90."
+desc "Using valgrind do Self test of fruit.f90."
 task :self_test_valgrind => [:anchor_root, :fruit_f90] do
   puts      "self_test_valgrind"
   Dir.chdir("self_test") do

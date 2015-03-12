@@ -33,14 +33,14 @@ Samples:
   in_3_minutes
     A sample of manually written driver.
     see https://sourceforge.net/apps/mediawiki/fortranxunit/index.php?title=FruitExample
-    * fruit.f90 and fruit_util.f90 must be copied to in_3_minutes beforehand.
+    * fruit.f90 must be copied to in_3_minutes beforehand.
 
   sample
     Multi-directry test.
     Tester codes are in fruit-x.x.x/sample/test directry.
     Before running the test,
     tested code (fruit-x.x.x/sample/src/calculator.f90) and
-    fruit codes (fruit-x.x.x/src/fruit.f90, fruit_util.f90)
+    fruit code (fruit-x.x.x/src/fruit.f90)
     must be compiled into lib*.a archives.
     * libfruit.a needed. To prepare it, run "rake compile" in fruit-x.x.x directry for libfruit.a.
 
@@ -76,5 +76,5 @@ Samples:
     Selective build: fruit-x.x.x/sample_multi_dir/build_selective/
 
   self_test
-    Test of fruit.f90 and fruit_util.f90 themselves.
+    Test of fruit.f90 itsef.
 

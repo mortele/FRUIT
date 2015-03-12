@@ -7,7 +7,7 @@ load "../rake_base.rb"
 require 'rexml/document'
 
 $build_dir = ""  #If not set, build will be done in ../build/
-$source_dirs = ["../src", "./"]  # "../src" is for fruit.f90 and fruit_util.f90
+$source_dirs = ["../src", "./"]  # "../src" is for fruit.f90
 $goal = "fruit_driver_fxx.exe"
 
 # Add this line at the beginning if there are generated code involved

@@ -1,6 +1,5 @@
 module fruit_mpi
   use fruit
-  use fruit_util
   use mpi
   implicit none
   private

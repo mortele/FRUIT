@@ -6,7 +6,8 @@ compiler=gfortran
 option=-Wall -Wextra -pedantic -fbounds-check -Wuninitialized -O -g \
  -Wno-unused-parameter -cpp
 
-fruit_code = ../src/fruit_util.f90 ../src/fruit.f90
+### fruit_code = ../src/fruit_util.f90 ../src/fruit.f90
+fruit_code = ../src/fruit.f90
 code = calculator.f90 calculator_test.f90
 code_gen = fruit_basket_gen.f90 fruit_driver_gen.f90
 
