@@ -660,15 +660,19 @@ contains
       write (stdout,*) "   . : successful assert,   F : failed assert "
       write (stdout,*)
     endif
+!$omp critical
     if ( .not. allocated(message_array) ) then
       allocate(message_array(MSG_ARRAY_INCREMENT))
     end if
+!$omp end critical
   end subroutine init_fruit
 
   subroutine fruit_finalize_
+!$omp critical
     if (allocated(message_array)) then
       deallocate(message_array)
     endif
+!$omp end critical
   end subroutine fruit_finalize_
 
   subroutine init_fruit_xml_(rank)
@@ -993,6 +997,7 @@ contains
   !!  Definition of linechar_count is moved to module,
   !!  so that it can be stashed and restored.
 
+    !$omp critical
     linechar_count = linechar_count + 1
     if ( linechar_count .lt. MAX_MARKS_PER_LINE ) then
        write(stdout,"(A1)",ADVANCE='NO') chr
@@ -1000,7 +1005,7 @@ contains
        write(stdout,"(A1)",ADVANCE='YES') chr
        linechar_count = 0
     endif
-
+    !$omp end critical
   end subroutine output_mark_
 
   subroutine success_mark_
@@ -1021,6 +1026,7 @@ contains
        stop 1
     end if
 
+!$omp critical
     if (message_index > current_max) then
       msg_swap_holder(1:current_max) = message_array(1:current_max)
       deallocate(message_array)
@@ -1032,6 +1038,7 @@ contains
 
     message_array (message_index) = msg
     message_index = message_index + 1
+!$omp end critical
   end subroutine increase_message_stack_
 
 
@@ -1125,8 +1132,10 @@ contains
   end subroutine obsolete_
 
   subroutine add_success
-    successful_assert_count = successful_assert_count + 1
-    last_passed = .true.
+    !$omp critical
+      successful_assert_count = successful_assert_count + 1
+      last_passed = .true.
+    !$omp end critical
 
     if (if_show_dots) then
       call success_mark_
@@ -1144,9 +1153,11 @@ contains
       call make_error_msg_ (expected, got, .true., message)
     endif
     call increase_message_stack_
-    failed_assert_count = failed_assert_count + 1
-    last_passed = .false.
-    case_passed = .false.
+    !$omp critical
+      failed_assert_count = failed_assert_count + 1
+      last_passed = .false.
+      case_passed = .false.
+    !$omp end critical
     call failed_mark_
   end subroutine failed_assert_action
 
