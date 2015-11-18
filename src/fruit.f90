@@ -1176,6 +1176,7 @@ contains
     logical,      intent(in)           :: if_is
     character(*), intent(in), optional :: message
 
+!$omp critical     (FRUIT_OMP_MAKE_MSG)
     msg = '[' // trim(strip(case_name)) // ']: ' 
     if (if_is) then
       msg = trim(msg) //     'Expected'
@@ -1189,6 +1190,7 @@ contains
     if (present(message)) then
        msg = trim(msg) // '; User message: [' // trim(message) // ']'
     endif
+!$omp end critical     (FRUIT_OMP_MAKE_MSG)
   end subroutine make_error_msg_
 
   function is_last_passed()
