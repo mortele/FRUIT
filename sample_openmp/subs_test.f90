@@ -7,15 +7,35 @@ contains
     use subs, only : just_sum
 
     integer :: result
+    integer, parameter :: MAX_THREAD_NUM = 100
+    integer :: flag(0:MAX_THREAD_NUM)
     character(50) :: str
+    integer :: thread_num
+    integer :: num_threads
 
-!$omp parallel
-    write(str, '("thread", i3, " / ", i3)') omp_get_thread_num() + 1, omp_get_num_threads()
+    flag(:) = 0
+
+!$omp parallel private(thread_num) private(str) shared(num_threads)
+    thread_num = omp_get_thread_num()
+    num_threads = omp_get_num_threads()
+
+    if (thread_num <= MAX_THREAD_NUM) then
+      flag(thread_num) = flag(thread_num) + 1
+      call assert_equals(1, flag(thread_num), "Each thread should come only once")
+    endif
+
+    write(str, '("thread", i3, " / ", i3)') thread_num + 1, omp_get_num_threads()
+
     result = just_sum(2, 3)
     call assert_equals(6, result, " it should fail, " // trim(str))
 
     result = just_sum(4, 5)
     call assert_equals(9, result, " it should success, " // trim(str))
 !$omp end parallel
+
+    call assert_equals(&
+    & min(MAX_THREAD_NUM + 1, num_threads), &
+    & sum(flag(:)), &
+    & "Each thread once")
   end subroutine test_just_sum
 end module subs_test

@@ -660,19 +660,19 @@ contains
       write (stdout,*) "   . : successful assert,   F : failed assert "
       write (stdout,*)
     endif
-!$omp critical
+!$omp critical     (FRUIT_OMP_ALLOCATE_MESSAGE_ARRAY)
     if ( .not. allocated(message_array) ) then
       allocate(message_array(MSG_ARRAY_INCREMENT))
     end if
-!$omp end critical
+!$omp end critical (FRUIT_OMP_ALLOCATE_MESSAGE_ARRAY)
   end subroutine init_fruit
 
   subroutine fruit_finalize_
-!$omp critical
+!$omp critical     (FRUIT_OMP_DEALLOCATE_MESSAGE_ARRAY)
     if (allocated(message_array)) then
       deallocate(message_array)
     endif
-!$omp end critical
+!$omp end critical (FRUIT_OMP_DEALLOCATE_MESSAGE_ARRAY)
   end subroutine fruit_finalize_
 
   subroutine init_fruit_xml_(rank)
@@ -997,7 +997,7 @@ contains
   !!  Definition of linechar_count is moved to module,
   !!  so that it can be stashed and restored.
 
-    !$omp critical
+    !$omp critical      (FRUIT_OMP_ADD_OUTPUT_MARK)
     linechar_count = linechar_count + 1
     if ( linechar_count .lt. MAX_MARKS_PER_LINE ) then
        write(stdout,"(A1)",ADVANCE='NO') chr
@@ -1005,7 +1005,7 @@ contains
        write(stdout,"(A1)",ADVANCE='YES') chr
        linechar_count = 0
     endif
-    !$omp end critical
+    !$omp end critical  (FRUIT_OMP_ADD_OUTPUT_MARK)
   end subroutine output_mark_
 
   subroutine success_mark_
@@ -1026,7 +1026,7 @@ contains
        stop 1
     end if
 
-!$omp critical
+!$omp critical     (FRUIT_OMP_STACK_A_MESSAGE)
     if (message_index > current_max) then
       msg_swap_holder(1:current_max) = message_array(1:current_max)
       deallocate(message_array)
@@ -1038,7 +1038,7 @@ contains
 
     message_array (message_index) = msg
     message_index = message_index + 1
-!$omp end critical
+!$omp end critical (FRUIT_OMP_STACK_A_MESSAGE)
   end subroutine increase_message_stack_
 
 
@@ -1132,10 +1132,10 @@ contains
   end subroutine obsolete_
 
   subroutine add_success
-    !$omp critical
+    !$omp critical     (FRUIT_OMP_ADD_SUCCESS)
       successful_assert_count = successful_assert_count + 1
       last_passed = .true.
-    !$omp end critical
+    !$omp end critical (FRUIT_OMP_ADD_SUCCESS)
 
     if (if_show_dots) then
       call success_mark_
@@ -1153,11 +1153,11 @@ contains
       call make_error_msg_ (expected, got, .true., message)
     endif
     call increase_message_stack_
-    !$omp critical
+    !$omp critical     (FRUIT_OMP_ADD_FAIL)
       failed_assert_count = failed_assert_count + 1
       last_passed = .false.
       case_passed = .false.
-    !$omp end critical
+    !$omp end critical (FRUIT_OMP_ADD_FAIL)
     call failed_mark_
   end subroutine failed_assert_action
 
