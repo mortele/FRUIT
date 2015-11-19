@@ -1026,7 +1026,6 @@ contains
        stop 1
     end if
 
-!$omp critical     (FRUIT_OMP_STACK_A_MESSAGE)
     if (message_index > current_max) then
       msg_swap_holder(1:current_max) = message_array(1:current_max)
       deallocate(message_array)
@@ -1038,7 +1037,6 @@ contains
 
     message_array (message_index) = msg
     message_index = message_index + 1
-!$omp end critical (FRUIT_OMP_STACK_A_MESSAGE)
   end subroutine increase_message_stack_
 
 
@@ -1147,16 +1145,16 @@ contains
     character(*), intent(in), optional :: message
     logical, intent(in), optional :: if_is
 
+    !$omp critical     (FRUIT_OMP_ADD_FAIL)
     if (present(if_is)) then
       call make_error_msg_ (expected, got, if_is,  message)
     else
       call make_error_msg_ (expected, got, .true., message)
     endif
     call increase_message_stack_
-    !$omp critical     (FRUIT_OMP_ADD_FAIL)
-      failed_assert_count = failed_assert_count + 1
-      last_passed = .false.
-      case_passed = .false.
+    failed_assert_count = failed_assert_count + 1
+    last_passed = .false.
+    case_passed = .false.
     !$omp end critical (FRUIT_OMP_ADD_FAIL)
     call failed_mark_
   end subroutine failed_assert_action
@@ -1176,7 +1174,6 @@ contains
     logical,      intent(in)           :: if_is
     character(*), intent(in), optional :: message
 
-!$omp critical     (FRUIT_OMP_MAKE_MSG)
     msg = '[' // trim(strip(case_name)) // ']: ' 
     if (if_is) then
       msg = trim(msg) //     'Expected'
@@ -1190,7 +1187,6 @@ contains
     if (present(message)) then
        msg = trim(msg) // '; User message: [' // trim(message) // ']'
     endif
-!$omp end critical     (FRUIT_OMP_MAKE_MSG)
   end subroutine make_error_msg_
 
   function is_last_passed()

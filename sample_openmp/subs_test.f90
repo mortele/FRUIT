@@ -14,10 +14,15 @@ contains
     integer :: num_threads
 
     flag(:) = 0
+    num_threads = -1
 
-!$omp parallel private(thread_num) private(str) shared(num_threads)
-    thread_num = omp_get_thread_num()
+!$omp parallel default(none) shared(flag) private(thread_num) shared(num_threads) &
+!$omp   &      private(str) private(result)
+    !$omp single
     num_threads = omp_get_num_threads()
+    !$omp end single
+
+    thread_num = omp_get_thread_num()
 
     if (thread_num <= MAX_THREAD_NUM) then
       flag(thread_num) = flag(thread_num) + 1
