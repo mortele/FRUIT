@@ -334,6 +334,14 @@ if $mpiexec_exist
   end
 end
 
+desc   "self_test_openmp"
+task   :self_test_openmp do
+  puts "self_test_openmp"
+  Dir.chdir("self_test_openmp") do
+    sh "rake"
+  end
+end
+
 
 load 'rake_base_deps.rb'
 include RakeBaseDeps

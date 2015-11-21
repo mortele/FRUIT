@@ -251,6 +251,10 @@ module fruit
   character (len = *), parameter :: XML_FN_WORK_DEF = "result_tmp.xml"
   character (len = 50) :: xml_filename_work = XML_FN_WORK_DEF
 
+  integer, parameter :: MAX_NUM_FAILURES_IN_XML = 10
+  integer, parameter :: XML_LINE_LENGTH = 2670  
+    !! xml_line_length >= max_num_failures_in_xml * (msg_length + 1) + 50
+
   integer, parameter :: STRLEN_T = 12
 
   integer, parameter :: NUMBER_LENGTH = 10
@@ -749,10 +753,11 @@ contains
     close(xml_work)
   end subroutine case_passed_xml_
 
+
   subroutine case_failed_xml_(tc_name, classname)
     character(*), intent(in) :: tc_name
     character(*), intent(in) :: classname
-    integer :: i
+    integer :: i, j
     character(len = STRLEN_T) :: case_time
 
     case_time = case_delta_t()
@@ -763,8 +768,16 @@ contains
    &  trim(tc_name), trim(prefix), trim(classname), trim(case_time)
 
     write(xml_work, '("      <failure type=""failure"" message=""")', advance = "no")
+
     do i = message_index_from, message_index - 1
+      j = i - message_index_from + 1
+      if (j > MAX_NUM_FAILURES_IN_XML) then
+        write(xml_work, '("(omit the rest)")', advance="no")
+        exit
+      endif
+
       write(xml_work, '(a)', advance = "no") trim(strip(message_array(i)))
+
       if (i == message_index - 1) then
         continue
       else
@@ -779,7 +792,7 @@ contains
   end subroutine case_failed_xml_
 
   subroutine fruit_summary_xml_
-    character(len = 1000) :: whole_line
+    character(len = XML_LINE_LENGTH) :: whole_line
     character(len = 100) :: full_count
     character(len = 100) :: fail_count
 

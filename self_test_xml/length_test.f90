@@ -11,6 +11,22 @@ contains
     
     call assert_equals(5.0, length_xy(xy_1, xy_2), 1.e-5, "length (0.5,1)to(3.5,5.0)")
 
-     stop   !! code for debug. What if tester code stops?
+    !! stop   !! code for debug. What if tester code stops?
   end subroutine test_length_xy
+
+  subroutine test_length_xy_hundred
+    use length, only : length_xy
+    real :: xy_1(2)
+    real :: xy_2(2)
+    integer :: i
+    character(20) :: message
+
+    do i = 1, 100
+      write(message, '("assertion", i3)') i
+      xy_1(1:2) = (/ 0.0, 0.0 /)
+      xy_2(1:2) = (/ 3.0, 4.0 /)
+      call assert_equals(5.1, length_xy(xy_1, xy_2), 1.e-5, &
+      &  trim(message) // " length sqrt(3^2+4^2)")
+    enddo
+  end subroutine test_length_xy_hundred
 end module length_test
