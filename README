@@ -75,6 +75,13 @@ Samples:
     Build is done in fruit-x.x.x/sample_multi_dir/build/
     Selective build: fruit-x.x.x/sample_multi_dir/build_selective/
 
+  sample_openmp
+    Tester code uses multiple threads using OpenMP.
+
   self_test
-    Test of fruit.f90 itsef.
+    Test of fruit.f90 itself.
+
+  self_test_openmp
+    Test of fruit.f90 itself. Tester code uses multiple threads using OpenMP.
+
 

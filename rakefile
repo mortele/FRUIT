@@ -334,9 +334,18 @@ if $mpiexec_exist
   end
 end
 
-desc   "self_test_openmp"
-task   :self_test_openmp do
-  puts "self_test_openmp"
+desc        "sample_openmp"
+task        :sample_openmp do
+  puts      "sample_openmp"
+  Dir.chdir("sample_openmp") do
+    sh "rake"
+  end
+end
+
+
+desc        "self_test_openmp"
+task        :self_test_openmp do
+  puts      "self_test_openmp"
   Dir.chdir("self_test_openmp") do
     sh "rake"
   end

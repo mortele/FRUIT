@@ -1,4 +1,14 @@
 -----------
+FRUIT 3.4.0
+-----------
+
+A sample of calling assertations from multi-thread code
+using OpenMP is added as sample_openmp.
+No changes in fruit_processor in this version.
+Version number of fruit_processor remains 3.3.8.
+
+
+-----------
 FRUIT 3.3.9
 -----------
 
