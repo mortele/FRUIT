@@ -7,7 +7,7 @@ contains
     use subs, only : just_sum
 
     integer :: result
-    integer, parameter :: MAX_THREAD_NUM = 100
+    integer, parameter :: MAX_THREAD_NUM = 10000
     integer :: flag(0:MAX_THREAD_NUM)
     character(50) :: str
     integer :: thread_num

@@ -776,9 +776,13 @@ contains
     message_index_from = message_index
     call system_clock(case_time_from)
 
+    !$OMP BARRIER
+
     !!! "case_passed" is true here.
     !!! "case_passed" becomes .false. at the first fail of assertion
     call tc()
+
+    !$OMP BARRIER
 
     if ( initial_failed_assert_count .eq. failed_assert_count ) then
        ! If no additional assertions failed during the run of this test case
@@ -809,6 +813,7 @@ contains
 
   subroutine fruit_summary_
     integer :: i
+
 
     write (stdout,*)
     write (stdout,*)
@@ -921,10 +926,7 @@ contains
     character(len=MSG_LENGTH) :: msg_swap_holder(current_max)
 
     if (message_index > MAX_MSG_STACK_SIZE) then
-       write(stdout,*) "Stop because there are too many error messages to put into stack."
-       write(stdout,*) "Try to increase MAX_MSG_STACK_SIZE if you really need so."
-       call getTestSummary ()
-       stop 1
+      return
     end if
 
     if (message_index > current_max) then
@@ -937,7 +939,16 @@ contains
     end if
 
     message_array (message_index) = msg
+    if (message_index == MAX_MSG_STACK_SIZE) then
+      message_array(message_index) = "Max number of messages reached. Further messages suppressed."
+    endif
+
     message_index = message_index + 1
+
+    if (message_index > MAX_MSG_STACK_SIZE) then
+       write(stdout,*) "Stop because there are too many error messages to put into stack."
+       write(stdout,*) "Try to increase MAX_MSG_STACK_SIZE if you really need so."
+    end if
   end subroutine increase_message_stack_
 
 

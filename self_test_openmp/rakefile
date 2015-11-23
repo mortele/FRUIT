@@ -30,9 +30,9 @@ task :default => [
 
 task :run => $goal do
   if RUBY_PLATFORM =~ /(darwin|linux)/i
-    sh "export OMP_NUM_THREADS=100; ./#{$goal} > stdout"
+    sh "export OMP_NUM_THREADS=2100; ./#{$goal} > stdout"
   else
-    sh "set    OMP_NUM_THREADS=100&   #{$goal} > stdout"
+    sh "set    OMP_NUM_THREADS=2100&   #{$goal} > stdout"
   end
 end
 

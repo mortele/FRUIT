@@ -43,10 +43,10 @@ else
   raise "line [Start of FRUIT summary] not appeared or appeared more than once"
 end
 
-if (num_failed_sum  == 100)
-  print "OK, Number of fails is 100.\n"
+if (num_failed_sum  == 2100)
+  print "OK, Number of fails is 2100.\n"
 else
-  raise "NG, Number of fails is not 100."
+  raise "NG, Number of fails is not 2100."
 end
 
 if (num_failed_line == 1)
@@ -55,10 +55,10 @@ else
   ralse "NG, [Failed : ] line not appeared  or appeared more than once"
 end
 
-if (num_success_sum  == 201)
-  print "OK, Number of successes is 201.\n"
+if (num_success_sum  == 4201)
+  print "OK, Number of successes is 4201.\n"
 else
-  raise "NG, Number of successes is not 201."
+  raise "NG, Number of successes is not 4201."
 end
 
 if (num_success_line == 1)
