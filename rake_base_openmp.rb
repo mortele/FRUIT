@@ -18,7 +18,7 @@ module RakeBase
   else
     # Intel FORTRAN on Windows
     $compiler = 'ifort'
-    $option = "/check:all /warn:all /fpp /openmp"
+    $option = "/check:all /warn:all /fpp /Qopenmp"
     $ext_obj = "obj"
     $dosish_path = true
     $gcov = false

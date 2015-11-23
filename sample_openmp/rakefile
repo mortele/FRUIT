@@ -39,7 +39,11 @@ load '../rake_base_deps.rb' #It uses SRC and OBJ updated by rake_estimate.rb
 task :default => [:test]
 
 task :test => $goal do
-  sh "export OMP_NUM_THREADS=16; ./#{$goal}"
+  if RUBY_PLATFORM =~ /(darwin|linux)/i
+    sh "export OMP_NUM_THREADS=16; ./#{$goal}"
+  else
+    sh "set OMP_NUM_THREADS=16& #{$goal}"
+  end
 end
 
 task :coverage => $for_coverage.clone.push(:test) do
