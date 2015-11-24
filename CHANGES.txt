@@ -1,4 +1,12 @@
 -----------
+FRUIT 3.4.1
+-----------
+
+Maximum number of failed assertations was limited to 2000.
+This limitation is removed.
+
+
+-----------
 FRUIT 3.4.0
 -----------
 
