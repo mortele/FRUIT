@@ -3,6 +3,23 @@ The fruit_processor gem works with fortranxunit on sourceforge
 To generate and install gem:
 rake install
 
+(Possibly you need sudo as
+  sudo rake install
+)
+
 To install existing gem:
 gem install pkg/fruit_processor-(version number).gem
+
+
+
+-------------------------------------------
+Issue on some versions of ruby and minitest
+-------------------------------------------
+On some versions of ruby (between version 1.9 and 2.1) and minitest (version 5),
+  test/fruit_processor_test.rb
+may need modification.
+A sample of modification is
+  test/fruit_processor_test_ruby2.rb
+See
+  https://sourceforge.net/p/fortranxunit/bugs/5/
 

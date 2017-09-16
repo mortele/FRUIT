@@ -12,6 +12,7 @@ else
   require 'rubygems/package_task'
 end
 
+
 require 'rake/clean'
 
 CLEAN.include(
@@ -23,7 +24,7 @@ CLOBBER.include(FileList['pkg/*.gem'])
 spec = Gem::Specification.new do |s|
   s.platform  =   Gem::Platform::RUBY
   s.name      =   "fruit_processor"
-  s.version   =   "3.3.8"
+  s.version   =   "3.4.2"
   s.author    =   "Andrew Chen"
   s.email     =   "meihome meihome.com"
   s.summary   =   "A package for fortranxunit (fruit)."
@@ -33,7 +34,8 @@ spec = Gem::Specification.new do |s|
     'test/*_test.f90', 'test/*_test.f03', 'test/for_test_gather_specs.txt',
     'test/os_install_from.txt',
     'test/cause_error/*.f90',
-    'test/for_test_picker/*.f90',
+#    'test/for_test_picker/*.f90',
+    'test/for_test_picker/*_test.f90',
     'test/subdir/*.f90',
     'test/subdir2/*.f90',
   ].to_a
@@ -71,6 +73,8 @@ task :install => :default do
 end
 
 task :test do
+  puts "test/fruit_processor_test.rb may need modification depending on version of minitest. See test/fruit_processor_test_ruby2.rb and https://sourceforge.net/p/fortranxunit/bugs/5/ "
+  sh "gem list minitest -d"
   Dir.chdir("test") do
     sh "ruby fruit_processor_test.rb"
     sh "ruby misc_test.rb"
