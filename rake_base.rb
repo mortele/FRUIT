@@ -7,14 +7,14 @@ module RakeBase
   puts "RUBY_PLATFORM=" + RUBY_PLATFORM if $show_info
 
   if RUBY_PLATFORM =~ /(darwin|linux)/i
-    # Intel FORTRAN compiler tested on Linux
-    $compiler = 'ifort'
-    $option = "-check all -warn all -fpp"
+    # GCC FORTRAN compiler tested on MacOs (10.6.8 Snow Leopard) and Windows Vista + cygwin
+    $compiler = "gfortran"
+    $option = "-Wall -Wextra -pedantic -fbounds-check " +
+              "-Wuninitialized -O -g -Wno-unused-parameter -cpp"
     $ext_obj = "o"
     $dosish_path = false
-    $gcov = false
-		$prof_genx = "-prof-genx"
-    $mpiexec = nil
+    # With " -std=f95",
+    # subroutines whose name is longer than 31 characters cause error.
   else
     # Intel FORTRAN on Windows
     $compiler = 'ifort'
@@ -25,6 +25,15 @@ module RakeBase
 		$prof_genx = "/Qprof-genx"
     $mpiexec = nil
   end
+
+  # # Intel FORTRAN compiler tested on Linux
+  # $compiler = 'ifort'
+  # $option = "-check all -warn all"
+  # $ext_obj = "o"
+  # $dosish_path = false
+  # $gcov = false
+  # $prof_genx = "-prof-genx"
+  # $mpiexec = nil
 
 
   # GCC FORTRAN compiler tested on MacOs (10.6.8 Snow Leopard) and Windows Vista + cygwin

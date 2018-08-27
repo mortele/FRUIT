@@ -14,10 +14,11 @@ Installation guide:
 	    cd fruit/fruit_processor_gem
 	    rake install
 
-	5. You may need to change your compiler from Intel FORTRAN to other
+	5. You may need to change your compiler from gfortran to other
 	   modify this line in rake_base.rb :
-	     $compiler = 'ifort'
-       $option = "-check all -warn all"
+	     $compiler = 'gfortran'
+       $option = "-Wall -Wextra -pedantic -fbounds-check " +
+                 "-Wuninitialized -O -g -Wno-unused-parameter -cpp"
 
      By default, ifort is used if available.
      If ifort is abesnt, gfotran or FTN95 is used.
