@@ -23,6 +23,7 @@
 
 
 module fruit_util
+  use, intrinsic :: iso_fortran_env, only: real32, real64, int32, int64
   private
   
   public :: equals, to_s, strip
@@ -237,6 +238,7 @@ end module fruit_util
 
 
 module fruit
+  use, intrinsic :: iso_fortran_env, only: real32, real64, int32, int64
   use fruit_util
   implicit none
   private
@@ -1383,6 +1385,81 @@ contains
       call failed_assert_action(to_s(.true.), to_s(var1), message, if_is = .false.)
     endif
   end subroutine assert_false_
+
+
+  !====== ADDED real64 subroutines =====
+  !=====================================
+
+!  !------ 0d_real64 ------
+!  subroutine assert_eq_real64_(var1, var2, message)
+!
+!    real (real64), intent (in) :: var1, var2
+!    
+!    character(len = *), intent (in), optional :: message
+!
+!        if ((var1 < var2) .or. (var1 > var2)) then
+!          call failed_assert_action(&
+!          & to_s(var1), &
+!          & to_s(var2), message, if_is = .true.)
+!          return
+!        endif
+!
+!    call add_success
+!  end subroutine assert_eq_real64_
+!
+!  !------ 0d_real64 ------
+!  subroutine assert_eq_real64_in_range_(var1, var2, delta, message)
+!
+!    real (real64), intent (in) :: var1, var2
+!    real (real64), intent (in) :: delta
+!    character(len = *), intent (in), optional :: message
+!
+!        if (abs(var1 - var2) > delta) then
+!          call failed_assert_action(&
+!          & to_s(var1), &
+!          & to_s(var2), message, if_is = .true.)
+!          return
+!        endif
+!
+!    call add_success
+!  end subroutine assert_eq_real64_in_range_
+!
+!  !------ 1d_real64 ------
+!  subroutine assert_eq_1d_real64_(var1, var2, n, message)
+!    integer, intent (in) :: n
+!    integer              :: i
+!    real (real64), intent (in) :: var1(n), var2(n)
+!    
+!    character(len = *), intent (in), optional :: message
+!    do i = 1, n
+!        if ((var1(i) < var2(i)) .or. (var1(i) > var2(i))) then
+!          call failed_assert_action(&
+!          & to_s(var1(i)), &
+!          & to_s(var2(i)), '1d array has difference, ' // message, if_is = .true.)
+!          return
+!        endif
+!    enddo
+!    call add_success
+!  end subroutine assert_eq_1d_real64_
+!
+!  !------ 1d_real64 ------
+!  subroutine assert_eq_1d_real64_in_range_(var1, var2, n, delta, message)
+!    integer, intent (in) :: n
+!    integer              :: i
+!    real (real64), intent (in) :: var1(n), var2(n)
+!    real (real64), intent (in) :: delta
+!    character(len = *), intent (in), optional :: message
+!    do i = 1, n
+!        if (abs(var1(i) - var2(i)) > delta) then
+!          call failed_assert_action(&
+!          & to_s(var1(i)), &
+!          & to_s(var2(i)), '1d array has difference, ' // message, if_is = .true.)
+!          return
+!        endif
+!    enddo
+!    call add_success
+!  end subroutine assert_eq_1d_real64_in_range_
+
 
   !====== begin of generated code ======
   !------ 0d_logical ------
