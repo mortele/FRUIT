@@ -5,6 +5,12 @@
 # with help from 
 # 
 #    https://stackoverflow.com/a/49565707
+#
+# 
+# The link to the old Sourceforge example guide is broken, an archived 
+# version can be found here:
+#
+#    https://web.archive.org/web/20140509103954/https://sourceforge.net/apps/mediawiki/fortranxunit/index.php?title=FruitExample
 
 
 Installation guide:
@@ -42,7 +48,7 @@ Samples:
 --------
   in_3_minutes
     A sample of manually written driver.
-    see https://sourceforge.net/apps/mediawiki/fortranxunit/index.php?title=FruitExample
+    see https://web.archive.org/web/20140509103954/https://sourceforge.net/apps/mediawiki/fortranxunit/index.php?title=FruitExample
     * fruit.f90 must be copied to in_3_minutes beforehand.
 
   sample
