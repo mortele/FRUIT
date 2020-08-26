@@ -911,9 +911,9 @@ contains
 
     if (xml_output .eq. .true.) then 
         if (case_passed .eq. .true.) then
-            call case_passed_xml(tc_name, "")
+            call case_passed_xml(tc_name, "dummy_class_name")
         else 
-            call case_failed_xml(tc_name, "")
+            call case_failed_xml(tc_name, "dummy_class_name")
         end if
     end if
     
